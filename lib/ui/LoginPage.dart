@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Loginpage extends StatelessWidget {
@@ -6,17 +7,42 @@ class Loginpage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    Future<void> login() async {
+      try {
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+        print("Login successful! UID: ${userCredential.user!.uid}");
+      } on FirebaseAuthException catch (e) {
+        print("FirebaseAuthException: ${e.message}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.message}")),
+        );
+      } catch (e) {
+        print("General exception: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    }
+
     return Scaffold(
         body: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // TextButton Username
+          // TextButton Email
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: const TextField(
-              decoration: InputDecoration(
-                hintText: 'Username',
+            child: TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                hintText: 'Email',
                 labelStyle: TextStyle(color: Colors.deepPurple),
                 border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(
@@ -31,8 +57,9 @@ class Loginpage extends StatelessWidget {
           // TextButton Password
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: const TextField(
-              decoration: InputDecoration(
+            child: TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(
                 hintText: 'Password',
                 labelText: 'Password',
                 labelStyle: TextStyle(color: Colors.deepPurple),
@@ -49,9 +76,7 @@ class Loginpage extends StatelessWidget {
 
           // ElevatedButton Login
           ElevatedButton(
-            onPressed: () {
-              // Add code here
-            },
+            onPressed: login,
             style: ElevatedButton.styleFrom(
               textStyle: const TextStyle(
                 fontSize: 16,

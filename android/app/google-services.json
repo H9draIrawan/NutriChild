@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "831360940478",
+    "project_id": "nutrichild-331f6",
+    "storage_bucket": "nutrichild-331f6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831360940478:android:b9382e3d17f535ca5f61ef",
+        "android_client_info": {
+          "package_name": "com.example.nutrichild"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBJVdc7C1m82X1BsaAEhslXJG5zpJGbp4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

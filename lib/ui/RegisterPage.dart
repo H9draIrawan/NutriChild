@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Registerpage extends StatelessWidget {
@@ -6,6 +8,45 @@ class Registerpage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final usernameController = TextEditingController();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+
+    Future<void> register() async {
+      try {
+        if (passwordController.text != confirmPasswordController.text) {
+          throw Exception("Passwords do not match");
+        }
+
+        // Firebase Authentication
+        UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+
+        // Firestore
+        String uid = userCredential.user!.uid;
+        await FirebaseFirestore.instance.collection('users').doc(uid).set({
+          'username': usernameController.text,
+          'email': emailController.text,
+          'uid': uid,
+        });
+
+        // Navigate to Login Page
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registrasi berhasil!')),
+        );
+        Navigator.pushReplacementNamed(context, '/login');
+      } catch (e) {
+        print("Error during registration: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+
     return Scaffold(
         body: Center(
       child: Column(
@@ -14,8 +55,9 @@ class Registerpage extends StatelessWidget {
           // TextButton Username
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: const TextField(
-              decoration: InputDecoration(
+            child: TextField(
+              controller: usernameController,
+              decoration: const InputDecoration(
                 hintText: 'Username',
                 labelStyle: TextStyle(color: Colors.deepPurple),
                 border: OutlineInputBorder(),
@@ -31,8 +73,9 @@ class Registerpage extends StatelessWidget {
           // TextButton Email
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: const TextField(
-              decoration: InputDecoration(
+            child: TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
                 hintText: 'Email',
                 labelStyle: TextStyle(color: Colors.deepPurple),
                 border: OutlineInputBorder(),
@@ -48,8 +91,9 @@ class Registerpage extends StatelessWidget {
           // TextButton Password
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: const TextField(
-              decoration: InputDecoration(
+            child: TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(
                 hintText: 'Password',
                 labelText: 'Password',
                 labelStyle: TextStyle(color: Colors.deepPurple),
@@ -64,11 +108,29 @@ class Registerpage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
+          // TextButton Confirm Password
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: TextField(
+              controller: confirmPasswordController,
+              decoration: const InputDecoration(
+                hintText: 'Confirm Password',
+                labelText: 'Confirm Password',
+                labelStyle: TextStyle(color: Colors.deepPurple),
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.deepPurple),
+                ),
+                prefixIcon: Icon(Icons.lock, color: Colors.deepPurple),
+              ),
+              obscureText: true,
+            ),
+          ),
+          const SizedBox(height: 20),
+
           // ElevatedButton Register
           ElevatedButton(
-            onPressed: () {
-              // Add code here
-            },
+            onPressed: register,
             style: ElevatedButton.styleFrom(
               textStyle: const TextStyle(
                 fontSize: 16,

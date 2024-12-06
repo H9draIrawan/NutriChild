@@ -1,0 +1,25 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "nutrichild-331f6",
+          "appId": "1:831360940478:android:b9382e3d17f535ca5f61ef",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "nutrichild-331f6",
+          "configurations": {
+            "android": "1:831360940478:android:b9382e3d17f535ca5f61ef",
+            "ios": "1:831360940478:ios:66d0da7c8c74f81b5f61ef",
+            "macos": "1:831360940478:ios:66d0da7c8c74f81b5f61ef",
+            "web": "1:831360940478:web:cb19738f41c695665f61ef",
+            "windows": "1:831360940478:web:057ce8ba6059fdee5f61ef"
+          }
+        }
+      }
+    }
+  }
+}
