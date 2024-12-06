@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nutrichild/ui/HomePage.dart';
 import 'package:nutrichild/ui/LoginPage.dart';
 import 'package:nutrichild/ui/RegisterPage.dart';
 
@@ -18,8 +19,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: Loginpage.routeName,
+      initialRoute: Homepage.routeName,
       routes: {
+        Homepage.routeName: (context) => const Homepage(),
         Loginpage.routeName: (context) => const Loginpage(),
         Registerpage.routeName: (context) => const Registerpage(),
       },
