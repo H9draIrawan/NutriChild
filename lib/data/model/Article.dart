@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 class Article {
   String Food_Name;

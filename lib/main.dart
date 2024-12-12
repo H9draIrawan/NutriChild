@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:nutrichild/ui/HomePage.dart';
 import 'package:nutrichild/ui/LoginPage.dart';
 import 'package:nutrichild/ui/RegisterPage.dart';
+import 'package:nutrichild/ui/WelcomePage.dart';
 
+import 'database/database_child.dart';
 import 'firebase_options.dart';
 
 void main() async {
+  final sqlite = DatabaseChild();
+  sqlite.initDB();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -26,11 +30,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: Homepage.routeName,
+      initialRoute: Welcomepage.routeName,
       routes: {
-        Homepage.routeName: (context) => const Homepage(),
+        Welcomepage.routeName: (context) => const Welcomepage(),
         Loginpage.routeName: (context) => const Loginpage(),
         Registerpage.routeName: (context) => const Registerpage(),
+        Homepage.routeName: (context) => const Homepage(),
       },
     );
   }

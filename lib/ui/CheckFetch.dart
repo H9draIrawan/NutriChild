@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nutrichild/api/ApiService.dart';
-import 'package:nutrichild/ui/HomePage.dart';
+import 'package:nutrichild/ui/WelcomePage.dart';
 
 class Checkfetch extends StatefulWidget {
   const Checkfetch({super.key});
@@ -14,23 +13,23 @@ class _NewsPageState extends State<Checkfetch> {
   final ApiService apiService = ApiService();
   List articles = [];
 
-  void initState(){
+  @override
+  void initState() {
     super.initState();
     fetchArticles("nasi");
   }
 
   Future<void> fetchArticles(String item) async {
     print("fetch data");
-    try{
+    try {
       final result = await apiService.topHeadlines(item);
       setState(() {
         articles = result.articles;
       });
-    }catch (e){
+    } catch (e) {
       print("Error $e");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -38,15 +37,13 @@ class _NewsPageState extends State<Checkfetch> {
         appBar: AppBar(
           title: Text("Nutrinix Syndigo"),
         ),
-        body: articles.isEmpty ?
-        const Center(child: Text('No available news')) :
-        ListView.builder(
-            itemCount: articles.length,
-            itemBuilder: (context, index){
-              final article = articles[index];
-              return Homepage();
-            }
-        )
-    );
+        body: articles.isEmpty
+            ? const Center(child: Text('No available news'))
+            : ListView.builder(
+                itemCount: articles.length,
+                itemBuilder: (context, index) {
+                  final article = articles[index];
+                  return Welcomepage();
+                }));
   }
 }
