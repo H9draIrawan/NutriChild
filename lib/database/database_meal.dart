@@ -1,10 +1,10 @@
 import 'package:sqflite/sqflite.dart';
 
-import '../data/model/child.dart';
+import '../data/model/Meal.dart';
 
-class DatabaseChild {
+class DatabaseMeal {
   static Database? _database;
-  static const String _childTable = 'child';
+  static const String _mealTable = 'meal';
 
   Future<Database> get database async {
     if (_database != null) {
@@ -17,51 +17,51 @@ class DatabaseChild {
 
   initDB() async {
     var path = await getDatabasesPath();
-    var db = openDatabase("$path/child.db",
+    var db = openDatabase("$path/meal.db",
         onCreate: (Database db, int version) async {
       await db.execute(
-          "CREATE TABLE $_childTable(id TEXT PRIMARY KEY, name TEXT, age INTEGER, gender TEXT, weight DOUBLE, height DOUBLE)");
+          "CREATE TABLE $_mealTable(id TEXT PRIMARY KEY, childId TEXT, mealTime TEXT, date DATE, qty INTEGER)");
       print("DB Created");
     });
     return db;
   }
 
-  Future insertChild(Child child) async {
+  Future insertMeal(Meal meal) async {
     final Database db = await database;
     try {
-      await db.insert(_childTable, child.toMap());
+      await db.insert(_mealTable, meal.toMap());
       print("Data Inserted");
     } catch (_) {
       print("Failed to Inserted Data");
     }
   }
 
-  Future<List<Child>> getChild() async {
+  Future<List<Meal>> getMeal() async {
     final Database db = await database;
-    List<Map<String, dynamic>> results = await db.query(_childTable);
-    List<Child> child = [];
+    List<Map<String, dynamic>> results = await db.query(_mealTable);
+    List<Meal> meal = [];
     for (var result in results) {
-      child.add(Child.fromMap(result));
+      meal.add(Meal.fromMap(result));
     }
-    print("Database : ${child.length}");
-    return child;
+    print("Database : ${meal.length}");
+    return meal;
   }
 
-  Future updateChild(Child child) async {
+  Future updateMeal(Meal meal) async {
     final Database db = await database;
     try {
-      await db.update(_childTable, child.toMap(),
-          where: 'id = ?', whereArgs: [child.id]);
+      await db.update(_mealTable, meal.toMap(),
+          where: 'mid = ?', whereArgs: [meal.id]);
       print("Data Updated");
     } catch (_) {
       print("Failed to Update Data");
     }
   }
 
-  Future deleteChild(int id) async {
+  Future deleteMeal(String mid) async {
     final Database db = await database;
     try {
-      await db.delete(_childTable, where: 'id = ?', whereArgs: [id]);
+      await db.delete(_mealTable, where: 'mid = ?', whereArgs: [mid]);
       print("Data Deleted");
     } catch (_) {
       print("Failed to Delete Data");

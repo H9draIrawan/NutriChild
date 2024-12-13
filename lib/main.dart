@@ -5,12 +5,9 @@ import 'package:nutrichild/ui/LoginPage.dart';
 import 'package:nutrichild/ui/RegisterPage.dart';
 import 'package:nutrichild/ui/WelcomePage.dart';
 
-import 'database/database_child.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  final sqlite = DatabaseChild();
-  sqlite.initDB();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

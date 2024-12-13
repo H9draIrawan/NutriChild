@@ -1,10 +1,10 @@
 import 'package:sqflite/sqflite.dart';
 
-import '../data/model/Nutrition.dart';
+import '../data/model/Food.dart';
 
-class DatabaseNutrition {
+class DatabaseFood {
   static Database? _database;
-  static const String _nutritionTable = 'nutrition';
+  static const String _foodTable = 'food';
 
   Future<Database> get database async {
     if (_database != null) {
@@ -17,31 +17,31 @@ class DatabaseNutrition {
 
   initDB() async {
     var path = await getDatabasesPath();
-    var db = openDatabase("$path/nutrition.db",
+    var db = openDatabase("$path/food.db",
         onCreate: (Database db, int version) async {
       await db.execute(
-          "CREATE TABLE $_nutritionTable(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, calories DOUBLE, protein DOUBLE, fat DOUBLE, carbohydrates DOUBLE)");
+          "CREATE TABLE $_foodTable(id TEXT PRIMARY KEY AUTOINCREMENT, name TEXT, calories DOUBLE, protein DOUBLE, fat DOUBLE, carbohydrates DOUBLE)");
       print("DB Created");
     });
     return db;
   }
 
-  Future insertNutrition(Nutrition nutrition) async {
+  Future insertFood(Food nutrition) async {
     final Database db = await database;
     try {
-      await db.insert(_nutritionTable, nutrition.toMap());
+      await db.insert(_foodTable, nutrition.toMap());
       print("Data Inserted");
     } catch (_) {
       print("Failed to Inserted Data");
     }
   }
 
-  Future<List<Nutrition>> getNutrition() async {
+  Future<List<Food>> getFood() async {
     final Database db = await database;
-    List<Map<String, dynamic>> results = await db.query(_nutritionTable);
-    List<Nutrition> nutrition = [];
+    List<Map<String, dynamic>> results = await db.query(_foodTable);
+    List<Food> nutrition = [];
     for (var result in results) {
-      nutrition.add(Nutrition.fromMap(result));
+      nutrition.add(Food.fromMap(result));
     }
     print("Database : ${nutrition.length}");
     return nutrition;
