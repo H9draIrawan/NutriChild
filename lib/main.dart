@@ -1,9 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:nutrichild/provider/provider_child.dart';
+import 'package:nutrichild/provider/provider_food.dart';
+import 'package:nutrichild/provider/provider_meal.dart';
 import 'package:nutrichild/ui/HomePage.dart';
 import 'package:nutrichild/ui/LoginPage.dart';
 import 'package:nutrichild/ui/RegisterPage.dart';
 import 'package:nutrichild/ui/WelcomePage.dart';
+import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 
@@ -12,7 +16,14 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => ProviderChild()),
+      ChangeNotifierProvider(create: (context) => ProviderFood()),
+      ChangeNotifierProvider(create: (context) => ProviderMeal()),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
