@@ -18,7 +18,7 @@ class Loginpage extends StatelessWidget {
           password: passwordController.text.trim(),
         );
         print("Login successful! UID: ${userCredential.user!.uid}");
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushReplacementNamed(context, '/');
       } on FirebaseAuthException catch (e) {
         print("FirebaseAuthException: ${e.message}");
         ScaffoldMessenger.of(context).showSnackBar(

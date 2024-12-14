@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:nutrichild/navigation/BottomNavigation.dart';
 import 'package:nutrichild/provider/provider_child.dart';
 import 'package:nutrichild/provider/provider_food.dart';
 import 'package:nutrichild/provider/provider_meal.dart';
-import 'package:nutrichild/ui/HomePage.dart';
 import 'package:nutrichild/ui/LoginPage.dart';
 import 'package:nutrichild/ui/RegisterPage.dart';
 import 'package:nutrichild/ui/WelcomePage.dart';
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
         Welcomepage.routeName: (context) => const Welcomepage(),
         Loginpage.routeName: (context) => const Loginpage(),
         Registerpage.routeName: (context) => const Registerpage(),
-        Homepage.routeName: (context) => const Homepage(),
+        Bottomnavigation.routeName: (context) => const Bottomnavigation(),
       },
     );
   }

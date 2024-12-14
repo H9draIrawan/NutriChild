@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nutrichild/ui/LoginPage.dart';
 
 class Welcomepage extends StatelessWidget {
-  static const routeName = "/";
+  static const routeName = "/welcome";
   const Welcomepage({super.key});
 
   @override
