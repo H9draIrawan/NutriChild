@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 
 class Chatpage extends StatefulWidget {
   const Chatpage({super.key});
@@ -13,6 +14,8 @@ class _ChatpageState extends State<Chatpage> {
   final TextEditingController _messageController = TextEditingController();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
+  String _currentDisplayText = "";
+  Timer? _typeTimer;
 
   @override
   void initState() {
@@ -25,6 +28,37 @@ class _ChatpageState extends State<Chatpage> {
         timestamp: DateTime.now(),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _typeTimer?.cancel();
+    super.dispose();
+  }
+
+  void _animateText(String text) {
+    if (text.isEmpty) return;
+    
+    final words = text.split(' ');
+    var currentIndex = 0;
+    _currentDisplayText = "";
+
+    _typeTimer = Timer.periodic(const Duration(milliseconds: 150), (timer) {
+      if (currentIndex < words.length) {
+        setState(() {
+          _currentDisplayText += "${words[currentIndex]} ";
+          _messages.last = ChatMessage(
+            text: _currentDisplayText.trim(),
+            isUser: false,
+            timestamp: DateTime.now(),
+          );
+        });
+        currentIndex++;
+      } else {
+        timer.cancel();
+        _isLoading = false;
+      }
+    });
   }
 
   Future<void> _sendMessage(String message) async {
@@ -45,7 +79,7 @@ class _ChatpageState extends State<Chatpage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://api.cohere.ai/v1/chat'), // Kembali ke v1
+        Uri.parse('https://api.cohere.ai/v1/chat'),
         headers: {
           'Authorization': 'Bearer gKeFiwYfdepYLdtl9jlHDeg9UVnn6VQ5BofZp3UW',
           'Content-Type': 'application/json',
@@ -53,7 +87,7 @@ class _ChatpageState extends State<Chatpage> {
         },
         body: jsonEncode({
           'message': message,
-          'model': 'command-nightly',  // Menggunakan model terbaru
+          'model': 'command-nightly',
           'preamble': '''Anda adalah asisten dokter AI yang ahli dalam kesehatan dan gizi.
           Anda harus selalu menjawab dalam Bahasa Indonesia yang mudah dipahami.
           Berikan informasi medis yang akurat dan terpercaya.
@@ -61,7 +95,7 @@ class _ChatpageState extends State<Chatpage> {
           Fokus pada memberikan informasi kesehatan dan gizi yang bermanfaat.
           Jelaskan istilah medis dengan bahasa yang sederhana.''',
           'temperature': 0.8,
-          'connectors': [], // Tidak menggunakan konektor tambahan
+          'connectors': [],
           'chat_history': _messages.take(10).map((msg) => {
             'role': msg.isUser ? 'USER' : 'CHATBOT',
             'message': msg.text,
@@ -76,19 +110,21 @@ class _ChatpageState extends State<Chatpage> {
         setState(() {
           _messages.add(
             ChatMessage(
-              text: botResponse,
+              text: "",
               isUser: false,
               timestamp: DateTime.now(),
             ),
           );
-          _isLoading = false;
         });
+        
+        _animateText(botResponse);
+        
       } else {
-        print('Error response: ${response.body}'); // Untuk debugging
+        print('Error response: ${response.body}');
         throw Exception('Gagal mendapatkan respons: ${response.statusCode}');
       }
     } catch (e) {
-      print('Exception caught: $e'); // Untuk debugging
+      print('Exception caught: $e');
       setState(() {
         _messages.add(
           ChatMessage(
@@ -144,11 +180,6 @@ class _ChatpageState extends State<Chatpage> {
               },
             ),
           ),
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
-            ),
           _buildMessageInput(),
         ],
       ),
