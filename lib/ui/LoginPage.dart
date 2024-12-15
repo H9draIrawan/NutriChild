@@ -33,73 +33,131 @@ class Loginpage extends StatelessWidget {
     }
 
     return Scaffold(
-        body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // TextButton Email
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                hintText: 'Email',
-                labelStyle: TextStyle(color: Colors.deepPurple),
-                border: OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.deepPurple),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Title
+              const Text(
+                'Login',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                prefixIcon: Icon(Icons.person, color: Colors.deepPurple),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ),
-          const SizedBox(height: 20),
+              const SizedBox(height: 10),
+              
+              // Login/Register tabs
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Login',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/register');
+                    },
+                    child: const Text('Register'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
 
-          // TextButton Password
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(
-                hintText: 'Password',
-                labelText: 'Password',
-                labelStyle: TextStyle(color: Colors.deepPurple),
-                border: OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.deepPurple),
+              // Email field
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  hintText: 'Email Address',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.all(12),
                 ),
-                prefixIcon: Icon(Icons.lock, color: Colors.deepPurple),
               ),
-              obscureText: true,
-            ),
-          ),
-          const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-          // ElevatedButton Login
-          ElevatedButton(
-            onPressed: login,
-            style: ElevatedButton.styleFrom(
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+              // Password field
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: 'Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.all(12),
+                  suffixIcon: const Icon(Icons.visibility_off),
+                ),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text('Login'),
-          ),
-          const SizedBox(height: 20),
 
-          // TextButton Create Account
-          TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/register');
-            },
-            child: const Text('Create Account'),
+              // Remember password & Forgot password
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: false,
+                        onChanged: (value) {},
+                      ),
+                      const Text('Remember password'),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      'Forgot password',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Login button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: login,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'LOGIN',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 40),
+              
+              // Bottom illustration
+              Image.asset(
+                'assets/images/login_illustration.png',
+                height: 200,
+                fit: BoxFit.contain,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ));
+    );
   }
 }
