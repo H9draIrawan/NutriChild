@@ -13,25 +13,40 @@ class _SearchpageState extends State<Searchpage> {
   List articles = [];
   bool isLoading = false;
   final TextEditingController _searchController = TextEditingController();
+  int currentPage = 0;
+  static const int itemsPerPage = 5;
+  bool hasMoreItems = true;
+
+  List get paginatedArticles {
+    final startIndex = 0;
+    final endIndex = (currentPage + 1) * itemsPerPage;
+    if (articles.length > startIndex) {
+      return articles.sublist(startIndex, endIndex.clamp(0, articles.length));
+    }
+    return [];
+  }
 
   Future<void> searchFood(String query) async {
     if (query.isEmpty) {
       setState(() {
         articles = [];
+        currentPage = 0;
+        hasMoreItems = true;
       });
       return;
     }
 
     setState(() {
       isLoading = true;
+      currentPage = 0;
     });
 
     try {
       final result = await apiService.topHeadlines(query);
-      print("Search Results: ${result.articles}");
       setState(() {
         articles = result.articles;
         isLoading = false;
+        hasMoreItems = articles.length > itemsPerPage;
       });
     } catch (e) {
       print("Error: $e");
@@ -39,6 +54,15 @@ class _SearchpageState extends State<Searchpage> {
         isLoading = false;
       });
     }
+  }
+
+  void loadMore() {
+    if (!hasMoreItems || isLoading) return;
+    
+    setState(() {
+      currentPage++;
+      hasMoreItems = articles.length > (currentPage + 1) * itemsPerPage;
+    });
   }
 
   @override
@@ -72,23 +96,53 @@ class _SearchpageState extends State<Searchpage> {
                 ? const Center(child: CircularProgressIndicator())
                 : articles.isEmpty
                     ? const Center(child: Text('Tidak ada hasil pencarian'))
-                    : ListView.builder(
-                        itemCount: articles.length,
-                        itemBuilder: (context, index) {
-                          final article = articles[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 5),
-                            child: ListTile(
-                              title: Text(article.Food_Name),
-                              subtitle: Text(
-                                  'Kalori: ${article.Calories} | Protein: ${article.Protein}g'),
-                              onTap: () {
-                                // Tambahkan aksi ketika item diklik
-                              },
-                            ),
-                          );
+                    : NotificationListener<ScrollNotification>(
+                        onNotification: (ScrollNotification scrollInfo) {
+                          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                            loadMore();
+                          }
+                          return true;
                         },
+                        child: ListView.builder(
+                          itemCount: paginatedArticles.length + (hasMoreItems ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index >= paginatedArticles.length) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                  child: hasMoreItems
+                                      ? const CircularProgressIndicator()
+                                      : const Text('Tidak ada data lagi'),
+                                ),
+                              );
+                            }
+
+                            final article = paginatedArticles[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 5),
+                              child: ListTile(
+                                title: Text(article.Food_Name),
+                                subtitle: Text(
+                                  'Kalori: ${article.Calories?.toStringAsFixed(1) ?? 'Memuat...'} kcal | '
+                                  'Protein: ${article.Protein?.toStringAsFixed(1) ?? 'Memuat...'}g'
+                                ),
+                                trailing: (article.Calories == null || article.Protein == null) 
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ) 
+                                  : null,
+                                onTap: () {
+                                  // Tambahkan aksi ketika item diklik
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       ),
           ),
         ],

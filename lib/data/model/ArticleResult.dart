@@ -1,14 +1,18 @@
 import 'package:nutrichild/data/model/Article.dart';
 
-class ArticleResults {
-  List<Article> articles;
+class ArticleResult {
+  final List<Article> articles;
 
-  ArticleResults({
+  ArticleResult({
     required this.articles,
   });
 
-  factory ArticleResults.fromJson(Map<String, dynamic> json) => ArticleResults(
-        articles:
-            List<Article>.from(json["common"].map((x) => Article.fromJson(x))),
-      );
+  factory ArticleResult.fromJson(Map<String, dynamic> json) {
+    var list = json["common"] as List;
+    List<Article> articleList = list.map((item) => Article.fromJson(item)).toList();
+    
+    return ArticleResult(
+      articles: articleList,
+    );
+  }
 }
