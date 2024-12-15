@@ -8,7 +8,7 @@ class ArticleResults {
   });
 
   factory ArticleResults.fromJson(Map<String, dynamic> json) => ArticleResults(
-    articles:
-    List<Article>.from(json["result.data.foods"].map((x) => Article.fromJson(x))),
-  );
+        articles:
+            List<Article>.from(json["common"].map((x) => Article.fromJson(x))),
+      );
 }

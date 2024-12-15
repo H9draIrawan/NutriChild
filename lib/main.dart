@@ -1,12 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:nutrichild/navigation/BottomNavigation.dart';
 import 'package:nutrichild/provider/provider_child.dart';
 import 'package:nutrichild/provider/provider_food.dart';
 import 'package:nutrichild/provider/provider_meal.dart';
-import 'package:nutrichild/ui/LoginPage.dart';
-import 'package:nutrichild/ui/RegisterPage.dart';
-import 'package:nutrichild/ui/WelcomePage.dart';
+import 'package:nutrichild/ui/CheckFetch.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
@@ -38,13 +35,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: Welcomepage.routeName,
-      routes: {
-        Welcomepage.routeName: (context) => const Welcomepage(),
-        Loginpage.routeName: (context) => const Loginpage(),
-        Registerpage.routeName: (context) => const Registerpage(),
-        Bottomnavigation.routeName: (context) => const Bottomnavigation(),
-      },
+      // initialRoute: Welcomepage.routeName,
+      // routes: {
+      //   Welcomepage.routeName: (context) => const Welcomepage(),
+      //   Loginpage.routeName: (context) => const Loginpage(),
+      //   Registerpage.routeName: (context) => const Registerpage(),
+      //   Bottomnavigation.routeName: (context) => const Bottomnavigation(),
+      // },
+      home: Checkfetch(),
     );
   }
 }

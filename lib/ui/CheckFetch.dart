@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:nutrichild/api/ApiService.dart';
-import 'package:nutrichild/ui/WelcomePage.dart';
 
 class Checkfetch extends StatefulWidget {
   const Checkfetch({super.key});
@@ -43,7 +42,7 @@ class _NewsPageState extends State<Checkfetch> {
                 itemCount: articles.length,
                 itemBuilder: (context, index) {
                   final article = articles[index];
-                  return Welcomepage();
+                  return ListTile(title: Text(article.Food_Name));
                 }));
   }
 }
