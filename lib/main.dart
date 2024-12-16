@@ -1,14 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:nutrichild/navigation/BottomNavigation.dart';
-import 'package:nutrichild/provider/provider_child.dart';
-import 'package:nutrichild/provider/provider_food.dart';
-import 'package:nutrichild/provider/provider_meal.dart';
-import 'package:nutrichild/ui/CheckFetch.dart';
 import 'package:nutrichild/ui/LoginPage.dart';
 import 'package:nutrichild/ui/RegisterPage.dart';
+import 'package:nutrichild/ui/ResetPasswordPage.dart';
 import 'package:nutrichild/ui/WelcomePage.dart';
-import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 
@@ -17,14 +13,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (context) => ProviderChild()),
-      ChangeNotifierProvider(create: (context) => ProviderFood()),
-      ChangeNotifierProvider(create: (context) => ProviderMeal()),
-    ],
-    child: const MyApp(),
-  ));
+  runApp(
+    const MyApp(),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -44,6 +35,7 @@ class MyApp extends StatelessWidget {
         Welcomepage.routeName: (context) => const Welcomepage(),
         Loginpage.routeName: (context) => const Loginpage(),
         Registerpage.routeName: (context) => const Registerpage(),
+        Resetpasswordpage.routeName: (context) => const Resetpasswordpage(),
         Bottomnavigation.routeName: (context) => const Bottomnavigation(),
       },
       // home: Checkfetch(),

@@ -49,7 +49,7 @@ class Loginpage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-              
+
               // Login/Register tabs
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -109,14 +109,19 @@ class Loginpage extends StatelessWidget {
                         value: false,
                         onChanged: (value) {},
                       ),
-                      const Text('Remember password'),
+                      const Text(
+                        'Remember password',
+                        style: TextStyle(fontSize: 12),
+                      ),
                     ],
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/reset-password');
+                    },
                     child: const Text(
                       'Forgot password',
-                      style: TextStyle(color: Colors.blue),
+                      style: TextStyle(color: Colors.blue, fontSize: 12),
                     ),
                   ),
                 ],
@@ -145,9 +150,7 @@ class Loginpage extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 40),
-              
               // Bottom illustration
               Image.asset(
                 'assets/images/login_illustration.png',

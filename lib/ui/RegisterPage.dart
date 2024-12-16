@@ -64,7 +64,7 @@ class Registerpage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-              
+
               // Register/Login tabs
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -128,31 +128,6 @@ class Registerpage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Remember password
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: false,
-                        onChanged: (value) {},
-                      ),
-                      const Text('Remember password'),
-                    ],
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'Forgot password',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
               // Register button
               SizedBox(
                 width: double.infinity,
@@ -176,7 +151,7 @@ class Registerpage extends StatelessWidget {
               ),
 
               const SizedBox(height: 40),
-              
+
               // Bottom illustration
               Image.asset(
                 'assets/images/login_illustration.png',
