@@ -1,37 +1,73 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class Loginpage extends StatelessWidget {
+class Loginpage extends StatefulWidget {
   static const String routeName = '/login';
   const Loginpage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
+  State<Loginpage> createState() => _LoginpageState();
+}
 
-    Future<void> login() async {
-      try {
-        UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        );
-        print("Login successful! UID: ${userCredential.user!.uid}");
-        Navigator.pushReplacementNamed(context, '/');
-      } on FirebaseAuthException catch (e) {
-        print("FirebaseAuthException: ${e.message}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: ${e.message}")),
-        );
-      } catch (e) {
-        print("General exception: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
-        );
+class _LoginpageState extends State<Loginpage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool rememberMe = false;
+
+  Future<void> login() async {
+    try {
+      // Firebase login
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      print("Login successful! UID: ${userCredential.user!.uid}");
+      if (rememberMe) {
+        saveUser(emailController.text.trim(), passwordController.text.trim());
       }
+      // Navigate to home page
+      Navigator.pushReplacementNamed(context, '/');
+    } on FirebaseAuthException catch (e) {
+      print("FirebaseAuthException: ${e.message}");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.message}")),
+      );
+    } catch (e) {
+      print("General exception: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
     }
+  }
 
+  Future<void> loadCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? storedEmail = prefs.getString('email');
+    String? storedPassword = prefs.getString('password');
+    if (storedEmail != null && storedPassword != null) {
+      emailController.text = storedEmail;
+      passwordController.text = storedPassword;
+      login();
+    }
+  }
+
+  Future<void> saveUser(String email, String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email', email);
+    await prefs.setString('password', password);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadCredentials();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -99,15 +135,19 @@ class Loginpage extends StatelessWidget {
                 ),
               ),
 
-              // Remember password & Forgot password
+              // Remember me & Forgot password
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
                       Checkbox(
-                        value: false,
-                        onChanged: (value) {},
+                        value: rememberMe,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            rememberMe = value!;
+                          });
+                        },
                       ),
                       const Text(
                         'Remember password',
@@ -151,6 +191,7 @@ class Loginpage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 40),
+
               // Bottom illustration
               Image.asset(
                 'assets/images/login_illustration.png',

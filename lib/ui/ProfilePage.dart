@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
@@ -34,7 +35,8 @@ class Profilepage extends StatelessWidget {
                   .snapshots(),
               builder: (context, userSnapshot) {
                 if (userSnapshot.hasData && userSnapshot.data != null) {
-                  final userData = userSnapshot.data!.data() as Map<String, dynamic>?;
+                  final userData =
+                      userSnapshot.data!.data() as Map<String, dynamic>?;
                   return ListView(
                     children: [
                       // Profile Header
@@ -143,6 +145,19 @@ class Profilepage extends StatelessWidget {
                         icon: Icons.people_outline,
                         title: 'Invite Friends',
                         onTap: () {},
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.logout,
+                        title: 'Logout',
+                        onTap: () {
+                          // Handle logout
+                          Navigator.pop(context);
+                          SharedPreferences.getInstance().then((prefs) {
+                            prefs.remove('email');
+                            prefs.remove('password');
+                            FirebaseAuth.instance.signOut();
+                          });
+                        },
                       ),
 
                       // Need Help Button
