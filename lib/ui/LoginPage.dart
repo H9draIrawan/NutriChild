@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Loginpage extends StatefulWidget {
@@ -14,9 +15,13 @@ class _LoginpageState extends State<Loginpage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool rememberMe = false;
+  bool _isLoading = false;
 
   Future<void> login() async {
     try {
+      setState(() {
+        _isLoading = true;
+      });
       // Firebase login
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -40,6 +45,10 @@ class _LoginpageState extends State<Loginpage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e")),
       );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -168,28 +177,38 @@ class _LoginpageState extends State<Loginpage> {
               ),
 
               const SizedBox(height: 20),
-
-              // Login button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              _isLoading
+                  ? const SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: LoadingIndicator(
+                        indicatorType: Indicator.circleStrokeSpin,
+                        colors: [Colors.green],
+                        strokeWidth: 5,
+                        backgroundColor: Colors.white,
+                        pathBackgroundColor: Colors.white,
+                      ),
+                    )
+                  : SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'LOGIN',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'LOGIN',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
               const SizedBox(height: 40),
 
               // Bottom illustration
