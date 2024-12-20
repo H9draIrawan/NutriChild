@@ -1,8 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nutrichild/bloc/auth/auth_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_event.dart';
@@ -18,24 +17,34 @@ class Loginpage extends StatefulWidget {
 class _LoginpageState extends State<Loginpage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool _obscureText = true;
   bool rememberMe = false;
   bool _isLoading = false;
 
-  Future<void> loadCredentials() async {
-    final firebaseAuth = FirebaseAuth.instance;
-    try {
-      if (await firebaseAuth.currentUser?.email != null) {
-        Navigator.pushReplacementNamed(context, '/');
-      }
-    } catch (e) {
-      print(e);
+  Future<void> saveUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('email', emailController.text);
+    prefs.setString('password', passwordController.text);
+  }
+
+  Future<bool> loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email');
+    final password = prefs.getString('password');
+    if (email != null && password != null) {
+      return true;
     }
+    return false;
   }
 
   @override
   void initState() {
     super.initState();
-    loadCredentials();
+    loadUser().then((value) {
+      if (value) {
+        Navigator.pushNamed(context, '/');
+      }
+    });
   }
 
   @override
@@ -46,7 +55,13 @@ class _LoginpageState extends State<Loginpage> {
         body: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthenticatedAuthState) {
-              Navigator.pushReplacementNamed(context, '/');
+              if (rememberMe) {
+                saveUser();
+              }
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Login berhasil!')),
+              );
+              Navigator.pushNamed(context, '/');
             } else if (state is ErrorAuthState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("Error: ${state.message}")),
@@ -63,7 +78,8 @@ class _LoginpageState extends State<Loginpage> {
             }
           },
           builder: (context, state) {
-            return SingleChildScrollView(
+            return Center(
+                child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -117,14 +133,25 @@ class _LoginpageState extends State<Loginpage> {
                   // Password field
                   TextField(
                     controller: passwordController,
-                    obscureText: true,
+                    obscureText: _obscureText,
                     decoration: InputDecoration(
                       hintText: 'Password',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                       contentPadding: const EdgeInsets.all(12),
-                      suffixIcon: const Icon(Icons.visibility_off),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText; // Toggle visibility
+                          });
+                        },
+                      ),
                     ),
                   ),
 
@@ -162,12 +189,9 @@ class _LoginpageState extends State<Loginpage> {
 
                   const SizedBox(height: 20),
                   _isLoading
-                      ? LoadingIndicator(
-                          indicatorType: Indicator.circleStrokeSpin,
-                          colors: [Colors.green],
+                      ? CircularProgressIndicator(
+                          color: Colors.blue,
                           strokeWidth: 5,
-                          backgroundColor: Colors.white,
-                          pathBackgroundColor: Colors.white,
                         )
                       : SizedBox(
                           width: double.infinity,
@@ -204,7 +228,7 @@ class _LoginpageState extends State<Loginpage> {
                   ),
                 ],
               ),
-            );
+            ));
           },
         ),
       ),
