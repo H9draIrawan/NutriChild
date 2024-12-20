@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nutrichild/ui/ChatPage.dart';
 import 'package:nutrichild/ui/HomePage.dart';
+import 'package:nutrichild/ui/MealPage.dart';
 import 'package:nutrichild/ui/ProfilePage.dart';
-import 'package:nutrichild/ui/SearchPage.dart';
+import 'package:nutrichild/ui/RecommendPage.dart';
 
 class Bottomnavigation extends StatefulWidget {
   static const routeName = '/';
@@ -19,9 +20,10 @@ class _BottomnavigationState extends State<Bottomnavigation> {
   Widget build(BuildContext context) {
     List<Widget> widgetOptions = [
       Homepage(),
-      Searchpage(),
+      Recommendpage(),
+      Profilepage(),
+      Mealpage(),
       Chatpage(),
-      Profilepage()
     ];
 
     return Scaffold(
@@ -31,7 +33,8 @@ class _BottomnavigationState extends State<Bottomnavigation> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.white,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.red,
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
@@ -44,16 +47,20 @@ class _BottomnavigationState extends State<Bottomnavigation> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chat',
+            icon: Icon(Icons.favorite),
+            label: 'Recommendation',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Meal Plan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.auto_awesome),
+            label: 'Nutri AI',
           ),
         ],
       ),

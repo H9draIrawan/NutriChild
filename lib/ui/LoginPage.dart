@@ -37,12 +37,25 @@ class _LoginpageState extends State<Loginpage> {
     return false;
   }
 
+  Future<void> loginUser() async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login berhasil!')),
+      );
+      Navigator.pushNamed(context, '/');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     loadUser().then((value) {
       if (value) {
-        Navigator.pushNamed(context, '/');
+        loginUser();
       }
     });
   }
@@ -58,10 +71,7 @@ class _LoginpageState extends State<Loginpage> {
               if (rememberMe) {
                 saveUser();
               }
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Login berhasil!')),
-              );
-              Navigator.pushNamed(context, '/');
+              loginUser();
             } else if (state is ErrorAuthState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("Error: ${state.message}")),
