@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nutrichild/bloc/auth/auth_state.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_event.dart';
@@ -22,59 +21,15 @@ class _LoginpageState extends State<Loginpage> {
   bool rememberMe = false;
   bool _isLoading = false;
 
-  Future<void> login() async {
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-      // Firebase login
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-
-      print("Login successful! UID: ${userCredential.user!.uid}");
-      if (rememberMe) {
-        saveUser(emailController.text.trim(), passwordController.text.trim());
-      }
-      // Navigate to home page
-      Navigator.pushReplacementNamed(context, '/');
-    } on FirebaseAuthException catch (e) {
-      print("FirebaseAuthException: ${e.message}");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: ${e.message}")),
-      );
-    } catch (e) {
-      print("General exception: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
   Future<void> loadCredentials() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? storedEmail = prefs.getString('email');
-    String? storedPassword = prefs.getString('password');
-    if (storedEmail != null && storedPassword != null) {
-      emailController.text = storedEmail;
-      passwordController.text = storedPassword;
-      context.read<AuthBloc>().add(LoginEvent(
-            email: storedEmail,
-            password: storedPassword,
-          ));
+    final firebaseAuth = FirebaseAuth.instance;
+    try {
+      if (await firebaseAuth.currentUser?.email != null) {
+        Navigator.pushReplacementNamed(context, '/');
+      }
+    } catch (e) {
+      print(e);
     }
-  }
-
-  Future<void> saveUser(String email, String password) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('email', email);
-    await prefs.setString('password', password);
   }
 
   @override
@@ -91,10 +46,6 @@ class _LoginpageState extends State<Loginpage> {
         body: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthenticatedAuthState) {
-              if (rememberMe) {
-                saveUser(emailController.text.trim(),
-                    passwordController.text.trim());
-              }
               Navigator.pushReplacementNamed(context, '/');
             } else if (state is ErrorAuthState) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -211,16 +162,12 @@ class _LoginpageState extends State<Loginpage> {
 
                   const SizedBox(height: 20),
                   _isLoading
-                      ? const SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: LoadingIndicator(
-                            indicatorType: Indicator.circleStrokeSpin,
-                            colors: [Colors.green],
-                            strokeWidth: 5,
-                            backgroundColor: Colors.white,
-                            pathBackgroundColor: Colors.white,
-                          ),
+                      ? LoadingIndicator(
+                          indicatorType: Indicator.circleStrokeSpin,
+                          colors: [Colors.green],
+                          strokeWidth: 5,
+                          backgroundColor: Colors.white,
+                          pathBackgroundColor: Colors.white,
                         )
                       : SizedBox(
                           width: double.infinity,
