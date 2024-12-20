@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
@@ -151,12 +150,8 @@ class Profilepage extends StatelessWidget {
                         title: 'Logout',
                         onTap: () {
                           // Handle logout
-                          Navigator.pop(context);
-                          SharedPreferences.getInstance().then((prefs) {
-                            prefs.remove('email');
-                            prefs.remove('password');
-                            FirebaseAuth.instance.signOut();
-                          });
+                          FirebaseAuth.instance.signOut();
+                          Navigator.pushReplacementNamed(context, '/login');
                         },
                       ),
 

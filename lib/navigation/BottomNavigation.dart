@@ -15,8 +15,9 @@ class Bottomnavigation extends StatefulWidget {
 class _BottomnavigationState extends State<Bottomnavigation> {
   @override
   int _selectedIndex = 0;
+  @override
   Widget build(BuildContext context) {
-    List<Widget> _widgetOptions = [
+    List<Widget> widgetOptions = [
       Homepage(),
       Searchpage(),
       Chatpage(),
@@ -26,10 +27,10 @@ class _BottomnavigationState extends State<Bottomnavigation> {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: _widgetOptions,
+        children: widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.shifting,
+        type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -41,22 +42,18 @@ class _BottomnavigationState extends State<Bottomnavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
-            backgroundColor: Colors.orange,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Search',
-            backgroundColor: Colors.red,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chat',
-            backgroundColor: Colors.green,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
-            backgroundColor: Colors.blue,
           ),
         ],
       ),
