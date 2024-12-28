@@ -21,8 +21,9 @@ class _LoginpageState extends State<Loginpage> {
   bool rememberMe = false;
   bool _isLoading = false;
 
-  Future<void> saveUser() async {
+  Future<void> saveUser(String username) async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
     prefs.setString('email', emailController.text);
     prefs.setString('password', passwordController.text);
   }
@@ -69,7 +70,7 @@ class _LoginpageState extends State<Loginpage> {
           listener: (context, state) {
             if (state is AuthenticatedAuthState) {
               if (rememberMe) {
-                saveUser();
+                saveUser(emailController.text);
               }
               loginUser();
             } else if (state is ErrorAuthState) {
