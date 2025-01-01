@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'CustomMealPlan.dart';
 
 class Mealpage extends StatelessWidget {
   const Mealpage({super.key});
@@ -14,7 +15,7 @@ class Mealpage extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'WorkSans',
               color: Colors.black,
-              fontSize: 22,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -31,6 +32,8 @@ class Mealpage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   elevation: 2,
+                  color: Colors.white,
+                  shadowColor: Colors.black.withOpacity(0.2),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -70,7 +73,7 @@ class Mealpage extends StatelessWidget {
                               style: TextStyle(
                                 fontFamily: 'WorkSans',
                                 fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             Icon(
@@ -91,7 +94,7 @@ class Mealpage extends StatelessWidget {
                   'Meal plan recommended for you',
                   style: TextStyle(
                     fontFamily: 'WorkSans',
-                    fontSize: 18,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -100,6 +103,8 @@ class Mealpage extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
+                  color: Colors.white,
+                  shadowColor: Colors.black.withOpacity(0.2),
                   elevation: 4,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,14 +129,14 @@ class Mealpage extends StatelessWidget {
                               'Protein power',
                               style: TextStyle(
                                 fontFamily: 'WorkSans',
-                                fontSize: 18,
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 8),
                             const Text(
                               'This meal plan allows all types of meat, fish, poultry, eggs, cheese, non-starchy vegetables, butter, oil, and salad dressing.',
-                              style: TextStyle(fontSize: 14, color: Colors.black, fontFamily: 'WorkSans'),
+                              style: TextStyle(fontSize: 18, color: Colors.black, fontFamily: 'WorkSans'),
                             ),
                             const SizedBox(height: 16),
                             Align(
@@ -145,11 +150,11 @@ class Mealpage extends StatelessWidget {
                                   color: Colors.red[50],
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'RICH IN PROTEIN',
                                   style: TextStyle(
-                                    color: Colors.redAccent,
-                                    fontSize: 12,
+                                    color: Colors.red[800],
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold, fontFamily: 'WorkSans'
                                   ),
                                 ),
@@ -168,7 +173,7 @@ class Mealpage extends StatelessWidget {
                   'Create your own',
                   style: TextStyle(
                     fontFamily: 'WorkSans',
-                    fontSize: 18,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -180,9 +185,14 @@ class Mealpage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 4,
+                      color: Colors.white,
+                      shadowColor: Colors.black.withOpacity(0.2),
                       child: InkWell(
                         onTap: () {
-                          // Tambahkan logika untuk membuat meal plan baru
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const CustomMealPlan()),
+                          );
                         },
                         child: Column(
                           children: [
@@ -204,9 +214,9 @@ class Mealpage extends StatelessWidget {
                                   Container(
                                     width: 56,
                                     height: 56,
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.redAccent,
+                                      color: Colors.red[800],
                                     ),
                                     child: const Icon(
                                       Icons.add,
@@ -219,7 +229,7 @@ class Mealpage extends StatelessWidget {
                                     'Create new meal plan',
                                     style: TextStyle(
                                       color: Colors.black,
-                                      fontSize: 16,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'WorkSans',
                                     ),
