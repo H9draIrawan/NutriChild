@@ -93,3 +93,8 @@ flutter:
 
   assets:
     - assets/images/
+
+  fonts:
+    - family: WorkSans
+      fonts:
+        - asset: fonts/WorkSans-Regular.ttf

@@ -8,7 +8,16 @@ class Mealpage extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Meal planner'),
+          centerTitle: false,
+          title: const Text(
+            'Meal planner',
+            style: TextStyle(
+              fontFamily: 'WorkSans',
+              color: Colors.black,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -19,9 +28,9 @@ class Mealpage extends StatelessWidget {
                 // Section: Your Goal
                 Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  elevation: 4,
+                  elevation: 2,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -45,19 +54,32 @@ class Mealpage extends StatelessWidget {
                             const Text(
                               'Your goal',
                               style: TextStyle(
+                                fontFamily: 'WorkSans',
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
-                        const Text(
-                          'Build muscles',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Text(
+                              'Build muscles',
+                              style: TextStyle(
+                                fontFamily: 'WorkSans',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.grey
+                            )
+                          ]
+                        )
                       ],
                     ),
                   ),
@@ -68,6 +90,7 @@ class Mealpage extends StatelessWidget {
                 const Text(
                   'Meal plan recommended for you',
                   style: TextStyle(
+                    fontFamily: 'WorkSans',
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -75,7 +98,7 @@ class Mealpage extends StatelessWidget {
                 const SizedBox(height: 16),
                 Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   elevation: 4,
                   child: Column(
@@ -83,12 +106,12 @@ class Mealpage extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(8),
+                          top: Radius.circular(16),
                         ),
                         child: Image.network(
                           'https://via.placeholder.com/150', // Ganti dengan URL gambar makanan
                           width: double.infinity,
-                          height: 150,
+                          height: 200,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -100,6 +123,7 @@ class Mealpage extends StatelessWidget {
                             const Text(
                               'Protein power',
                               style: TextStyle(
+                                fontFamily: 'WorkSans',
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -107,24 +131,27 @@ class Mealpage extends StatelessWidget {
                             const SizedBox(height: 8),
                             const Text(
                               'This meal plan allows all types of meat, fish, poultry, eggs, cheese, non-starchy vegetables, butter, oil, and salad dressing.',
-                              style: TextStyle(fontSize: 14),
+                              style: TextStyle(fontSize: 14, color: Colors.black, fontFamily: 'WorkSans'),
                             ),
                             const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.pinkAccent,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Text(
-                                'RICH IN PROTEIN',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red[50],
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: const Text(
+                                  'RICH IN PROTEIN',
+                                  style: TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold, fontFamily: 'WorkSans'
+                                  ),
                                 ),
                               ),
                             ),
@@ -140,65 +167,74 @@ class Mealpage extends StatelessWidget {
                 const Text(
                   'Create your own',
                   style: TextStyle(
+                    fontFamily: 'WorkSans',
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 16),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 4,
-                  child: InkWell(
-                    onTap: () {
-                      // Tambahkan logika untuk membuat meal plan baru
-                    },
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(8),
-                          ),
-                          child: Image.network(
-                            'https://via.placeholder.com/150', // Ganti dengan URL gambar
-                            width: double.infinity,
-                            height: 150,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.redAccent,
-                                ),
-                                child: const Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                ),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 4,
+                      child: InkWell(
+                        onTap: () {
+                          // Tambahkan logika untuk membuat meal plan baru
+                        },
+                        child: Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(
+                                'https://via.placeholder.com/400x200', // Ganti URL sesuai kebutuhan
+                                width: double.infinity,
+                                height: constraints.maxWidth * 0.5,
+                                fit: BoxFit.cover,
                               ),
-                              const SizedBox(width: 16),
-                              const Text(
-                                'Create new meal plan',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            ),
+                            Positioned(
+                              top: constraints.maxWidth * 0.2, // Atur posisi vertikal
+                              left: 0,
+                              right: 0,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.redAccent,
+                                    ),
+                                    child: const Icon(
+                                      Icons.add,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Create new meal plan',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'WorkSans',
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
+                      ),
+                    );
+                  }
+                )
+
               ],
             ),
           ),

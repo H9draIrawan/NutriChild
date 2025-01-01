@@ -41,6 +41,7 @@ class _HomepageState extends State<Homepage> {
                 const Text(
                   "Welcome, ",
                   style: TextStyle(
+                    fontFamily: 'WorkSans',
                     fontSize: 16,
                     color: Colors.black54,
                   ),
@@ -48,6 +49,7 @@ class _HomepageState extends State<Homepage> {
                 Text(
                   '${username ?? 'Guest'}',
                   style: const TextStyle(
+                    fontFamily: 'WorkSans',
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -71,6 +73,7 @@ class _HomepageState extends State<Homepage> {
               const Text(
                 "What do you want to cook today?",
                 style: TextStyle(
+                  fontFamily: 'WorkSans',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -156,6 +159,7 @@ class CategoryButton extends StatelessWidget {
       child: Text(
         label,
         style: const TextStyle(
+          fontFamily: 'WorkSans',
           color: Colors.white,
           fontSize: 14,
           fontWeight: FontWeight.bold,
@@ -181,6 +185,7 @@ class RecipeSection extends StatelessWidget {
             Text(
               title,
               style: const TextStyle(
+                fontFamily: 'WorkSans',
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -189,7 +194,10 @@ class RecipeSection extends StatelessWidget {
               onPressed: () {},
               child: const Text(
                 "Show all",
-                style: TextStyle(color: Color(0xFF19A413)),
+                style: TextStyle(
+                  color: Color(0xFF19A413),
+                  fontFamily: 'WorkSans',
+                ),
               ),
             ),
           ],
@@ -240,7 +248,7 @@ class RecipeCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'WorkSans'),
                 ),
                 const Icon(
                   Icons.favorite_border,
