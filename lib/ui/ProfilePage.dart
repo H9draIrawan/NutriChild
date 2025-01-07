@@ -21,14 +21,23 @@ class Profilepage extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text(
-            'PROFILES',
+            'Profile',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          backgroundColor: const Color(0xFF1A1A1A),
-          foregroundColor: Colors.white,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                // Settings action
+              },
+            ),
+          ],
+          elevation: 0,
         ),
         body: StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),
@@ -43,26 +52,25 @@ class Profilepage extends StatelessWidget {
                   if (userSnapshot.hasData && userSnapshot.data != null) {
                     final userData =
                         userSnapshot.data!.data() as Map<String, dynamic>?;
-                    return ListView(
-                      children: [
-                        // Profile Header
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          color: const Color(0xFF1A1A1A),
-                          child: Row(
+
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          // Profile Header
+                          Row(
                             children: [
-                              // Profile Image
                               CircleAvatar(
-                                radius: 30,
-                                backgroundColor: Colors.red[100],
-                                child: const Icon(
-                                  Icons.person,
-                                  size: 35,
-                                  color: Colors.white,
+                                radius: 40,
+                                backgroundColor: Colors.yellow,
+                                child: CircleAvatar(
+                                  radius: 36,
+                                  backgroundColor: Colors.white,
+                                  backgroundImage: const AssetImage(
+                                      'assets/profile_placeholder.png'),
                                 ),
                               ),
-                              const SizedBox(width: 15),
-                              // User Info
+                              const SizedBox(width: 16),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,11 +78,11 @@ class Profilepage extends StatelessWidget {
                                     Text(
                                       userData?['username'] ?? 'User',
                                       style: const TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
                                       ),
                                     ),
+                                    const SizedBox(height: 4),
                                     Text(
                                       userData?['email'] ?? 'email@gmail.com',
                                       style: const TextStyle(
@@ -82,106 +90,43 @@ class Profilepage extends StatelessWidget {
                                         color: Colors.grey,
                                       ),
                                     ),
-                                    const Text(
-                                      'Registered Since Dec 2023',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
-                              // Edit Icon
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () {
-                                  // Handle edit profile
-                                },
-                              ),
                             ],
                           ),
-                        ),
-
-                        // Menu Items
-                        _buildMenuItem(
-                          icon: Icons.shopping_bag_outlined,
-                          title: 'My Orders',
-                          onTap: () {},
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.favorite_border,
-                          title: 'My Wishlist',
-                          onTap: () {},
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.description_outlined,
-                          title: 'My Prescription',
-                          onTap: () {},
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.science_outlined,
-                          title: 'Your Lab Test',
-                          onTap: () {},
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.medical_services_outlined,
-                          title: 'Doctor Consultation',
-                          onTap: () {},
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.payment_outlined,
-                          title: 'Payment Methods',
-                          onTap: () {},
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.location_on_outlined,
-                          title: 'Your Addresses',
-                          onTap: () {},
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.notifications_outlined,
-                          title: 'Pill Reminder',
-                          onTap: () {},
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.people_outline,
-                          title: 'Invite Friends',
-                          onTap: () {},
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.logout,
-                          title: 'Logout',
-                          onTap: () async {
-                            // Handle logout
-                            final prefs = await SharedPreferences.getInstance();
-                            prefs.remove('email');
-                            prefs.remove('password');
-                            BlocProvider.of<AuthBloc>(context)
-                                .add(LogoutEvent());
-                            Navigator.pushReplacementNamed(context, '/login');
-                          },
-                        ),
-
-                        // Need Help Button
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: ElevatedButton(
-                            onPressed: () {},
+                          const SizedBox(height: 24),
+                          // Meal Plan Progress Section
+                          Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          const Spacer(),
+                          // Need Help Button
+                          ElevatedButton(
+                            onPressed: () async {
+                              // logout action
+                              BlocProvider.of<AuthBloc>(context)
+                                  .add(LogoutEvent());
+                              var pref = await SharedPreferences.getInstance();
+                              pref.clear();
+                              Navigator.pushReplacementNamed(context, "/login");
+                            },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey[100],
+                              backgroundColor: Colors.grey[200],
                               foregroundColor: Colors.black,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
                             ),
-                            child: const Text('Need Help?'),
+                            child: const Text('Logout'),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     );
                   }
                   return const Center(child: CircularProgressIndicator());
@@ -192,25 +137,6 @@ class Profilepage extends StatelessWidget {
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildMenuItem({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.black87),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          color: Colors.black87,
-        ),
-      ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: onTap,
     );
   }
 }

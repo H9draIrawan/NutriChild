@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:nutrichild/ui/LoginPage.dart';
 
 class Welcomepage extends StatefulWidget {
-  static const routeName = "/welcome";
   const Welcomepage({super.key});
 
   @override
@@ -94,7 +92,7 @@ class _WelcomepageState extends State<Welcomepage> {
                 buttonText: "LET'S BEGIN",
                 centerContent: true,
                 onButtonPressed: () {
-                  Navigator.pushReplacementNamed(context, Loginpage.routeName);
+                  Navigator.pushReplacementNamed(context, '/login');
                 },
               ),
             ],

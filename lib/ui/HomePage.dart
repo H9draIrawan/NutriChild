@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../bloc/auth/auth_bloc.dart';
+import '../bloc/auth/auth_state.dart';
 
 class Homepage extends StatefulWidget {
-  static const routeName = "/home";
   const Homepage({super.key});
 
   @override
@@ -19,10 +21,18 @@ class _HomepageState extends State<Homepage> {
   }
 
   Future<void> _loadUsername() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      username = prefs.getString('username') ?? 'Guest';
-    });
+    // final prefs = await SharedPreferences.getInstance();
+    // setState(() {
+    //   username = prefs.getString('username') ?? 'Guest';
+    // });
+
+    final authBloc = BlocProvider.of<AuthBloc>(context);
+    if (authBloc.state is LoginAuthState) {
+      final state = authBloc.state as LoginAuthState;
+      setState(() {
+        username = state.username;
+      });
+    }
   }
 
   @override
@@ -32,36 +42,37 @@ class _HomepageState extends State<Homepage> {
         elevation: 0,
         backgroundColor: Colors.white,
         toolbarHeight: 80,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        title: BlocConsumer<AuthBloc, AuthState>(
+          listener: (context, state) {},
+          builder: (context, state) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "Welcome, ",
-                  style: TextStyle(
-                    fontFamily: 'WorkSans',
-                    fontSize: 16,
-                    color: Colors.black54,
-                  ),
-                ),
-                Text(
-                  '${username ?? 'Guest'}',
-                  style: const TextStyle(
-                    fontFamily: 'WorkSans',
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Welcome, ",
+                      style: TextStyle(
+                        fontFamily: 'WorkSans',
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    Text(
+                      username ?? '',
+                      style: const TextStyle(
+                        fontFamily: 'WorkSans',
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-            const CircleAvatar(
-              backgroundImage: AssetImage('assets/images/Default.png'),
-              radius: 25,
-            ),
-          ],
+            );
+          },
         ),
       ),
       body: SingleChildScrollView(
@@ -96,7 +107,8 @@ class _HomepageState extends State<Homepage> {
                   ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0x1919A413).withOpacity(0.65),
+                      backgroundColor:
+                          const Color(0x1919A413).withOpacity(0.65),
                       padding: const EdgeInsets.all(12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -119,19 +131,34 @@ class _HomepageState extends State<Homepage> {
               RecipeSection(
                 title: "Rich in protein recipes",
                 recipes: [
-                  RecipeCard(image: 'assets/images/Default.png', title: "Roasted chicken"),
-                  RecipeCard(image: 'assets/images/Default.png', title: "Salmon with salad"),
-                  RecipeCard(image: 'assets/images/Default.png', title: "Roasted lamb"),
-                  RecipeCard(image: 'assets/images/Default.png', title: "Ravioli with pesto"),
+                  RecipeCard(
+                      image: 'assets/images/Default.png',
+                      title: "Roasted chicken"),
+                  RecipeCard(
+                      image: 'assets/images/Default.png',
+                      title: "Salmon with salad"),
+                  RecipeCard(
+                      image: 'assets/images/Default.png',
+                      title: "Roasted lamb"),
+                  RecipeCard(
+                      image: 'assets/images/Default.png',
+                      title: "Ravioli with pesto"),
                 ],
               ),
               RecipeSection(
                 title: "Popular recipes this week",
                 recipes: [
-                  RecipeCard(image: 'assets/images/Default.png', title: "Tomato soup"),
-                  RecipeCard(image: 'assets/images/Default.png', title: "Pumpkin soup"),
-                  RecipeCard(image: 'assets/images/Default.png', title: "Roasted chicken"),
-                  RecipeCard(image: 'assets/images/Default.png', title: "Ravioli with pesto"),
+                  RecipeCard(
+                      image: 'assets/images/Default.png', title: "Tomato soup"),
+                  RecipeCard(
+                      image: 'assets/images/Default.png',
+                      title: "Pumpkin soup"),
+                  RecipeCard(
+                      image: 'assets/images/Default.png',
+                      title: "Roasted chicken"),
+                  RecipeCard(
+                      image: 'assets/images/Default.png',
+                      title: "Ravioli with pesto"),
                 ],
               ),
             ],
@@ -241,14 +268,18 @@ class RecipeCard extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.black54,
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(10)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'WorkSans'),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontFamily: 'WorkSans'),
                 ),
                 const Icon(
                   Icons.favorite_border,

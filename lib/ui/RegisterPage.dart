@@ -6,7 +6,6 @@ import '../bloc/auth/auth_event.dart';
 import '../bloc/auth/auth_state.dart';
 
 class Registerpage extends StatefulWidget {
-  static const routeName = "/register";
   const Registerpage({super.key});
 
   @override
@@ -27,7 +26,7 @@ class _RegisterpageState extends State<Registerpage> {
       child: Scaffold(
         body: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is AuthenticatedAuthState) {
+            if (state is RegisterAuthState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Registrasi berhasil!')),
               );
@@ -40,7 +39,7 @@ class _RegisterpageState extends State<Registerpage> {
 
             if (state is LoadingAuthState) {
               isLoading = true;
-            } else if (state is LoadedAuthState) {
+            } else {
               isLoading = false;
             }
           },

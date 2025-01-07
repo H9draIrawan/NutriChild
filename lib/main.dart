@@ -1,11 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrichild/navigation/BottomNavigation.dart';
 import 'package:nutrichild/ui/LoginPage.dart';
 import 'package:nutrichild/ui/RegisterPage.dart';
 import 'package:nutrichild/ui/ResetPasswordPage.dart';
 import 'package:nutrichild/ui/WelcomePage.dart';
 
+import 'bloc/auth/auth_bloc.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -21,24 +23,33 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => AuthBloc(),
+          child: const Loginpage(),
+        ),
+        BlocProvider(
+          create: (context) => AuthBloc(),
+          child: const Registerpage(),
+        ),
+        BlocProvider(
+          create: (context) => AuthBloc(),
+          child: const Bottomnavigation(),
+        ),
+      ],
+      child: MaterialApp(
+        initialRoute: "/login",
+        routes: {
+          "/welcome": (context) => const Welcomepage(),
+          "/login": (context) => const Loginpage(),
+          "/register": (context) => const Registerpage(),
+          "/reset-password": (context) => const Resetpasswordpage(),
+          "/": (context) => const Bottomnavigation(),
+        },
       ),
-      initialRoute: Welcomepage.routeName,
-      routes: {
-        Welcomepage.routeName: (context) => const Welcomepage(),
-        Loginpage.routeName: (context) => const Loginpage(),
-        Registerpage.routeName: (context) => const Registerpage(),
-        Resetpasswordpage.routeName: (context) => const Resetpasswordpage(),
-        Bottomnavigation.routeName: (context) => const Bottomnavigation(),
-      },
-      // home: Checkfetch(),
     );
   }
 }
