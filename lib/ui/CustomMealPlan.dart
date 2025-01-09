@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nutrichild/ui/SearchMealCustom.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CustomMealPlan extends StatelessWidget {
@@ -360,7 +361,10 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                             Icons.add, 
                             "Add Breakfast",
                             onTap: () {
-                              print("Add Breakfast tapped!");
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => SearchMealCustom()),
+                              );
                             },
                         ),
                         const SizedBox(height: 16),
@@ -368,7 +372,10 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                             Icons.add,
                             "Add Lunch",
                             onTap: () {
-                              //Logicnya
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => SearchMealCustom()),
+                              );
                             },
                         ),
                         const SizedBox(height: 16),
@@ -376,7 +383,10 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                             Icons.add,
                             "Add Dinner",
                             onTap: () {
-                              //Logicnya
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => SearchMealCustom()),
+                              );
                             },
                         ),
                       ],
@@ -422,39 +432,39 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
     return GestureDetector(
       onTap: onTap,
       child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        color: Colors.white,
+        shadowColor: Colors.black.withOpacity(0.2),
+        child: Container(
+          height: 80,
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: Colors.green,
+                size: 32,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'WorkSans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+            ],
           ),
-          color: Colors.white,
-          shadowColor: Colors.black.withOpacity(0.2),
-          child: Container(
-            height: 80,
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                    icon,
-                    color: Colors.green,
-                    size : 32
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontFamily: 'WorkSans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          )
-      )
-
+        ),
+      ),
     );
   }
+
 }
