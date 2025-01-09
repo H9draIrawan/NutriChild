@@ -171,7 +171,7 @@ class _HomepageState extends State<Homepage> {
 
 class CategoryButton extends StatelessWidget {
   final String label;
-  const CategoryButton({required this.label});
+  const CategoryButton({super.key, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +199,7 @@ class CategoryButton extends StatelessWidget {
 class RecipeSection extends StatelessWidget {
   final String title;
   final List<RecipeCard> recipes;
-  const RecipeSection({required this.title, required this.recipes});
+  const RecipeSection({super.key, required this.title, required this.recipes});
 
   @override
   Widget build(BuildContext context) {
@@ -248,7 +248,7 @@ class RecipeSection extends StatelessWidget {
 class RecipeCard extends StatelessWidget {
   final String image;
   final String title;
-  const RecipeCard({required this.image, required this.title});
+  const RecipeCard({super.key, required this.image, required this.title});
 
   @override
   Widget build(BuildContext context) {

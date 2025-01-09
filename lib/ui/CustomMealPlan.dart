@@ -195,7 +195,7 @@ class ChooseNewPlan extends StatefulWidget {
 }
 
 class _ChooseNewPlanState extends State<ChooseNewPlan> {
-  CalendarFormat _calendarFormat = CalendarFormat.week;
+  final CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
