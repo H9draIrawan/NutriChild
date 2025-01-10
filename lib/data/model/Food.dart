@@ -1,36 +1,31 @@
 class Food {
-  late String? id;
-  late String? name;
-  late double? calories;
-  late double? fat;
-  late double? protein;
-  late double? carbohydrates;
+  final String id;
+  final String name;
+  final double calories;
+  final String imageUrl;
 
-  Food(
-      {required this.id,
-      required this.name,
-      required this.calories,
-      required this.fat,
-      required this.protein,
-      required this.carbohydrates});
+  Food({
+    required this.id,
+    required this.name,
+    required this.calories,
+    required this.imageUrl,
+  });
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
       'calories': calories,
-      'fat': fat,
-      'protein': protein,
-      'carbohydrates': carbohydrates,
+      'imageUrl': imageUrl,
     };
   }
 
-  Food.fromMap(Map<String, dynamic> map) {
-    id = map['id'];
-    name = map['name'];
-    calories = map['calories'];
-    fat = map['fat'];
-    protein = map['protein'];
-    carbohydrates = map['carbohydrates'];
+  factory Food.fromMap(Map<String, dynamic> map) {
+    return Food(
+      id: map['id'],
+      name: map['name'],
+      calories: map['calories'],
+      imageUrl: map['imageUrl'],
+    );
   }
 }

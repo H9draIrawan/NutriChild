@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrichild/bloc/auth/auth_bloc.dart';
 import 'package:nutrichild/bloc/auth/auth_state.dart';
-import 'package:nutrichild/ui/MyGoalPage.dart';
 import 'package:nutrichild/ui/EditProfilePage.dart';
 import 'package:nutrichild/ui/ResetPasswordPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../bloc/auth/auth_event.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
@@ -312,8 +314,11 @@ class Profilepage extends StatelessWidget {
 
                       // Logout Button
                       InkWell(
-                        onTap: () {
+                        onTap: () async {
                           // Handle logout
+                          final prefs = await SharedPreferences.getInstance();
+                          prefs.clear();
+                          BlocProvider.of<AuthBloc>(context).add(LogoutEvent());
                           Navigator.pushReplacementNamed(context, '/login');
                         },
                         child: Container(

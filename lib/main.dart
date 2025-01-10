@@ -1,15 +1,18 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nutrichild/bloc/food/food_bloc.dart';
 import 'package:nutrichild/navigation/BottomNavigation.dart';
+import 'package:nutrichild/ui/EditProfilePage.dart';
 import 'package:nutrichild/ui/LoginPage.dart';
+import 'package:nutrichild/ui/MyGoalPage.dart';
 import 'package:nutrichild/ui/RegisterPage.dart';
 import 'package:nutrichild/ui/ResetPasswordPage.dart';
 import 'package:nutrichild/ui/WelcomePage.dart';
-import 'package:nutrichild/ui/MyGoalPage.dart';
-import 'package:nutrichild/ui/EditProfilePage.dart';
 
 import 'bloc/auth/auth_bloc.dart';
+import 'database/database_food.dart';
+import 'database/database_meal.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -17,6 +20,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  final foodSqflite = FoodSqflite();
+  final MealSqflite mealSqflite = MealSqflite();
+  await foodSqflite.initDB();
+  await mealSqflite.initDB();
   runApp(
     const MyApp(),
   );
@@ -39,6 +46,10 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => AuthBloc(),
+          child: const Bottomnavigation(),
+        ),
+        BlocProvider(
+          create: (context) => FoodBloc(),
           child: const Bottomnavigation(),
         ),
       ],

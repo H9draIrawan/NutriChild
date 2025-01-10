@@ -2,7 +2,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../data/model/Food.dart';
 
-class DatabaseFood {
+class FoodSqflite {
   static Database? _database;
   static const String _foodTable = 'food';
 
@@ -17,33 +17,50 @@ class DatabaseFood {
 
   initDB() async {
     var path = await getDatabasesPath();
-    var db = openDatabase("$path/food.db",
+    var db = openDatabase("$path/food.db", version: 1,
         onCreate: (Database db, int version) async {
-      await db.execute(
-          "CREATE TABLE $_foodTable(id TEXT PRIMARY KEY AUTOINCREMENT, name TEXT, calories DOUBLE, protein DOUBLE, fat DOUBLE, carbohydrates DOUBLE)");
+      await db.execute('''CREATE TABLE $_foodTable(
+          id TEXT PRIMARY KEY, 
+          name TEXT, 
+          calories REAL, 
+          imageUrl TEXT)''');
       print("DB Created");
     });
     return db;
   }
 
-  Future insertFood(Food nutrition) async {
-    final Database db = await database;
-    try {
-      await db.insert(_foodTable, nutrition.toMap());
-      print("Data Inserted");
-    } catch (_) {
-      print("Failed to Inserted Data");
-    }
+  Future<void> insertFood(Food food) async {
+    final db = await database;
+    await db.insert(_foodTable, food.toMap());
+  }
+
+  Future<void> updateFood(Food food) async {
+    final db = await database;
+    await db.update(
+      _foodTable,
+      food.toMap(),
+      where: 'id = ?',
+      whereArgs: [food.id],
+    );
   }
 
   Future<List<Food>> getFood() async {
-    final Database db = await database;
-    List<Map<String, dynamic>> results = await db.query(_foodTable);
-    List<Food> nutrition = [];
-    for (var result in results) {
-      nutrition.add(Food.fromMap(result));
-    }
-    print("Database : ${nutrition.length}");
-    return nutrition;
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(_foodTable);
+    return List.generate(maps.length, (i) {
+      return Food.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<Food>> getFoodbyId(String id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      _foodTable,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return List.generate(maps.length, (i) {
+      return Food.fromMap(maps[i]);
+    });
   }
 }
