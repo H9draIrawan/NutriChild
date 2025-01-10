@@ -6,6 +6,7 @@ import 'package:nutrichild/ui/LoginPage.dart';
 import 'package:nutrichild/ui/RegisterPage.dart';
 import 'package:nutrichild/ui/ResetPasswordPage.dart';
 import 'package:nutrichild/ui/WelcomePage.dart';
+import 'package:nutrichild/ui/MyGoalPage.dart';
 
 import 'bloc/auth/auth_bloc.dart';
 import 'firebase_options.dart';
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
           "/register": (context) => const Registerpage(),
           "/reset-password": (context) => const Resetpasswordpage(),
           "/": (context) => const Bottomnavigation(),
+          "/goal": (context) => const MyGoalPage(),
         },
       ),
     );
