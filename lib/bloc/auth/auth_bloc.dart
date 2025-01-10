@@ -52,5 +52,72 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(ErrorAuthState(e.toString()));
       }
     });
+
+    on<UpdateProfileEvent>((event, emit) async {
+      try {
+        emit(LoadingAuthState());
+
+        // Get current user
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          // Update email if changed
+          if (user.email != event.email) {
+            await user.updateEmail(event.email);
+          }
+
+          // Update username in Firestore
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({
+            'username': event.username,
+            'email': event.email,
+          });
+
+          // Emit UpdateProfileSuccessState first
+          emit(UpdateProfileSuccessState());
+
+          // Then immediately emit new LoginAuthState with updated data
+          emit(LoginAuthState(event.username, event.email));
+        }
+      } catch (e) {
+        emit(ErrorAuthState(e.toString()));
+      }
+    });
+
+    on<ResetPasswordEvent>((event, emit) async {
+      try {
+        emit(LoadingAuthState());
+        await _firebaseAuth.sendPasswordResetEmail(email: event.email);
+        emit(ResetPasswordSuccessState());
+      } catch (e) {
+        emit(ErrorAuthState(e.toString()));
+      }
+    });
+
+    on<ChangePasswordEvent>((event, emit) async {
+      try {
+        emit(LoadingAuthState());
+
+        // Get current user
+        final user = _firebaseAuth.currentUser;
+        if (user != null && user.email != null) {
+          // Re-authenticate user
+          final credential = EmailAuthProvider.credential(
+            email: user.email!,
+            password: event.currentPassword,
+          );
+
+          await user.reauthenticateWithCredential(credential);
+
+          // Change password
+          await user.updatePassword(event.newPassword);
+
+          emit(ChangePasswordSuccessState());
+        }
+      } catch (e) {
+        emit(ErrorAuthState(e.toString()));
+      }
+    });
   }
 }
