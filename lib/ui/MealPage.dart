@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'CustomMealPlan.dart';
+
+import 'ChooseNewPlan.dart';
 
 class Mealpage extends StatelessWidget {
   const Mealpage({super.key});
@@ -66,23 +67,19 @@ class Mealpage extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text(
-                              'Build muscles',
-                              style: TextStyle(
-                                fontFamily: 'WorkSans',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              Text(
+                                'Build muscles',
+                                style: TextStyle(
+                                  fontFamily: 'WorkSans',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: Colors.grey
-                            )
-                          ]
-                        )
+                              Icon(Icons.arrow_forward_ios,
+                                  size: 16, color: Colors.grey)
+                            ])
                       ],
                     ),
                   ),
@@ -136,7 +133,10 @@ class Mealpage extends StatelessWidget {
                             const SizedBox(height: 8),
                             const Text(
                               'This meal plan allows all types of meat, fish, poultry, eggs, cheese, non-starchy vegetables, butter, oil, and salad dressing.',
-                              style: TextStyle(fontSize: 18, color: Colors.black, fontFamily: 'WorkSans'),
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                  fontFamily: 'WorkSans'),
                             ),
                             const SizedBox(height: 16),
                             Align(
@@ -153,10 +153,10 @@ class Mealpage extends StatelessWidget {
                                 child: Text(
                                   'RICH IN PROTEIN',
                                   style: TextStyle(
-                                    color: Colors.red[800],
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold, fontFamily: 'WorkSans'
-                                  ),
+                                      color: Colors.red[800],
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'WorkSans'),
                                 ),
                               ),
                             ),
@@ -178,73 +178,72 @@ class Mealpage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 4,
-                      color: Colors.white,
-                      shadowColor: Colors.black.withOpacity(0.2),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const CustomMealPlan()),
-                          );
-                        },
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Image.network(
-                                'https://via.placeholder.com/400x200', // Ganti URL sesuai kebutuhan
-                                width: double.infinity,
-                                height: constraints.maxWidth * 0.5,
-                                fit: BoxFit.cover,
-                              ),
+                LayoutBuilder(builder: (context, constraints) {
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 4,
+                    color: Colors.white,
+                    shadowColor: Colors.black.withOpacity(0.2),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ChooseNewPlan()),
+                        );
+                      },
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.network(
+                              'https://via.placeholder.com/400x200', // Ganti URL sesuai kebutuhan
+                              width: double.infinity,
+                              height: constraints.maxWidth * 0.5,
+                              fit: BoxFit.cover,
                             ),
-                            Positioned(
-                              top: constraints.maxWidth * 0.2, // Atur posisi vertikal
-                              left: 0,
-                              right: 0,
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: 56,
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.red[800],
-                                    ),
-                                    child: const Icon(
-                                      Icons.add,
-                                      color: Colors.white,
-                                      size: 32,
-                                    ),
+                          ),
+                          Positioned(
+                            top: constraints.maxWidth *
+                                0.2, // Atur posisi vertikal
+                            left: 0,
+                            right: 0,
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.red[800],
                                   ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    'Create new meal plan',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'WorkSans',
-                                    ),
-                                    textAlign: TextAlign.center,
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 32,
                                   ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Create new meal plan',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'WorkSans',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    );
-                  }
-                )
-
+                    ),
+                  );
+                })
               ],
             ),
           ),

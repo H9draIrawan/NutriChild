@@ -1,28 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 
-class ChooseNewPlan extends StatelessWidget {
+import 'SearchMealCustom.dart';
+
+class ChooseNewPlan extends StatefulWidget {
   const ChooseNewPlan({super.key});
+
+  @override
+  State<ChooseNewPlan> createState() => _ChooseNewPlanState();
+}
+
+class _ChooseNewPlanState extends State<ChooseNewPlan> {
+  final CalendarFormat _calendarFormat = CalendarFormat.week;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            // Background image
-            SizedBox(
-              height: 250,
-              width: double.infinity,
-              child: Image.asset(
-                'assets/images/pic1.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-            SingleChildScrollView(
-              child: Column(
+        body: SingleChildScrollView(
+          child: Stack(
+            children: [
+              // Background image that scrolls with the page
+              Column(
                 children: [
-                  const SizedBox(height: 200), // Push card below the image
+                  SizedBox(
+                    height: 250,
+                    width: double.infinity,
+                    child: Image.asset(
+                      'assets/images/pic1.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  // Empty space below image to allow scrolling
+                  Container(
+                    height: 800,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  const SizedBox(
+                      height: 200), // Push card below the top of the screen
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Card(
@@ -54,7 +76,7 @@ class ChooseNewPlan extends StatelessWidget {
                                     Icons.edit,
                                     color: Colors.red[800],
                                   ),
-                                )
+                                ),
                               ],
                             ),
                             const SizedBox(height: 8),
@@ -76,64 +98,85 @@ class ChooseNewPlan extends StatelessWidget {
                                 color: Colors.black54,
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Amount of meals',
-                              style: TextStyle(
-                                fontFamily: 'WorkSans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Fill amount of meals',
-                                hintStyle: const TextStyle(
-                                    fontFamily: 'WorkSans',
-                                    fontSize: 16,
-                                    color: Colors.grey
-                                ),
-                                prefixIcon: const Icon(Icons.search),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Plan length',
-                              style: TextStyle(
-                                fontFamily: 'WorkSans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Fill plan length',
-                                hintStyle: const TextStyle(
-                                    fontFamily: 'WorkSans',
-                                    fontSize: 16,
-                                    color: Colors.grey
-                                ),
-                                prefixIcon: const Icon(Icons.search),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
+                  const Text(
+                    'Calendar',
+                    style: TextStyle(
+                      fontFamily: 'WorkSans',
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TableCalendar(
+                    focusedDay: _focusedDay,
+                    firstDay: DateTime.utc(2025, 1, 1),
+                    lastDay: DateTime.utc(2025, 12, 31),
+                    calendarFormat: _calendarFormat,
+                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                    onPageChanged: (focusedDay) {
+                      _focusedDay = focusedDay;
+                    },
+                  ),
+                  const SizedBox(height: 16),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      children: [
+                        _buildActionButton(
+                          Icons.add,
+                          "Add Breakfast",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SearchMealCustom()),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildActionButton(
+                          Icons.add,
+                          "Add Lunch",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SearchMealCustom()),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildActionButton(
+                          Icons.add,
+                          "Add Dinner",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SearchMealCustom()),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 32),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -160,8 +203,48 @@ class ChooseNewPlan extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(IconData icon, String label,
+      {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        color: Colors.white,
+        shadowColor: Colors.black.withOpacity(0.2),
+        child: Container(
+          height: 80,
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: Colors.green,
+                size: 32,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'WorkSans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

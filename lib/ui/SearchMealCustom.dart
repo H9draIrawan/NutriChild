@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nutrichild/ui/CustomMealPlan.dart';
 
 class SearchMealCustom extends StatelessWidget {
   const SearchMealCustom({super.key});
@@ -46,7 +47,8 @@ class MealCard extends StatelessWidget {
   final String calories;
   final String imageUrl;
 
-  const MealCard({super.key, 
+  const MealCard({
+    super.key,
     required this.title,
     required this.time,
     required this.calories,
@@ -54,45 +56,58 @@ class MealCard extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              imageUrl,
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
-            ),
+    return InkWell(
+      onTap: () {
+        // Handle the onClick action here
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CustomMealPlan(),
           ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.timer, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text(time),
-                    SizedBox(width: 16),
-                    Icon(Icons.local_fire_department, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text('$calories kcal'),
-                  ],
-                ),
-              ],
+        );
+      },
+      child: Card(
+        margin: EdgeInsets.only(bottom: 16),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                imageUrl,
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-        ],
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.timer, size: 16, color: Colors.grey),
+                      SizedBox(width: 4),
+                      Text(time),
+                      SizedBox(width: 16),
+                      Icon(Icons.local_fire_department,
+                          size: 16, color: Colors.grey),
+                      SizedBox(width: 4),
+                      Text('$calories kcal'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
