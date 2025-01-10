@@ -7,23 +7,23 @@ class FoodSqflite {
   static const String _foodTable = 'food';
 
   Future<Database> get database async {
-    if (_database != null) return _database!;
+    if (_database != null) {
+      return _database!;
+    }
+
     _database = await initDB();
     return _database!;
   }
 
   initDB() async {
     var path = await getDatabasesPath();
-    var db = openDatabase("$path/food.db",
+    var db = openDatabase("$path/food.db", version: 1,
         onCreate: (Database db, int version) async {
-      await db.execute('''
-          CREATE TABLE $_foodTable(
-          id TEXT PRIMARY KEY,
-          name TEXT,
-          calories DOUBLE,
-          imageUrl TEXT,
-          )
-          ''');
+      await db.execute('''CREATE TABLE $_foodTable(
+          id TEXT PRIMARY KEY, 
+          name TEXT, 
+          calories REAL, 
+          imageUrl TEXT)''');
       print("DB Created");
     });
     return db;
@@ -47,6 +47,18 @@ class FoodSqflite {
   Future<List<Food>> getFood() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(_foodTable);
+    return List.generate(maps.length, (i) {
+      return Food.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<Food>> getFoodbyId(String id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      _foodTable,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
     return List.generate(maps.length, (i) {
       return Food.fromMap(maps[i]);
     });

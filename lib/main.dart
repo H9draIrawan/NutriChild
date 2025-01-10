@@ -11,6 +11,8 @@ import 'package:nutrichild/ui/ResetPasswordPage.dart';
 import 'package:nutrichild/ui/WelcomePage.dart';
 
 import 'bloc/auth/auth_bloc.dart';
+import 'database/database_food.dart';
+import 'database/database_meal.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -18,6 +20,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  final foodSqflite = FoodSqflite();
+  final MealSqflite mealSqflite = MealSqflite();
+  await foodSqflite.initDB();
+  await mealSqflite.initDB();
   runApp(
     const MyApp(),
   );

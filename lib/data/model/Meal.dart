@@ -3,7 +3,7 @@ class Meal {
   late String childId;
   late String foodId;
   late String mealTime;
-  late DateTime dateTime;
+  late String dateTime;
   late int qty;
 
   Meal(

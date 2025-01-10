@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrichild/bloc/food/food_bloc.dart';
+import 'package:nutrichild/database/database_food.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../bloc/food/food_event.dart';
+import '../database/database_meal.dart';
 import 'SearchMealCustom.dart';
 
 class ChooseNewPlan extends StatefulWidget {
@@ -17,6 +19,9 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
   final CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+
+  final FoodSqflite foodSqflite = FoodSqflite();
+  final MealSqflite mealSqflite = MealSqflite();
 
   @override
   Widget build(BuildContext context) {

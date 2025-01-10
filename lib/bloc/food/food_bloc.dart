@@ -41,10 +41,13 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
           childId: event.childId,
           foodId: foodId,
           mealTime: 'Breakfast',
-          dateTime: DateTime.now(),
+          dateTime:
+              "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
           qty: event.qty,
         ),
       );
+
+      print("Data Inserted");
     });
 
     on<LunchEvent>((event, emit) {
@@ -64,7 +67,8 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
           childId: event.childId,
           foodId: foodId,
           mealTime: 'Lunch',
-          dateTime: DateTime.now(),
+          dateTime:
+              "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
           qty: event.qty,
         ),
       );
@@ -87,7 +91,8 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
           childId: event.childId,
           foodId: foodId,
           mealTime: 'Dinner',
-          dateTime: DateTime.now(),
+          dateTime:
+              "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
           qty: event.qty,
         ),
       );
