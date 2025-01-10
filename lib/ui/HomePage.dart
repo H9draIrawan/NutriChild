@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_state.dart';
+import '../ui/AllRecipesPage.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -298,6 +299,13 @@ class RecipeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final recipesList = recipes
+        .map((recipe) => {
+              'image': recipe.image,
+              'title': recipe.title,
+            })
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -313,7 +321,17 @@ class RecipeSection extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AllRecipesPage(
+                      categoryTitle: title,
+                      recipes: recipesList,
+                    ),
+                  ),
+                );
+              },
               child: const Text(
                 "Show all",
                 style: TextStyle(
