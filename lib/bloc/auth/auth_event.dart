@@ -46,3 +46,17 @@ class UpdateProfileEvent extends AuthEvent {
     required this.email,
   });
 }
+
+class ResetPasswordEvent extends AuthEvent {
+  final String email;
+  const ResetPasswordEvent(this.email);
+}
+
+class ChangePasswordEvent extends AuthEvent {
+  final String currentPassword;
+  final String newPassword;
+  const ChangePasswordEvent({
+    required this.currentPassword,
+    required this.newPassword,
+  });
+}

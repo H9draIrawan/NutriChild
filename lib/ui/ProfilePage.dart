@@ -4,6 +4,7 @@ import 'package:nutrichild/bloc/auth/auth_bloc.dart';
 import 'package:nutrichild/bloc/auth/auth_state.dart';
 import 'package:nutrichild/ui/MyGoalPage.dart';
 import 'package:nutrichild/ui/EditProfilePage.dart';
+import 'package:nutrichild/ui/ResetPasswordPage.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
@@ -220,7 +221,13 @@ class Profilepage extends StatelessWidget {
                     // Change Password Button
                     InkWell(
                       onTap: () {
-                        Navigator.pushNamed(context, '/reset-password');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const ResetPasswordPage(isFromLogin: false),
+                          ),
+                        );
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(

@@ -33,3 +33,7 @@ class ErrorAuthState extends AuthState {
 }
 
 class UpdateProfileSuccessState extends AuthState {}
+
+class ResetPasswordSuccessState extends AuthState {}
+
+class ChangePasswordSuccessState extends AuthState {}

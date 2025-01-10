@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_event.dart';
+import '../ui/ResetPasswordPage.dart';
 
 class Loginpage extends StatefulWidget {
   const Loginpage({super.key});
@@ -240,7 +241,13 @@ class _LoginpageState extends State<Loginpage> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, '/reset-password');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ResetPasswordPage(
+                                      isFromLogin: true),
+                                ),
+                              );
                             },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,

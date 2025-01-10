@@ -48,7 +48,8 @@ class MyApp extends StatelessWidget {
           "/welcome": (context) => const Welcomepage(),
           "/login": (context) => const Loginpage(),
           "/register": (context) => const Registerpage(),
-          "/reset-password": (context) => const Resetpasswordpage(),
+          "/reset-password": (context) =>
+              const ResetPasswordPage(isFromLogin: true),
           "/": (context) => const Bottomnavigation(),
           "/goal": (context) => const MyGoalPage(),
           "/edit-profile": (context) => const EditProfilePage(),

@@ -84,5 +84,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(ErrorAuthState(e.toString()));
       }
     });
+
+    on<ResetPasswordEvent>((event, emit) async {
+      try {
+        emit(LoadingAuthState());
+        await _firebaseAuth.sendPasswordResetEmail(email: event.email);
+        emit(ResetPasswordSuccessState());
+      } catch (e) {
+        emit(ErrorAuthState(e.toString()));
+      }
+    });
+
+    on<ChangePasswordEvent>((event, emit) async {
+      try {
+        emit(LoadingAuthState());
+
+        // Get current user
+        final user = _firebaseAuth.currentUser;
+        if (user != null && user.email != null) {
+          // Re-authenticate user
+          final credential = EmailAuthProvider.credential(
+            email: user.email!,
+            password: event.currentPassword,
+          );
+
+          await user.reauthenticateWithCredential(credential);
+
+          // Change password
+          await user.updatePassword(event.newPassword);
+
+          emit(ChangePasswordSuccessState());
+        }
+      } catch (e) {
+        emit(ErrorAuthState(e.toString()));
+      }
+    });
   }
 }
