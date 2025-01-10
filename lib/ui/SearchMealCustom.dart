@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SearchMealCustom extends StatelessWidget {
+  const SearchMealCustom({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +46,7 @@ class MealCard extends StatelessWidget {
   final String calories;
   final String imageUrl;
 
-  const MealCard({
+  const MealCard({super.key, 
     required this.title,
     required this.time,
     required this.calories,
