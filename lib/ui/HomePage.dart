@@ -37,6 +37,7 @@ class _HomepageState extends State<Homepage> {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         elevation: 0,
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         toolbarHeight: 80,
         title: BlocConsumer<AuthBloc, AuthState>(

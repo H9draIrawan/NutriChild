@@ -38,7 +38,7 @@ class _ChatpageState extends State<Chatpage> {
 
   void _animateText(String text) {
     if (text.isEmpty) return;
-    
+
     final words = text.split(' ');
     var currentIndex = 0;
     _currentDisplayText = "";
@@ -88,7 +88,8 @@ class _ChatpageState extends State<Chatpage> {
         body: jsonEncode({
           'message': message,
           'model': 'command-nightly',
-          'preamble': '''Anda adalah asisten dokter AI yang ahli dalam kesehatan dan gizi.
+          'preamble':
+              '''Anda adalah asisten dokter AI yang ahli dalam kesehatan dan gizi.
           Anda harus selalu menjawab dalam Bahasa Indonesia yang mudah dipahami.
           Berikan informasi medis yang akurat dan terpercaya.
           Jika ditanya tentang penyakit serius, selalu sarankan untuk konsultasi ke dokter.
@@ -96,17 +97,21 @@ class _ChatpageState extends State<Chatpage> {
           Jelaskan istilah medis dengan bahasa yang sederhana.''',
           'temperature': 0.8,
           'connectors': [],
-          'chat_history': _messages.take(10).map((msg) => {
-            'role': msg.isUser ? 'USER' : 'CHATBOT',
-            'message': msg.text,
-          }).toList(),
+          'chat_history': _messages
+              .take(10)
+              .map((msg) => {
+                    'role': msg.isUser ? 'USER' : 'CHATBOT',
+                    'message': msg.text,
+                  })
+              .toList(),
         }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final botResponse = data['text'] ?? "Maaf, terjadi kesalahan dalam memproses respons.";
-        
+        final botResponse =
+            data['text'] ?? "Maaf, terjadi kesalahan dalam memproses respons.";
+
         setState(() {
           _messages.add(
             ChatMessage(
@@ -116,9 +121,8 @@ class _ChatpageState extends State<Chatpage> {
             ),
           );
         });
-        
+
         _animateText(botResponse);
-        
       } else {
         print('Error response: ${response.body}');
         throw Exception('Gagal mendapatkan respons: ${response.statusCode}');
@@ -128,7 +132,8 @@ class _ChatpageState extends State<Chatpage> {
       setState(() {
         _messages.add(
           ChatMessage(
-            text: "Maaf, saya sedang mengalami gangguan teknis. Mohon coba beberapa saat lagi.",
+            text:
+                "Maaf, saya sedang mengalami gangguan teknis. Mohon coba beberapa saat lagi.",
             isUser: false,
             timestamp: DateTime.now(),
           ),
@@ -144,27 +149,33 @@ class _ChatpageState extends State<Chatpage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1A1A),
         foregroundColor: Colors.white,
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.blue[100],
-              child: const Icon(Icons.medical_services, color: Colors.blue),
-            ),
-            const SizedBox(width: 10),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Dokter Pintar',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  'Konsultasi Kesehatan & Gizi',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ],
-            ),
-          ],
+        automaticallyImplyLeading: false,
+        leading: Container(),
+        titleSpacing: 0,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.blue[100],
+                child: const Icon(Icons.medical_services, color: Colors.blue),
+              ),
+              const SizedBox(width: 10),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Dokter Pintar',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'Konsultasi Kesehatan & Gizi',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       body: Column(

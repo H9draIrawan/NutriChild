@@ -20,6 +20,7 @@ class Profilepage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: false,
         centerTitle: false,
         title: const Text(
           'Profile',
