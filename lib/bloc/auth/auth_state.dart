@@ -31,3 +31,5 @@ class ErrorAuthState extends AuthState {
   @override
   List<Object> get props => [message];
 }
+
+class UpdateProfileSuccessState extends AuthState {}
