@@ -55,7 +55,7 @@ class _RegisterpageState extends State<Registerpage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 60),
+                        const SizedBox(height: 40),
                         // Title
                         const Text(
                           'Register',
@@ -64,7 +64,7 @@ class _RegisterpageState extends State<Registerpage> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 12),
 
                         // Register/Login tabs
                         Row(
@@ -95,7 +95,7 @@ class _RegisterpageState extends State<Registerpage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 24),
 
                         // Email field
                         TextField(
@@ -121,7 +121,7 @@ class _RegisterpageState extends State<Registerpage> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
 
                         // Username field
                         TextField(
@@ -147,7 +147,7 @@ class _RegisterpageState extends State<Registerpage> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
 
                         // Password field
                         TextField(
@@ -188,7 +188,7 @@ class _RegisterpageState extends State<Registerpage> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 24),
 
                         // Register button
                         SizedBox(

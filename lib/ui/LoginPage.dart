@@ -98,7 +98,7 @@ class _LoginpageState extends State<Loginpage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 60),
+                      const SizedBox(height: 40),
                       // Title
                       const Text(
                         'Login',
@@ -107,7 +107,7 @@ class _LoginpageState extends State<Loginpage> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
 
                       // Login/Register tabs
                       Row(
@@ -138,7 +138,7 @@ class _LoginpageState extends State<Loginpage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 24),
 
                       // Email field
                       TextField(
@@ -164,7 +164,7 @@ class _LoginpageState extends State<Loginpage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
                       // Password field
                       TextField(
@@ -255,7 +255,7 @@ class _LoginpageState extends State<Loginpage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
                       // Login button
                       SizedBox(
