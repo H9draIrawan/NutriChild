@@ -67,6 +67,34 @@ class Profilepage extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                const SizedBox(height: 8),
+                // Edit Profile Button
+                TextButton.icon(
+                  onPressed: () {
+                    // Handle edit profile
+                  },
+                  icon: const Icon(
+                    Icons.edit,
+                    size: 16,
+                    color: Colors.blue,
+                  ),
+                  label: const Text(
+                    'Edit Profile',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    backgroundColor: Colors.blue.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
