@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nutrichild/bloc/food/food_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../bloc/food/food_event.dart';
 import 'SearchMealCustom.dart';
 
 class ChooseNewPlan extends StatefulWidget {
@@ -139,6 +142,8 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                           Icons.add,
                           "Add Breakfast",
                           onTap: () {
+                            BlocProvider.of<FoodBloc>(context)
+                                .add(InitialBreakfastEvent());
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -151,6 +156,8 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                           Icons.add,
                           "Add Lunch",
                           onTap: () {
+                            BlocProvider.of<FoodBloc>(context)
+                                .add(InitialLunchEvent());
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -163,6 +170,8 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                           Icons.add,
                           "Add Dinner",
                           onTap: () {
+                            BlocProvider.of<FoodBloc>(context)
+                                .add(InitialDinnerEvent());
                             Navigator.push(
                               context,
                               MaterialPageRoute(

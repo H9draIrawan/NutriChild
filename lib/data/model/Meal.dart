@@ -1,23 +1,26 @@
 class Meal {
   late String id;
   late String childId;
+  late String foodId;
   late String mealTime;
-  late DateTime date;
+  late DateTime dateTime;
   late int qty;
 
   Meal(
       {required this.id,
       required this.childId,
+      required this.foodId,
       required this.mealTime,
-      required this.date,
+      required this.dateTime,
       required this.qty});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'childId': childId,
+      'foodId': foodId,
       'mealTime': mealTime,
-      'date': date,
+      'dateTime': dateTime,
       'qty': qty,
     };
   }
@@ -25,8 +28,9 @@ class Meal {
   Meal.fromMap(Map<String, dynamic> map) {
     id = map['id'];
     childId = map['childId'];
+    foodId = map['foodId'];
     mealTime = map['mealTime'];
-    date = map['date'];
+    dateTime = map['dateTime'];
     qty = map['qty'];
   }
 }

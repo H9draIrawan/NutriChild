@@ -12,13 +12,14 @@ class InitialAuthState extends AuthState {}
 class LoadingAuthState extends AuthState {}
 
 class LoginAuthState extends AuthState {
+  final String id;
   final String username;
   final String email;
 
-  const LoginAuthState(this.username, this.email);
+  const LoginAuthState(this.id, this.username, this.email);
 
   @override
-  List<Object> get props => [username, email];
+  List<Object> get props => [id, username, email];
 }
 
 class RegisterAuthState extends AuthState {}

@@ -64,7 +64,11 @@ class MealCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CustomMealPlan(),
+            builder: (context) => CustomMealPlan(
+              name: title,
+              calories: calories,
+              imageUrl: imageUrl,
+            ),
           ),
         );
       },

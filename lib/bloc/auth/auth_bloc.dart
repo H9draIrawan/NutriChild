@@ -18,7 +18,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
         DocumentSnapshot user =
             await _firestore.collection('users').doc(signIn.user!.uid).get();
-        emit(LoginAuthState(user['username'], user['email']));
+        emit(LoginAuthState(
+          signIn.user!.uid,
+          user['username'],
+          user['email'],
+        ));
       } catch (e) {
         emit(ErrorAuthState(e.toString()));
       }
@@ -78,7 +82,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(UpdateProfileSuccessState());
 
           // Then immediately emit new LoginAuthState with updated data
-          emit(LoginAuthState(event.username, event.email));
+          emit(LoginAuthState(user.uid, event.username, event.email));
         }
       } catch (e) {
         emit(ErrorAuthState(e.toString()));
