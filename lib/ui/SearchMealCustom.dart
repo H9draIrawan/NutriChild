@@ -134,24 +134,28 @@ final List<Map<String, dynamic>> mealData = [
     'title': 'Pasta and vegetables',
     'time': '25 min',
     'calories': '640',
+
     'imageUrl': '/assets/images/pic3.png',
   },
   {
     'title': 'Guacamole and salad',
     'time': '30 min',
     'calories': '450',
+
     'imageUrl': '/assets/images/pic4.png',
   },
   {
     'title': 'Carrots and quinoa',
     'time': '30 min',
     'calories': '507',
+
     'imageUrl': '/assets/images/pic5.png',
   },
   {
     'title': 'Roasted chicken',
     'time': '45 min',
     'calories': '640',
+
     'imageUrl': '/assets/images/Default.png',
   },
 ];

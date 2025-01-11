@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nutrichild/bloc/auth/auth_state.dart';
 import 'package:nutrichild/bloc/food/food_bloc.dart';
 import 'package:nutrichild/database/database_food.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../bloc/auth/auth_bloc.dart';
 import '../bloc/food/food_event.dart';
+import '../data/model/Food.dart';
+import '../data/model/Meal.dart';
 import '../database/database_meal.dart';
 import 'SearchMealCustom.dart';
 
@@ -22,6 +26,110 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
 
   final FoodSqflite foodSqflite = FoodSqflite();
   final MealSqflite mealSqflite = MealSqflite();
+
+  // Modified states to store meals
+  Meal? breakfastMeals;
+  Meal? lunchMeals;
+  Meal? dinnerMeals;
+
+  @override
+  void initState() {
+    _selectedDay = _focusedDay;
+    _loadMeals();
+    super.initState();
+  }
+
+  // Load meals for selected date
+  Future<void> _loadMeals() async {
+    if (_selectedDay != null) {
+      String dateStr =
+          "${_selectedDay!.day}/${_selectedDay!.month}/${_selectedDay!.year}";
+
+      // Get all meals for the child
+      final meals = await mealSqflite.getMealbyChildId(
+        (BlocProvider.of<AuthBloc>(context).state as LoginAuthState).id,
+      );
+
+      // Filter meals by date and meal time
+      setState(() {
+        breakfastMeals = meals
+            .where((meal) =>
+                meal.dateTime == dateStr && meal.mealTime == "Breakfast")
+            .toList()[0];
+
+        lunchMeals = meals
+            .where(
+                (meal) => meal.dateTime == dateStr && meal.mealTime == "Lunch")
+            .toList()[0];
+
+        dinnerMeals = meals
+            .where(
+                (meal) => meal.dateTime == dateStr && meal.mealTime == "Dinner")
+            .toList()[0];
+      });
+    }
+  }
+
+  Future<Food> _loadFood(String foodId) async {
+    final foods = await foodSqflite.getFoodbyId(foodId);
+    return foods[0];
+  }
+
+  Widget _buildMealCard(List<Meal> meals, FoodSqflite foodDb) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      color: Colors.white,
+      shadowColor: Colors.black.withOpacity(0.2),
+      child: Container(
+        height: 130,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.network(
+                    "${_loadFood(meals[0].foodId).then((value) => value.imageUrl)}",
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
+                  Text(
+                    'Qty: ${meals.fold(0, (sum, meal) => sum + meal.qty)}', // Sum of quantities
+                    style: TextStyle(
+                      fontFamily: 'WorkSans',
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.local_fire_department,
+                      ),
+                      Text(
+                        'Calories: ${meals.fold(0, (sum, meal) => sum + meal.qty)}',
+                        style: TextStyle(
+                          fontFamily: 'WorkSans',
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,51 +251,70 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
                       children: [
-                        _buildActionButton(
-                          Icons.add,
-                          "Add Breakfast",
-                          onTap: () {
-                            BlocProvider.of<FoodBloc>(context)
-                                .add(InitialBreakfastEvent());
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SearchMealCustom()),
-                            );
-                          },
-                        ),
+                        breakfastMeals != null
+                            ? _buildMealCard(
+                                [breakfastMeals!],
+                                foodSqflite,
+                              )
+                            : _buildActionButton(
+                                Icons.add,
+                                "Add Breakfast",
+                                onTap: () {
+                                  BlocProvider.of<FoodBloc>(context)
+                                      .add(InitialBreakfastEvent());
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SearchMealCustom(),
+                                    ),
+                                  );
+                                },
+                              ),
                         const SizedBox(height: 16),
-                        _buildActionButton(
-                          Icons.add,
-                          "Add Lunch",
-                          onTap: () {
-                            BlocProvider.of<FoodBloc>(context)
-                                .add(InitialLunchEvent());
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SearchMealCustom()),
-                            );
-                          },
-                        ),
+                        lunchMeals != null
+                            ? _buildMealCard(
+                                [lunchMeals!],
+                                foodSqflite,
+                              )
+                            : _buildActionButton(
+                                Icons.add,
+                                "Add Lunch",
+                                onTap: () {
+                                  BlocProvider.of<FoodBloc>(context)
+                                      .add(InitialLunchEvent());
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SearchMealCustom(),
+                                    ),
+                                  );
+                                },
+                              ),
                         const SizedBox(height: 16),
-                        _buildActionButton(
-                          Icons.add,
-                          "Add Dinner",
-                          onTap: () {
-                            BlocProvider.of<FoodBloc>(context)
-                                .add(InitialDinnerEvent());
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SearchMealCustom()),
-                            );
-                          },
-                        ),
+                        dinnerMeals != null
+                            ? _buildMealCard(
+                                [dinnerMeals!],
+                                foodSqflite,
+                              )
+                            : _buildActionButton(
+                                Icons.add,
+                                "Add Dinner",
+                                onTap: () {
+                                  BlocProvider.of<FoodBloc>(context)
+                                      .add(InitialDinnerEvent());
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SearchMealCustom(),
+                                    ),
+                                  );
+                                },
+                              ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
+
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 16, horizontal: 32),
@@ -202,7 +329,11 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                           ),
                         ),
                         onPressed: () {
-                          // Logic for Continue button
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ChooseNewPlan()),
+                          );
                         },
                         child: const Text(
                           'SAVE CHANGES',
