@@ -21,45 +21,54 @@ class _LoginpageState extends State<Loginpage> {
   bool rememberMe = false;
   bool _isLoading = false;
 
-  Future<void> saveUser(String username) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', username);
-    prefs.setString('email', emailController.text);
-    prefs.setString('password', passwordController.text);
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
   }
 
-  Future<void> loadUser() async {
-    final prefs = SharedPreferences.getInstance();
-    prefs.then((value) {
-      final email = value.getString('email');
-      final password = value.getString('password');
-      if (email != null && password != null) {
-        emailController.text = email;
-        passwordController.text = password;
-        _isLoading = true;
-        BlocProvider.of<AuthBloc>(context).add(LoginEvent(
-          email: email,
-          password: password,
-        ));
-        loginUser();
+  // Load saved credentials when app starts
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      rememberMe = prefs.getBool('rememberMe') ?? false;
+      if (rememberMe) {
+        emailController.text = prefs.getString('savedEmail') ?? '';
+        passwordController.text = prefs.getString('savedPassword') ?? '';
+
+        // Auto login if credentials exist
+        if (emailController.text.isNotEmpty &&
+            passwordController.text.isNotEmpty) {
+          _performLogin();
+        }
       }
     });
   }
 
-  Future<void> loginUser() async {
-    try {
-      Navigator.pushNamed(context, '/');
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+  // Save credentials if remember me is checked
+  Future<void> _saveCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('rememberMe', rememberMe);
+    if (rememberMe) {
+      await prefs.setString('savedEmail', emailController.text);
+      await prefs.setString('savedPassword', passwordController.text);
+    } else {
+      // Clear saved credentials if remember me is unchecked
+      await prefs.remove('savedEmail');
+      await prefs.remove('savedPassword');
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    loadUser();
+  // Perform login
+  Future<void> _performLogin() async {
+    setState(() => _isLoading = true);
+
+    context.read<AuthBloc>().add(
+          LoginEvent(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          ),
+        );
   }
 
   @override
@@ -69,19 +78,14 @@ class _LoginpageState extends State<Loginpage> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is LoadingAuthState) {
-            setState(() {
-              _isLoading = true;
-            });
+            setState(() => _isLoading = true);
           } else {
-            setState(() {
-              _isLoading = false;
-            });
+            setState(() => _isLoading = false);
           }
+
           if (state is LoginAuthState) {
-            if (rememberMe) {
-              saveUser(emailController.text);
-            }
-            loginUser();
+            _saveCredentials(); // Save credentials when login successful
+            Navigator.pushReplacementNamed(context, '/');
           } else if (state is ErrorAuthState) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Error: ${state.message}")),
@@ -221,7 +225,7 @@ class _LoginpageState extends State<Loginpage> {
                                   value: rememberMe,
                                   onChanged: (bool? value) {
                                     setState(() {
-                                      rememberMe = value!;
+                                      rememberMe = value ?? false;
                                     });
                                   },
                                   shape: RoundedRectangleBorder(
@@ -270,13 +274,7 @@ class _LoginpageState extends State<Loginpage> {
                         child: _isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : ElevatedButton(
-                                onPressed: () {
-                                  BlocProvider.of<AuthBloc>(context)
-                                      .add(LoginEvent(
-                                    email: emailController.text.trim(),
-                                    password: passwordController.text.trim(),
-                                  ));
-                                },
+                                onPressed: _isLoading ? null : _performLogin,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue,
                                   foregroundColor: Colors.white,
@@ -348,5 +346,12 @@ class _LoginpageState extends State<Loginpage> {
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }
