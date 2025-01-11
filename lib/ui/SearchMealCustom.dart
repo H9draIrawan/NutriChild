@@ -27,7 +27,7 @@ class SearchMealCustom extends StatelessWidget {
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(16),
-        itemCount: 7, // Sesuai dengan jumlah item pada gambar
+        itemCount: 6, // Sesuai dengan jumlah item pada gambar
         itemBuilder: (context, index) {
           return MealCard(
             title: mealData[index]['title'],
@@ -122,42 +122,36 @@ final List<Map<String, dynamic>> mealData = [
     'title': 'Salmon with salad',
     'time': '30 min',
     'calories': '450',
-    'imageUrl': 'https://via.placeholder.com/150',
+    'imageUrl': '/assets/images/pic1.png',
   },
   {
     'title': 'Quinoa with carrots',
     'time': '30 min',
     'calories': '507',
-    'imageUrl': 'https://via.placeholder.com/150',
+    'imageUrl': '/assets/images/pic2.png',
   },
   {
     'title': 'Pasta and vegetables',
     'time': '25 min',
     'calories': '640',
-    'imageUrl': 'https://via.placeholder.com/150',
+    'imageUrl': '/assets/images/pic3.png',
   },
   {
     'title': 'Guacamole and salad',
     'time': '30 min',
     'calories': '450',
-    'imageUrl': 'https://via.placeholder.com/150',
+    'imageUrl': '/assets/images/pic4.png',
   },
   {
     'title': 'Carrots and quinoa',
     'time': '30 min',
     'calories': '507',
-    'imageUrl': 'https://via.placeholder.com/150',
+    'imageUrl': '/assets/images/pic5.png',
   },
   {
     'title': 'Roasted chicken',
     'time': '45 min',
     'calories': '640',
-    'imageUrl': 'https://via.placeholder.com/150',
-  },
-  {
-    'title': 'Pesto pasta with vegetables',
-    'time': '25 min',
-    'calories': '640',
-    'imageUrl': 'https://via.placeholder.com/150',
+    'imageUrl': '/assets/images/Default.png',
   },
 ];
