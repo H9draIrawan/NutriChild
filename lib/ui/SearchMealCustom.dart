@@ -11,7 +11,7 @@ class SearchMealCustom extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: TextField(
