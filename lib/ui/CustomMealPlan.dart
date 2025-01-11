@@ -156,7 +156,32 @@ class CustomMealPlan extends StatelessWidget {
                               imageUrl: imageUrl,
                               qty: int.parse(mealController.text),
                             ));
+                          } else if (foodBloc.state is InitialLunchState &&
+                              authBloc.state is LoginAuthState) {
+                            final LoginAuthState loginAuthState =
+                                authBloc.state as LoginAuthState;
+
+                            foodBloc.add(LunchEvent(
+                              childId: loginAuthState.id,
+                              foodName: name,
+                              calories: double.parse(calories),
+                              imageUrl: imageUrl,
+                              qty: int.parse(mealController.text),
+                            ));
+                          } else if (foodBloc.state is InitialDinnerState &&
+                              authBloc.state is LoginAuthState) {
+                            final LoginAuthState loginAuthState =
+                                authBloc.state as LoginAuthState;
+
+                            foodBloc.add(DinnerEvent(
+                              childId: loginAuthState.id,
+                              foodName: name,
+                              calories: double.parse(calories),
+                              imageUrl: imageUrl,
+                              qty: int.parse(mealController.text),
+                            ));
                           }
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
