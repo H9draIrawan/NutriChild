@@ -35,39 +35,42 @@ class Mealpage extends StatelessWidget {
                   elevation: 2,
                   color: Colors.white,
                   shadowColor: Colors.black.withOpacity(0.2),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.orangeAccent,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/goal');
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.orangeAccent,
+                                ),
+                                child: const Icon(
+                                  Icons.fitness_center,
+                                  color: Colors.white,
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.fitness_center,
-                                color: Colors.white,
+                              const SizedBox(width: 16),
+                              const Text(
+                                'Your goal',
+                                style: TextStyle(
+                                  fontFamily: 'WorkSans',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            const Text(
-                              'Your goal',
-                              style: TextStyle(
-                                fontFamily: 'WorkSans',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            ],
+                          ),
+                          Row(
                             children: const [
                               Text(
                                 'Build muscles',
@@ -79,8 +82,10 @@ class Mealpage extends StatelessWidget {
                               ),
                               Icon(Icons.arrow_forward_ios,
                                   size: 16, color: Colors.grey)
-                            ])
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -111,7 +116,7 @@ class Mealpage extends StatelessWidget {
                           top: Radius.circular(16),
                         ),
                         child: Image.network(
-                          'https://via.placeholder.com/150', // Ganti dengan URL gambar makanan
+                          '/assets/images/pic1.png', // Ganti dengan URL gambar makanan
                           width: double.infinity,
                           height: 200,
                           fit: BoxFit.cover,
@@ -199,7 +204,7 @@ class Mealpage extends StatelessWidget {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: Image.network(
-                              'https://via.placeholder.com/400x200', // Ganti URL sesuai kebutuhan
+                              '/assets/images/Default.png', // Ganti URL sesuai kebutuhan
                               width: double.infinity,
                               height: constraints.maxWidth * 0.5,
                               fit: BoxFit.cover,

@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:nutrichild/bloc/food/food_bloc.dart';
 import 'package:nutrichild/navigation/BottomNavigation.dart';
 import 'package:nutrichild/ui/EditProfilePage.dart';
@@ -20,10 +21,14 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  final foodSqflite = FoodSqflite();
-  final MealSqflite mealSqflite = MealSqflite();
-  await foodSqflite.initDB();
-  await mealSqflite.initDB();
+
+  if (!kIsWeb) {
+    final foodSqflite = FoodSqflite();
+    final MealSqflite mealSqflite = MealSqflite();
+    await foodSqflite.initDB();
+    await mealSqflite.initDB();
+  }
+
   runApp(
     const MyApp(),
   );

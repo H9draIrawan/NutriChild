@@ -27,7 +27,7 @@ class SearchMealCustom extends StatelessWidget {
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(16),
-        itemCount: 7, // Sesuai dengan jumlah item pada gambar
+        itemCount: 6, // Sesuai dengan jumlah item pada gambar
         itemBuilder: (context, index) {
           return MealCard(
             title: mealData[index]['title'],
@@ -122,49 +122,40 @@ final List<Map<String, dynamic>> mealData = [
     'title': 'Salmon with salad',
     'time': '30 min',
     'calories': '450',
-    'imageUrl':
-        'https://www.paleorunningmomma.com/wp-content/uploads/2022/08/salmon-cobb-salad-3-scaled.jpg',
+    'imageUrl': '/assets/images/pic1.png',
   },
   {
     'title': 'Quinoa with carrots',
     'time': '30 min',
     'calories': '507',
-    'imageUrl':
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9Wku9H-CswGOicQqg5LP7RXz5U4Ess-hLrw&s',
+    'imageUrl': '/assets/images/pic2.png',
   },
   {
     'title': 'Pasta and vegetables',
     'time': '25 min',
     'calories': '640',
-    'imageUrl':
-        'https://www.cookingclassy.com/wp-content/uploads/2018/09/pasta-primavera-2.jpg',
+
+    'imageUrl': '/assets/images/pic3.png',
   },
   {
     'title': 'Guacamole and salad',
     'time': '30 min',
     'calories': '450',
-    'imageUrl':
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLz0CvLrm3k6NMr3tYrZREIQAQB5Ze9WE8hg&s',
+
+    'imageUrl': '/assets/images/pic4.png',
   },
   {
     'title': 'Carrots and quinoa',
     'time': '30 min',
     'calories': '507',
-    'imageUrl':
-        'https://withtwospoons.com/wp-content/uploads/2019/08/Roasted-Carrot-and-Quinoa-Salad-EDIT-RI-1.jpg',
+
+    'imageUrl': '/assets/images/pic5.png',
   },
   {
     'title': 'Roasted chicken',
     'time': '45 min',
     'calories': '640',
-    'imageUrl':
-        'https://www.foodandwine.com/thmb/t9YqzGbmH-huAbV6xitCQs0-G4s=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/FAW-recipes-herb-and-lemon-roasted-chicken-hero-c4ba0aec56884683be482c47b1e1df11.jpg',
-  },
-  {
-    'title': 'Pesto pasta with vegetables',
-    'time': '25 min',
-    'calories': '640',
-    'imageUrl':
-        'https://richanddelish.com/wp-content/uploads/2023/02/creamy-pesto-pasta-1.jpg',
+
+    'imageUrl': '/assets/images/Default.png',
   },
 ];
