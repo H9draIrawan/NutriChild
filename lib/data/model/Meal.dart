@@ -10,6 +10,7 @@ class Meal {
   final double protein;
   final double carbs;
   final double fat;
+  final String imageUrl;
 
   Meal({
     required this.id,
@@ -23,6 +24,7 @@ class Meal {
     this.protein = 0,
     this.carbs = 0,
     this.fat = 0,
+    this.imageUrl = '',
   });
 
   Map<String, dynamic> toMap() {
@@ -38,6 +40,7 @@ class Meal {
       'protein': protein,
       'carbs': carbs,
       'fat': fat,
+      'imageUrl': imageUrl,
     };
   }
 
@@ -54,6 +57,7 @@ class Meal {
       protein: map['protein']?.toDouble() ?? 0.0,
       carbs: map['carbs']?.toDouble() ?? 0.0,
       fat: map['fat']?.toDouble() ?? 0.0,
+      imageUrl: map['imageUrl'] ?? '',
     );
   }
 }

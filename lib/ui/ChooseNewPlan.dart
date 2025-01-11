@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrichild/bloc/food/food_bloc.dart';
 import 'package:nutrichild/database/database_food.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:nutrichild/data/model/Meal.dart';
 
 import '../bloc/food/food_event.dart';
 import '../database/database_meal.dart';
@@ -25,6 +26,11 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
+  // Tambahkan variabel untuk menyimpan meal yang dipilih
+  Meal? selectedBreakfast;
+  Meal? selectedLunch;
+  Meal? selectedDinner;
 
   @override
   void initState() {
@@ -121,47 +127,11 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     children: [
-                      _buildActionButton(
-                        Icons.add,
-                        "Add Breakfast",
-                        onTap: () {
-                          BlocProvider.of<FoodBloc>(context)
-                              .add(InitialBreakfastEvent());
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SearchMealCustom()),
-                          );
-                        },
-                      ),
+                      _buildMealCard(selectedBreakfast, 'Breakfast'),
                       const SizedBox(height: 16),
-                      _buildActionButton(
-                        Icons.add,
-                        "Add Lunch",
-                        onTap: () {
-                          BlocProvider.of<FoodBloc>(context)
-                              .add(InitialLunchEvent());
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SearchMealCustom()),
-                          );
-                        },
-                      ),
+                      _buildMealCard(selectedLunch, 'Lunch'),
                       const SizedBox(height: 16),
-                      _buildActionButton(
-                        Icons.add,
-                        "Add Dinner",
-                        onTap: () {
-                          BlocProvider.of<FoodBloc>(context)
-                              .add(InitialDinnerEvent());
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SearchMealCustom()),
-                          );
-                        },
-                      ),
+                      _buildMealCard(selectedDinner, 'Dinner'),
                     ],
                   ),
                 ),
@@ -185,6 +155,10 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
               if (_selectedDay != null) {
                 await mealSqflite.saveMealPlan(
                   date: _selectedDay!,
+                  breakfast:
+                      selectedBreakfast != null ? [selectedBreakfast!] : null,
+                  lunch: selectedLunch != null ? [selectedLunch!] : null,
+                  dinner: selectedDinner != null ? [selectedDinner!] : null,
                 );
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -392,6 +366,71 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMealCard(Meal? meal, String type) {
+    if (meal == null) {
+      return _buildActionButton(
+        Icons.add,
+        "Add $type",
+        onTap: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  SearchMealCustom(mealType: type.toLowerCase()),
+            ),
+          );
+
+          if (result != null && result is Meal) {
+            setState(() {
+              switch (type.toLowerCase()) {
+                case 'breakfast':
+                  selectedBreakfast = result;
+                  break;
+                case 'lunch':
+                  selectedLunch = result;
+                  break;
+                case 'dinner':
+                  selectedDinner = result;
+                  break;
+              }
+            });
+          }
+        },
+      );
+    }
+
+    return Card(
+      child: ListTile(
+        leading: Image.asset(
+          meal.imageUrl,
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+        ),
+        title: Text(meal.name),
+        subtitle: Text('${meal.calories} kcal'),
+        trailing: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            setState(() {
+              switch (type.toLowerCase()) {
+                case 'breakfast':
+                  selectedBreakfast = null;
+                  break;
+                case 'lunch':
+                  selectedLunch = null;
+                  break;
+                case 'dinner':
+                  selectedDinner = null;
+                  break;
+              }
+            });
+          },
         ),
       ),
     );

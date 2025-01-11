@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:nutrichild/ui/CustomMealPlan.dart';
+import 'package:nutrichild/data/model/Meal.dart';
 
 class SearchMealCustom extends StatelessWidget {
-  const SearchMealCustom({super.key});
+  final String mealType;
+
+  const SearchMealCustom({
+    super.key,
+    required this.mealType,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +32,29 @@ class SearchMealCustom extends StatelessWidget {
         ),
       ),
       body: ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: 6, // Sesuai dengan jumlah item pada gambar
+        padding: const EdgeInsets.all(16),
+        itemCount: mealData.length,
         itemBuilder: (context, index) {
           return MealCard(
             title: mealData[index]['title'],
             time: mealData[index]['time'],
             calories: mealData[index]['calories'],
             imageUrl: mealData[index]['imageUrl'],
+            onTap: () {
+              final meal = Meal(
+                id: DateTime.now().toString(),
+                childId: 'default',
+                foodId: index.toString(),
+                mealTime: mealType,
+                dateTime: DateTime.now().toString(),
+                qty: 1,
+                name: mealData[index]['title'],
+                calories: int.parse(mealData[index]['calories']),
+                imageUrl: mealData[index]['imageUrl'],
+              );
+
+              Navigator.pop(context, meal);
+            },
           );
         },
       ),
@@ -46,6 +67,7 @@ class MealCard extends StatelessWidget {
   final String time;
   final String calories;
   final String imageUrl;
+  final Function() onTap;
 
   const MealCard({
     super.key,
@@ -53,25 +75,13 @@ class MealCard extends StatelessWidget {
     required this.time,
     required this.calories,
     required this.imageUrl,
+    required this.onTap,
   });
 
   @override
-  @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        // Handle the onClick action here
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CustomMealPlan(
-              name: title,
-              calories: calories,
-              imageUrl: imageUrl,
-            ),
-          ),
-        );
-      },
+      onTap: onTap,
       child: Card(
         margin: EdgeInsets.only(bottom: 16),
         child: Row(

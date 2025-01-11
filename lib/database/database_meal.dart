@@ -14,7 +14,7 @@ class MealSqflite {
 
   initDB() async {
     var path = await getDatabasesPath();
-    var db = openDatabase("$path/meal.db", version: 2,
+    var db = openDatabase("$path/meal.db", version: 3,
         onCreate: (Database db, int version) async {
       await db.execute('''CREATE TABLE $_mealTable (
           id TEXT PRIMARY KEY,
@@ -33,13 +33,13 @@ class MealSqflite {
           calories INTEGER,
           protein REAL,
           carbs REAL,
-          fat REAL)''');
+          fat REAL,
+          imageUrl TEXT)''');
 
       await db.execute('''CREATE TABLE meal_plan_info (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
-        description TEXT
-      )''');
+        description TEXT)''');
 
       print("DB Created");
     }, onUpgrade: (db, oldVersion, newVersion) async {
@@ -53,7 +53,14 @@ class MealSqflite {
           calories INTEGER,
           protein REAL,
           carbs REAL,
-          fat REAL)''');
+          fat REAL,
+          imageUrl TEXT)''');
+      }
+      if (oldVersion < 3) {
+        await db.execute('''CREATE TABLE meal_plan_info (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT,
+          description TEXT)''');
       }
     });
     return db;
@@ -96,7 +103,6 @@ class MealSqflite {
     final db = await database;
     final batch = db.batch();
 
-    // Format tanggal ke string YYYY-MM-DD
     final dateStr =
         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
@@ -107,51 +113,29 @@ class MealSqflite {
       whereArgs: [dateStr],
     );
 
-    // Insert meal plan baru
-    if (breakfast != null) {
-      for (var meal in breakfast) {
-        batch.insert('meal_plans', {
-          'date': dateStr,
-          'meal_type': 'breakfast',
-          'meal_id': meal.id,
-          'name': meal.name,
-          'calories': meal.calories,
-          'protein': meal.protein,
-          'carbs': meal.carbs,
-          'fat': meal.fat,
-        });
+    // Fungsi helper untuk insert meal
+    void insertMeals(List<Meal>? meals, String mealType) {
+      if (meals != null) {
+        for (var meal in meals) {
+          batch.insert('meal_plans', {
+            'date': dateStr,
+            'meal_type': mealType,
+            'meal_id': meal.id,
+            'name': meal.name,
+            'calories': meal.calories,
+            'protein': meal.protein,
+            'carbs': meal.carbs,
+            'fat': meal.fat,
+            'imageUrl': meal.imageUrl,
+          });
+        }
       }
     }
 
-    if (lunch != null) {
-      for (var meal in lunch) {
-        batch.insert('meal_plans', {
-          'date': dateStr,
-          'meal_type': 'lunch',
-          'meal_id': meal.id,
-          'name': meal.name,
-          'calories': meal.calories,
-          'protein': meal.protein,
-          'carbs': meal.carbs,
-          'fat': meal.fat,
-        });
-      }
-    }
-
-    if (dinner != null) {
-      for (var meal in dinner) {
-        batch.insert('meal_plans', {
-          'date': dateStr,
-          'meal_type': 'dinner',
-          'meal_id': meal.id,
-          'name': meal.name,
-          'calories': meal.calories,
-          'protein': meal.protein,
-          'carbs': meal.carbs,
-          'fat': meal.fat,
-        });
-      }
-    }
+    // Insert semua meal
+    insertMeals(breakfast, 'breakfast');
+    insertMeals(lunch, 'lunch');
+    insertMeals(dinner, 'dinner');
 
     await batch.commit();
   }

@@ -2,6 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'dart:io' show Platform;
 import 'package:nutrichild/bloc/food/food_bloc.dart';
 import 'package:nutrichild/navigation/BottomNavigation.dart';
 import 'package:nutrichild/ui/EditProfilePage.dart';
@@ -18,13 +21,23 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Inisialisasi SQLite untuk platform non-web
   if (!kIsWeb) {
+    // Inisialisasi untuk Windows/Linux/MacOS
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+
+    // Inisialisasi database
     final foodSqflite = FoodSqflite();
-    final MealSqflite mealSqflite = MealSqflite();
+    final mealSqflite = MealSqflite();
     await foodSqflite.initDB();
     await mealSqflite.initDB();
   }
