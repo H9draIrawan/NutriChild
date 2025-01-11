@@ -16,6 +16,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           email: event.email,
           password: event.password,
         );
+
+        // Cek apakah email sudah diverifikasi
+        if (!signIn.user!.emailVerified) {
+          emit(const ErrorAuthState('Please verify your email first'));
+          return;
+        }
+
         DocumentSnapshot user =
             await _firestore.collection('users').doc(signIn.user!.uid).get();
         emit(LoginAuthState(
@@ -37,13 +44,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           password: event.password,
         );
 
+        // Kirim email verifikasi
+        await userCredential.user!.sendEmailVerification();
+
         String uid = userCredential.user!.uid;
         await _firestore.collection('users').doc(uid).set({
           'username': event.username,
           'email': event.email,
+          'emailVerified': false,
         });
 
-        emit(RegisterAuthState());
+        emit(EmailVerificationSentState());
       } catch (e) {
         emit(ErrorAuthState(e.toString()));
       }
