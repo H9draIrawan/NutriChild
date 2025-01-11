@@ -123,5 +123,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(ErrorAuthState(e.toString()));
       }
     });
+
+    on<DeleteAccountEvent>((event, emit) async {
+      try {
+        emit(LoadingAuthState());
+
+        final user = _firebaseAuth.currentUser;
+        if (user != null) {
+          // Re-authenticate user before deletion
+          final credential = EmailAuthProvider.credential(
+            email: user.email!,
+            password: event.password,
+          );
+          await user.reauthenticateWithCredential(credential);
+
+          // Delete user data from Firestore
+          await _firestore.collection('users').doc(user.uid).delete();
+
+          // Delete user account
+          await user.delete();
+
+          emit(DeleteAccountSuccessState());
+        }
+      } catch (e) {
+        emit(ErrorAuthState(e.toString()));
+      }
+    });
   }
 }

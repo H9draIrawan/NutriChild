@@ -38,3 +38,5 @@ class UpdateProfileSuccessState extends AuthState {}
 class ResetPasswordSuccessState extends AuthState {}
 
 class ChangePasswordSuccessState extends AuthState {}
+
+class DeleteAccountSuccessState extends AuthState {}
