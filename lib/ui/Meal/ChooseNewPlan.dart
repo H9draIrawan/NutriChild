@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nutrichild/data/model/Food.dart';
 import 'package:nutrichild/data/model/Meal.dart';
 import 'package:nutrichild/database/database_food.dart';
+import 'package:nutrichild/database/database_meal.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../database/database_meal.dart';
-import './SearchMealCustom.dart';
+import '../../bloc/food/food_bloc.dart';
+import '../../bloc/food/food_event.dart';
+import 'SearchMealCustom.dart';
 
 class ChooseNewPlan extends StatefulWidget {
   const ChooseNewPlan({super.key});
@@ -21,25 +26,88 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
   final FoodSqflite foodSqflite = FoodSqflite();
   final MealSqflite mealSqflite = MealSqflite();
 
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-
-  // Tambahkan variabel untuk menyimpan meal yang dipilih
   Meal? selectedBreakfast;
   Meal? selectedLunch;
   Meal? selectedDinner;
 
+  // Tambahkan variabel untuk menyimpan data dari SharedPreferences
+  Map<String, String> breakfastData = {};
+  Map<String, String> lunchData = {};
+  Map<String, String> dinnerData = {};
+  Map<String, int> mealAmounts = {};
+
   @override
   void initState() {
     super.initState();
-    _loadMealPlanInfo();
+    _selectedDay = DateTime.now();
+    _loadMealsForSelectedDay();
+    _loadSavedMeals(); // Tambahkan ini
   }
 
-  Future<void> _loadMealPlanInfo() async {
-    final info = await mealSqflite.getMealPlanInfo();
+  Future<void> _loadMealsForSelectedDay() async {
+    if (_selectedDay == null) return;
+
+    final dateStr =
+        "${_selectedDay!.year}-${_selectedDay!.month.toString().padLeft(2, '0')}-${_selectedDay!.day.toString().padLeft(2, '0')}";
+    final meals = await mealSqflite.getMealsByDate('default', dateStr);
+
     setState(() {
-      _titleController.text = info['title'] ?? '';
-      _descriptionController.text = info['description'] ?? '';
+      selectedBreakfast =
+          meals.where((meal) => meal.mealTime == 'Breakfast').isEmpty
+              ? null
+              : meals.firstWhere((meal) => meal.mealTime == 'Breakfast');
+
+      selectedLunch = meals.where((meal) => meal.mealTime == 'Lunch').isEmpty
+          ? null
+          : meals.firstWhere((meal) => meal.mealTime == 'Lunch');
+
+      selectedDinner = meals.where((meal) => meal.mealTime == 'Dinner').isEmpty
+          ? null
+          : meals.firstWhere((meal) => meal.mealTime == 'Dinner');
+    });
+  }
+
+  // Tambahkan fungsi untuk memuat data dari SharedPreferences
+  Future<void> _loadSavedMeals() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      // Load breakfast data
+      breakfastData = {
+        'name': prefs.getString('breakfast_name') ?? '',
+        'calories': prefs.getString('breakfast_calories') ?? '',
+        'protein': prefs.getString('breakfast_protein') ?? '',
+        'carbs': prefs.getString('breakfast_carbs') ?? '',
+        'fat': prefs.getString('breakfast_fat') ?? '',
+        'image': prefs.getString('breakfast_image') ?? '',
+      };
+
+      // Load lunch data
+      lunchData = {
+        'name': prefs.getString('lunch_name') ?? '',
+        'calories': prefs.getString('lunch_calories') ?? '',
+        'protein': prefs.getString('lunch_protein') ?? '',
+        'carbs': prefs.getString('lunch_carbs') ?? '',
+        'fat': prefs.getString('lunch_fat') ?? '',
+        'image': prefs.getString('lunch_image') ?? '',
+      };
+
+      // Load dinner data
+      dinnerData = {
+        'name': prefs.getString('dinner_name') ?? '',
+        'calories': prefs.getString('dinner_calories') ?? '',
+        'protein': prefs.getString('dinner_protein') ?? '',
+        'carbs': prefs.getString('dinner_carbs') ?? '',
+        'fat': prefs.getString('dinner_fat') ?? '',
+        'image': prefs.getString('dinner_image') ?? '',
+      };
+
+      // Load meal amounts
+      mealAmounts = {
+        'breakfast': prefs.getInt('breakfast_amount') ?? 0,
+        'lunch': prefs.getInt('lunch_amount') ?? 0,
+        'dinner': prefs.getInt('dinner_amount') ?? 0,
+      };
     });
   }
 
@@ -52,88 +120,45 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Custom Meal',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('Custom Meal'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        child: Stack(
+        child: Column(
           children: [
-            // Background image that scrolls with the page
-            Column(
-              children: [
-                SizedBox(
-                  height: 250,
-                  width: double.infinity,
-                  child: Image.asset(
-                    'assets/images/pic1.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                // Empty space below image to allow scrolling
-                Container(
-                  height: 800,
-                  color: Colors.white,
-                ),
-              ],
-            ),
-            Column(
-              children: [
-                const SizedBox(
-                    height: 200), // Push card below the top of the screen
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: _buildDescriptionSection(),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Calendar',
-                  style: TextStyle(
-                    fontFamily: 'WorkSans',
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TableCalendar(
-                  focusedDay: _focusedDay,
-                  firstDay: DateTime.utc(2025, 1, 1),
-                  lastDay: DateTime.utc(2025, 12, 31),
-                  calendarFormat: _calendarFormat,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      _focusedDay = focusedDay;
-                    });
-                  },
-                  onPageChanged: (focusedDay) {
+            TableCalendar(
+                focusedDay: _focusedDay,
+                firstDay: DateTime.now().subtract(const Duration(days: 365)),
+                lastDay: DateTime.now().add(const Duration(days: 365)),
+                calendarFormat: _calendarFormat,
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
                     _focusedDay = focusedDay;
-                  },
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    children: [
-                      _buildMealCard(selectedBreakfast, 'Breakfast'),
-                      const SizedBox(height: 16),
-                      _buildMealCard(selectedLunch, 'Lunch'),
-                      const SizedBox(height: 16),
-                      _buildMealCard(selectedDinner, 'Dinner'),
-                    ],
-                  ),
-                ),
-              ],
+                  });
+                  _loadMealsForSelectedDay();
+                },
+                onPageChanged: (focusedDay) {
+                  _focusedDay = focusedDay;
+                }),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _buildMealCard(selectedBreakfast, 'Breakfast'),
+                  const SizedBox(height: 16),
+                  _buildMealCard(selectedLunch, 'Lunch'),
+                  const SizedBox(height: 16),
+                  _buildMealCard(selectedDinner, 'Dinner'),
+                ],
+              ),
             ),
+            const SizedBox(height: 16),
+            _buildNutritionSummary(),
           ],
         ),
       ),
@@ -143,293 +168,687 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red[800],
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
           ),
           onPressed: () async {
             try {
               if (_selectedDay != null) {
-                await mealSqflite.saveMealPlan(
-                  date: _selectedDay!,
-                  breakfast:
-                      selectedBreakfast != null ? [selectedBreakfast!] : null,
-                  lunch: selectedLunch != null ? [selectedLunch!] : null,
-                  dinner: selectedDinner != null ? [selectedDinner!] : null,
-                );
+                final dateStr =
+                    "${_selectedDay!.year}-${_selectedDay!.month.toString().padLeft(2, '0')}-${_selectedDay!.day.toString().padLeft(2, '0')}";
+
+                // Dapatkan FoodBloc dari context
+                final foodBloc = BlocProvider.of<FoodBloc>(context);
+
+                // Hapus meal yang ada untuk tanggal tersebut
+                await mealSqflite.deleteMealsByDate('default', dateStr);
+
+                // Simpan data breakfast jika ada
+                if (breakfastData['name']?.isNotEmpty == true) {
+                  foodBloc.add(SaveFoodEvent(
+                      childId: 'default',
+                      foodName: breakfastData['name']!,
+                      calories: double.parse(breakfastData['calories'] ?? '0'),
+                      protein: double.parse(breakfastData['protein'] ?? '0'),
+                      carbs: double.parse(breakfastData['carbs'] ?? '0'),
+                      fat: double.parse(breakfastData['fat'] ?? '0'),
+                      imageUrl: breakfastData['image'] ?? '',
+                      mealTime: 'Breakfast',
+                      qty: mealAmounts['breakfast'] ?? 1,
+                      dateTime: _selectedDay!));
+                }
+
+                // Simpan data lunch jika ada
+                if (lunchData['name']?.isNotEmpty == true) {
+                  foodBloc.add(SaveFoodEvent(
+                      childId: 'default',
+                      foodName: lunchData['name']!,
+                      calories: double.parse(lunchData['calories'] ?? '0'),
+                      protein: double.parse(lunchData['protein'] ?? '0'),
+                      carbs: double.parse(lunchData['carbs'] ?? '0'),
+                      fat: double.parse(lunchData['fat'] ?? '0'),
+                      imageUrl: lunchData['image'] ?? '',
+                      mealTime: 'Lunch',
+                      qty: mealAmounts['lunch'] ?? 1,
+                      dateTime: _selectedDay!));
+                }
+
+                // Simpan data dinner jika ada
+                if (dinnerData['name']?.isNotEmpty == true) {
+                  foodBloc.add(SaveFoodEvent(
+                      childId: 'default',
+                      foodName: dinnerData['name']!,
+                      calories: double.parse(dinnerData['calories'] ?? '0'),
+                      protein: double.parse(dinnerData['protein'] ?? '0'),
+                      carbs: double.parse(dinnerData['carbs'] ?? '0'),
+                      fat: double.parse(dinnerData['fat'] ?? '0'),
+                      imageUrl: dinnerData['image'] ?? '',
+                      mealTime: 'Dinner',
+                      qty: mealAmounts['dinner'] ?? 1,
+                      dateTime: _selectedDay!));
+                }
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Meal plan saved successfully!'),
-                    duration: Duration(seconds: 2),
-                  ),
+                      content: Text('Rencana makan berhasil disimpan!')),
                 );
                 Navigator.pop(context);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please select a date first'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
               }
             } catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error saving meal plan: $e'),
-                  duration: const Duration(seconds: 2),
-                ),
+                SnackBar(content: Text('Error menyimpan rencana makan: $e')),
               );
             }
           },
-          child: const Text(
-            'SAVE CHANGES',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton(IconData icon, String label,
-      {required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        color: Colors.white,
-        shadowColor: Colors.black.withOpacity(0.2),
-        child: Container(
-          height: 80,
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                color: Colors.green,
-                size: 32,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'WorkSans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDescriptionSection() {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _titleController.text.isEmpty
-                      ? 'My mealplan'
-                      : _titleController.text,
-                  style: const TextStyle(
-                    fontFamily: 'WorkSans',
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        final tempTitleController =
-                            TextEditingController(text: _titleController.text);
-                        final tempDescController = TextEditingController(
-                            text: _descriptionController.text);
-
-                        return AlertDialog(
-                          title: const Text('Edit Meal Plan'),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextField(
-                                controller: tempTitleController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Title',
-                                  hintText: 'Enter meal plan title',
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              TextField(
-                                controller: tempDescController,
-                                maxLines: 3,
-                                decoration: const InputDecoration(
-                                  labelText: 'Description',
-                                  hintText: 'Enter meal plan description',
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                            ],
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                // Update controllers terlebih dahulu
-                                _titleController.text =
-                                    tempTitleController.text;
-                                _descriptionController.text =
-                                    tempDescController.text;
-
-                                // Tutup dialog
-                                Navigator.of(context).pop();
-
-                                // Simpan ke database dan update UI
-                                setState(() {});
-                                mealSqflite
-                                    .saveMealPlanInfo(
-                                  title: _titleController.text,
-                                  description: _descriptionController.text,
-                                )
-                                    .then((_) {
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content:
-                                            Text('Changes saved successfully!'),
-                                        duration: Duration(seconds: 2),
-                                      ),
-                                    );
-                                  }
-                                });
-                              },
-                              child: const Text('Save'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  icon: Icon(
-                    Icons.edit,
-                    color: Colors.red[800],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Description',
-              style: TextStyle(
-                fontFamily: 'WorkSans',
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _descriptionController.text,
-              style: const TextStyle(
-                fontFamily: 'WorkSans',
-                fontSize: 16,
-                color: Colors.black54,
-              ),
-            ),
-          ],
+          child: const Text('Simpan Perubahan'),
         ),
       ),
     );
   }
 
   Widget _buildMealCard(Meal? meal, String type) {
-    if (meal == null) {
-      return _buildActionButton(
-        Icons.add,
-        "Add $type",
-        onTap: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  SearchMealCustom(mealType: type.toLowerCase()),
-            ),
-          );
+    Map<String, String> savedData;
+    int? amount;
 
-          if (result != null && result is Meal) {
-            setState(() {
-              switch (type.toLowerCase()) {
-                case 'breakfast':
-                  selectedBreakfast = result;
-                  break;
-                case 'lunch':
-                  selectedLunch = result;
-                  break;
-                case 'dinner':
-                  selectedDinner = result;
-                  break;
-              }
-            });
-          }
-        },
+    switch (type) {
+      case 'Breakfast':
+        savedData = breakfastData;
+        amount = mealAmounts['breakfast'];
+        break;
+      case 'Lunch':
+        savedData = lunchData;
+        amount = mealAmounts['lunch'];
+        break;
+      case 'Dinner':
+        savedData = dinnerData;
+        amount = mealAmounts['dinner'];
+        break;
+      default:
+        savedData = {};
+        amount = 0;
+    }
+
+    // Tampilkan data dari SharedPreferences jika tidak ada meal dari database
+    if (meal == null && savedData['name']?.isNotEmpty == true) {
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  savedData['image']?.isNotEmpty == true
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            savedData['image']!,
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.red[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.restaurant,
+                              color: Colors.red[800], size: 48),
+                        ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          savedData['name'] ?? '',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          type,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close, color: Colors.grey[600]),
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+
+                      // Hapus data dari SharedPreferences sesuai dengan tipe meal
+                      if (type == 'Breakfast') {
+                        await prefs.remove('breakfast_name');
+                        await prefs.remove('breakfast_calories');
+                        await prefs.remove('breakfast_protein');
+                        await prefs.remove('breakfast_carbs');
+                        await prefs.remove('breakfast_fat');
+                        await prefs.remove('breakfast_image');
+                        await prefs.remove('breakfast_amount');
+                        setState(() {
+                          selectedBreakfast = null;
+                        });
+                      } else if (type == 'Lunch') {
+                        await prefs.remove('lunch_name');
+                        await prefs.remove('lunch_calories');
+                        await prefs.remove('lunch_protein');
+                        await prefs.remove('lunch_carbs');
+                        await prefs.remove('lunch_fat');
+                        await prefs.remove('lunch_image');
+                        await prefs.remove('lunch_amount');
+                        setState(() {
+                          selectedLunch = null;
+                        });
+                      } else if (type == 'Dinner') {
+                        await prefs.remove('dinner_name');
+                        await prefs.remove('dinner_calories');
+                        await prefs.remove('dinner_protein');
+                        await prefs.remove('dinner_carbs');
+                        await prefs.remove('dinner_fat');
+                        await prefs.remove('dinner_image');
+                        await prefs.remove('dinner_amount');
+                        setState(() {
+                          selectedDinner = null;
+                        });
+                      }
+
+                      // Reload data setelah menghapus
+                      _loadSavedMeals();
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNutrientInfo(
+                      icon: Icons.local_fire_department,
+                      value: '${savedData['calories']}',
+                      unit: 'kcal',
+                      color: Colors.orange,
+                    ),
+                    _buildNutrientInfo(
+                      icon: Icons.egg_outlined,
+                      value: '${savedData['protein']}',
+                      unit: 'g protein',
+                      color: Colors.red,
+                    ),
+                    _buildNutrientInfo(
+                      icon: Icons.breakfast_dining,
+                      value: '${savedData['carbs']}',
+                      unit: 'g carbs',
+                      color: Colors.blue,
+                    ),
+                    _buildNutrientInfo(
+                      icon: Icons.opacity,
+                      value: '${savedData['fat']}',
+                      unit: 'g fat',
+                      color: Colors.green,
+                    ),
+                  ],
+                ),
+              ),
+              if (amount != null && amount > 0) ...[
+                SizedBox(height: 12),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.restaurant, size: 16, color: Colors.red[800]),
+                      SizedBox(width: 4),
+                      Text(
+                        'Portion: $amount',
+                        style: TextStyle(
+                          color: Colors.red[800],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       );
     }
 
-    return Card(
-      child: ListTile(
-        // leading: Image.asset(
-        //   meal.imageUrl,
-        //   width: 60,
-        //   height: 60,
-        //   fit: BoxFit.cover,
-        // ),
-        title: Text(meal.name),
-        subtitle: Text('${meal.calories} kcal'),
-        trailing: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () {
-            setState(() {
-              switch (type.toLowerCase()) {
-                case 'breakfast':
-                  selectedBreakfast = null;
-                  break;
-                case 'lunch':
-                  selectedLunch = null;
-                  break;
-                case 'dinner':
-                  selectedDinner = null;
-                  break;
-              }
-            });
+    // Tampilkan card kosong jika tidak ada data
+    if (meal == null) {
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+        child: InkWell(
+          onTap: () async {
+            FoodBloc foodBloc = BlocProvider.of<FoodBloc>(context);
+            if (type == 'Breakfast') {
+              foodBloc.add(InitialBreakfastEvent());
+            } else if (type == 'Lunch') {
+              foodBloc.add(InitialLunchEvent());
+            } else if (type == 'Dinner') {
+              foodBloc.add(InitialDinnerEvent());
+            }
+
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SearchMealCustom(mealType: type),
+              ),
+            );
+
+            if (result != null) {
+              setState(() {
+                switch (type) {
+                  case 'Breakfast':
+                    selectedBreakfast = result as Meal;
+                    break;
+                  case 'Lunch':
+                    selectedLunch = result as Meal;
+                    break;
+                  case 'Dinner':
+                    selectedDinner = result as Meal;
+                    break;
+                }
+              });
+            }
           },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.red[800],
+                    size: 40,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Add $type",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.red[800],
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "Tap to choose meal for $type",
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Tampilkan data dari database jika ada
+    return FutureBuilder<List<Food>>(
+      future: foodSqflite.getFoodbyId(meal.foodId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const ListTile(
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              title: Text('Loading...'),
+            ),
+          );
+        }
+
+        final food = snapshot.data!.first;
+        return Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade300),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: Container(
+              width: 100,
+              height: 100,
+              child: food.imageUrl.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        food.imageUrl,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        color: Colors.red[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.restaurant,
+                        color: Colors.red[800],
+                        size: 40,
+                      ),
+                    ),
+            ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  food.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  type,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildNutrientInfo(
+                        icon: Icons.local_fire_department,
+                        value: '${food.calories}',
+                        unit: 'kcal',
+                        color: Colors.orange,
+                      ),
+                      _buildNutrientInfo(
+                        icon: Icons.egg_outlined,
+                        value: '${food.protein}',
+                        unit: 'g protein',
+                        color: Colors.red,
+                      ),
+                      _buildNutrientInfo(
+                        icon: Icons.breakfast_dining,
+                        value: '${food.carbs}',
+                        unit: 'g carbs',
+                        color: Colors.blue,
+                      ),
+                      _buildNutrientInfo(
+                        icon: Icons.opacity,
+                        value: '${food.fat}',
+                        unit: 'g fat',
+                        color: Colors.green,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            trailing: IconButton(
+              icon: Icon(Icons.close, color: Colors.grey[600]),
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+
+                // Hapus data dari SharedPreferences sesuai dengan tipe meal
+                if (type == 'Breakfast') {
+                  await prefs.remove('breakfast_name');
+                  await prefs.remove('breakfast_calories');
+                  await prefs.remove('breakfast_image');
+                  await prefs.remove('breakfast_protein');
+                  await prefs.remove('breakfast_carbs');
+                  await prefs.remove('breakfast_fat');
+                  await prefs.remove('breakfast_amount');
+                  setState(() {
+                    selectedBreakfast = null;
+                  });
+                } else if (type == 'Lunch') {
+                  await prefs.remove('lunch_name');
+                  await prefs.remove('lunch_calories');
+                  await prefs.remove('lunch_image');
+                  await prefs.remove('lunch_protein');
+                  await prefs.remove('lunch_carbs');
+                  await prefs.remove('lunch_fat');
+                  await prefs.remove('lunch_amount');
+                  setState(() {
+                    selectedLunch = null;
+                  });
+                } else if (type == 'Dinner') {
+                  await prefs.remove('dinner_name');
+                  await prefs.remove('dinner_calories');
+                  await prefs.remove('dinner_image');
+                  await prefs.remove('dinner_protein');
+                  await prefs.remove('dinner_carbs');
+                  await prefs.remove('dinner_fat');
+                  await prefs.remove('dinner_amount');
+                  setState(() {
+                    selectedDinner = null;
+                  });
+                }
+
+                // Reload data setelah menghapus
+                _loadSavedMeals();
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNutrientInfo({
+    required IconData icon,
+    required String value,
+    required String unit,
+    required MaterialColor color,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.shade100,
+          width: 1,
         ),
       ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: color.shade700,
+            size: 24,
+          ),
+          SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: color.shade700,
+            ),
+          ),
+          Text(
+            unit,
+            style: TextStyle(
+              fontSize: 12,
+              color: color.shade700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNutritionSummary() {
+    double totalCalories = 0;
+    double totalProtein = 0;
+    double totalCarbs = 0;
+    double totalFat = 0;
+
+    // Hitung dari data SharedPreferences
+    if (breakfastData['calories']?.isNotEmpty == true) {
+      totalCalories += double.parse(breakfastData['calories']!) *
+          (mealAmounts['breakfast'] ?? 1);
+      totalProtein += double.parse(breakfastData['protein']!) *
+          (mealAmounts['breakfast'] ?? 1);
+      totalCarbs += double.parse(breakfastData['carbs']!) *
+          (mealAmounts['breakfast'] ?? 1);
+      totalFat +=
+          double.parse(breakfastData['fat']!) * (mealAmounts['breakfast'] ?? 1);
+    }
+
+    if (lunchData['calories']?.isNotEmpty == true) {
+      totalCalories +=
+          double.parse(lunchData['calories']!) * (mealAmounts['lunch'] ?? 1);
+      totalProtein +=
+          double.parse(lunchData['protein']!) * (mealAmounts['lunch'] ?? 1);
+      totalCarbs +=
+          double.parse(lunchData['carbs']!) * (mealAmounts['lunch'] ?? 1);
+      totalFat += double.parse(lunchData['fat']!) * (mealAmounts['lunch'] ?? 1);
+    }
+
+    if (dinnerData['calories']?.isNotEmpty == true) {
+      totalCalories +=
+          double.parse(dinnerData['calories']!) * (mealAmounts['dinner'] ?? 1);
+      totalProtein +=
+          double.parse(dinnerData['protein']!) * (mealAmounts['dinner'] ?? 1);
+      totalCarbs +=
+          double.parse(dinnerData['carbs']!) * (mealAmounts['dinner'] ?? 1);
+      totalFat +=
+          double.parse(dinnerData['fat']!) * (mealAmounts['dinner'] ?? 1);
+    }
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ringkasan Nutrisi Harian',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.red[800],
+            ),
+          ),
+          SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNutrientSummaryItem(
+                icon: Icons.local_fire_department,
+                value: totalCalories.toStringAsFixed(1),
+                unit: 'kcal',
+                color: Colors.orange,
+              ),
+              _buildNutrientSummaryItem(
+                icon: Icons.egg_outlined,
+                value: totalProtein.toStringAsFixed(1),
+                unit: 'g protein',
+                color: Colors.red,
+              ),
+              _buildNutrientSummaryItem(
+                icon: Icons.breakfast_dining,
+                value: totalCarbs.toStringAsFixed(1),
+                unit: 'g karbo',
+                color: Colors.blue,
+              ),
+              _buildNutrientSummaryItem(
+                icon: Icons.opacity,
+                value: totalFat.toStringAsFixed(1),
+                unit: 'g lemak',
+                color: Colors.green,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNutrientSummaryItem({
+    required IconData icon,
+    required String value,
+    required String unit,
+    required MaterialColor color,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, color: color.shade700, size: 24),
+        SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: color.shade700,
+          ),
+        ),
+        Text(
+          unit,
+          style: TextStyle(
+            fontSize: 12,
+            color: color.shade700,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrichild/bloc/auth/auth_state.dart';
+import 'package:nutrichild/bloc/food/food_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../bloc/auth/auth_bloc.dart';
-import '../../bloc/food/food_bloc.dart';
-import '../../bloc/food/food_event.dart';
 import '../../bloc/food/food_state.dart';
 import 'ChooseNewPlan.dart';
 
@@ -12,19 +12,23 @@ class CustomMealPlan extends StatelessWidget {
   final String name;
   final String calories;
   final String imageUrl;
+  final String protein;
+  final String carbs;
+  final String fat;
 
   const CustomMealPlan({
     super.key,
     required this.name,
     required this.calories,
     required this.imageUrl,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
   });
 
   @override
   Widget build(BuildContext context) {
     final TextEditingController mealController = TextEditingController();
-    AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
-    FoodBloc foodBloc = BlocProvider.of<FoodBloc>(context);
 
     return MaterialApp(
       home: Scaffold(
@@ -128,8 +132,6 @@ class CustomMealPlan extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-
-                  const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 16, horizontal: 32),
@@ -143,20 +145,53 @@ class CustomMealPlan extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed: () {
-                          if (foodBloc.state is InitialBreakfastState &&
-                              authBloc.state is LoginAuthState) {
-                            final LoginAuthState loginAuthState =
-                                authBloc.state as LoginAuthState;
+                        onPressed: () async {
+                          FoodBloc foodBloc =
+                              BlocProvider.of<FoodBloc>(context);
+                          AuthBloc authBloc =
+                              BlocProvider.of<AuthBloc>(context);
 
-                            foodBloc.add(BreakfastEvent(
-                              childId: loginAuthState.id,
-                              foodName: name,
-                              calories: double.parse(calories),
-                              imageUrl: imageUrl,
-                              qty: int.parse(mealController.text),
-                            ));
+                          if (authBloc.state is LoginAuthState) {
+                            final prefs = await SharedPreferences.getInstance();
+
+                            if (foodBloc.state is InitialBreakfastState) {
+                              await prefs.setString('breakfast_name', name);
+                              await prefs.setString(
+                                  'breakfast_calories', calories);
+                              await prefs.setString(
+                                  'breakfast_protein', protein);
+                              await prefs.setString(
+                                  'breakfast_carbs', carbs);
+                              await prefs.setString(
+                                  'breakfast_fat', fat);
+                              await prefs.setString(
+                                  'breakfast_image', imageUrl);
+                              await prefs.setInt('breakfast_amount',
+                                  int.parse(mealController.text.trim()));
+                            } else if (foodBloc.state is InitialLunchState) {
+                              await prefs.setString('lunch_name', name);
+                              await prefs.setString('lunch_calories', calories);
+                              await prefs.setString('lunch_protein', protein);
+                              await prefs.setString('lunch_carbs', carbs);
+                              await prefs.setString('lunch_fat', fat);
+                              await prefs.setString('lunch_image', imageUrl);
+                              await prefs.setInt('lunch_amount',
+                                  int.parse(mealController.text.trim()));
+                            } else if (foodBloc.state is InitialDinnerState) {
+                              await prefs.setString('dinner_name', name);
+                              await prefs.setString(
+                                  'dinner_calories', calories);
+                              await prefs.setString(
+                                  'dinner_protein', protein);
+                              await prefs.setString('dinner_carbs', carbs);
+                              await prefs.setString('dinner_fat', fat);
+                              await prefs.setString(
+                                  'dinner_image', imageUrl);
+                              await prefs.setInt('dinner_amount',
+                                  int.parse(mealController.text.trim()));
+                            }
                           }
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(

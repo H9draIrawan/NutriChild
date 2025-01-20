@@ -12,59 +12,96 @@ class InitialLunchEvent extends FoodEvent {}
 
 class InitialDinnerEvent extends FoodEvent {}
 
-class BreakfastEvent extends FoodEvent {
+class SaveFoodEvent extends FoodEvent {
   final String childId;
   final String foodName;
-  final String imageUrl;
   final double calories;
+  final double protein;
+  final double carbs;
+  final double fat;
+  final String imageUrl;
+  final String mealTime;
   final int qty;
+  final DateTime dateTime;
 
-  const BreakfastEvent({
-    required this.childId,
-    required this.foodName,
-    required this.imageUrl,
-    required this.calories,
-    required this.qty,
-  });
+  const SaveFoodEvent(
+      {required this.childId,
+      required this.foodName,
+      required this.calories,
+      required this.protein,
+      required this.carbs,
+      required this.fat,
+      required this.imageUrl,
+      required this.mealTime,
+      required this.qty,
+      required this.dateTime});
 
   @override
-  List<Object> get props => [childId, foodName, imageUrl, calories, qty];
+  List<Object> get props => [
+        childId,
+        foodName,
+        calories,
+        protein,
+        carbs,
+        fat,
+        imageUrl,
+        mealTime,
+        qty,
+        dateTime
+      ];
 }
 
-class LunchEvent extends FoodEvent {
+class GetFoodEvent extends FoodEvent {
   final String childId;
-  final String foodName;
-  final String imageUrl;
-  final double calories;
-  final int qty;
+  final String mealTime;
 
-  const LunchEvent({
-    required this.childId,
-    required this.foodName,
-    required this.imageUrl,
-    required this.calories,
-    required this.qty,
-  });
+  const GetFoodEvent({required this.childId, required this.mealTime});
 
   @override
-  List<Object> get props => [childId, foodName, imageUrl, calories, qty];
+  List<Object> get props => [childId, mealTime];
 }
 
-class DinnerEvent extends FoodEvent {
-  final String childId;
-  final String foodName;
-  final String imageUrl;
-  final double calories;
-  final int qty;
+class DeleteFoodEvent extends FoodEvent {
+  final String mealId;
 
-  const DinnerEvent({
-    required this.childId,
-    required this.foodName,
-    required this.imageUrl,
-    required this.calories,
-    required this.qty,
-  });
+  const DeleteFoodEvent({required this.mealId});
 
   @override
-  List<Object> get props => [childId, foodName, imageUrl, calories, qty];
+  List<Object> get props => [mealId];
+}
+
+class UpdateFoodEvent extends FoodEvent {
+  final String mealId;
+  final String foodName;
+  final double calories;
+  final double protein;
+  final double carbs;
+  final double fat;
+  final String imageUrl;
+  final int qty;
+  final DateTime dateTime;
+
+  const UpdateFoodEvent(
+      {required this.mealId,
+      required this.foodName,
+      required this.calories,
+      required this.protein,
+      required this.carbs,
+      required this.fat,
+      required this.imageUrl,
+      required this.qty,
+      required this.dateTime});
+
+  @override
+  List<Object> get props => [
+        mealId,
+        foodName,
+        calories,
+        protein,
+        carbs,
+        fat,
+        imageUrl,
+        qty,
+        dateTime
+      ];
 }

@@ -24,78 +24,35 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
       emit(InitialDinnerState());
     });
 
-    on<BreakfastEvent>((event, emit) async {
-      final foodId = "F${DateTime.now().toString()}";
-      final mealId = "M${DateTime.now().toString()}";
+    on<SaveFoodEvent>((event, emit) async {
+      final foodId = "FOOD${DateTime.now().toString()}";
+      final mealId = "MEAL${DateTime.now().toString()}";
 
       await foodSqflite.insertFood(Food(
         id: foodId,
         name: event.foodName,
         calories: event.calories,
+        protein: event.protein,
+        carbs: event.carbs,
+        fat: event.fat,
         imageUrl: event.imageUrl,
       ));
+
+      print("Food Inserted");
 
       await mealSqflite.insertMeal(
         Meal(
           id: mealId,
           childId: event.childId,
           foodId: foodId,
-          mealTime: 'Breakfast',
+          mealTime: event.mealTime,
           dateTime:
-              "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+              "${event.dateTime.day}/${event.dateTime.month}/${event.dateTime.year}",
           qty: event.qty,
         ),
       );
 
-      print("Data Inserted");
-    });
-
-    on<LunchEvent>((event, emit) {
-      final foodId = "F${DateTime.now().toString()}";
-      final mealId = "M${DateTime.now().toString()}";
-
-      foodSqflite.insertFood(Food(
-        id: foodId,
-        name: event.foodName,
-        calories: event.calories,
-        imageUrl: event.imageUrl,
-      ));
-
-      mealSqflite.insertMeal(
-        Meal(
-          id: mealId,
-          childId: event.childId,
-          foodId: foodId,
-          mealTime: 'Lunch',
-          dateTime:
-              "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
-          qty: event.qty,
-        ),
-      );
-    });
-
-    on<DinnerEvent>((event, emit) {
-      final foodId = "F${DateTime.now().toString()}";
-      final mealId = "M${DateTime.now().toString()}";
-
-      foodSqflite.insertFood(Food(
-        id: foodId,
-        name: event.foodName,
-        calories: event.calories,
-        imageUrl: event.imageUrl,
-      ));
-
-      mealSqflite.insertMeal(
-        Meal(
-          id: mealId,
-          childId: event.childId,
-          foodId: foodId,
-          mealTime: 'Dinner',
-          dateTime:
-              "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
-          qty: event.qty,
-        ),
-      );
+      print("Meal Inserted");
     });
   }
 }

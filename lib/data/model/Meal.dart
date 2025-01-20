@@ -5,12 +5,6 @@ class Meal {
   final String mealTime;
   final String dateTime;
   final int qty;
-  final String name;
-  final int calories;
-  final double protein;
-  final double carbs;
-  final double fat;
-  final String imageUrl;
 
   Meal({
     required this.id,
@@ -19,12 +13,6 @@ class Meal {
     required this.mealTime,
     required this.dateTime,
     required this.qty,
-    this.name = '',
-    this.calories = 0,
-    this.protein = 0,
-    this.carbs = 0,
-    this.fat = 0,
-    this.imageUrl = '',
   });
 
   Map<String, dynamic> toMap() {
@@ -35,12 +23,6 @@ class Meal {
       'mealTime': mealTime,
       'dateTime': dateTime,
       'qty': qty,
-      'name': name,
-      'calories': calories,
-      'protein': protein,
-      'carbs': carbs,
-      'fat': fat,
-      'imageUrl': imageUrl,
     };
   }
 
@@ -52,12 +34,6 @@ class Meal {
       mealTime: map['mealTime'],
       dateTime: map['dateTime'],
       qty: map['qty'],
-      name: map['name'] ?? '',
-      calories: map['calories'] ?? 0,
-      protein: map['protein']?.toDouble() ?? 0.0,
-      carbs: map['carbs']?.toDouble() ?? 0.0,
-      fat: map['fat']?.toDouble() ?? 0.0,
-      imageUrl: map['imageUrl'] ?? '',
     );
   }
 }
