@@ -115,11 +115,24 @@ class Mealpage extends StatelessWidget {
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(16),
                         ),
-                        child: Image.network(
-                          '/assets/images/pic1.png', // Ganti dengan URL gambar makanan
+                        child: Container(
                           width: double.infinity,
                           height: 200,
-                          fit: BoxFit.cover,
+                          child: Image.asset(
+                            'assets/images/pic1.png',
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[300],
+                                child: const Center(
+                                  child: Text(
+                                    'Image not found',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                       Padding(
@@ -203,11 +216,24 @@ class Mealpage extends StatelessWidget {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: Image.network(
-                              '/assets/images/Default.png', // Ganti URL sesuai kebutuhan
+                            child: Container(
                               width: double.infinity,
-                              height: constraints.maxWidth * 0.5,
-                              fit: BoxFit.cover,
+                              height: 200,
+                              child: Image.asset(
+                                'assets/images/Default.png',
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[300],
+                                    child: const Center(
+                                      child: Text(
+                                        'Image not found',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                           Positioned(
@@ -217,6 +243,7 @@ class Mealpage extends StatelessWidget {
                             right: 0,
                             child: Column(
                               children: [
+                                const SizedBox(height: 16),
                                 Container(
                                   width: 56,
                                   height: 56,
@@ -230,7 +257,7 @@ class Mealpage extends StatelessWidget {
                                     size: 32,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 16),
                                 const Text(
                                   'Create new meal plan',
                                   style: TextStyle(

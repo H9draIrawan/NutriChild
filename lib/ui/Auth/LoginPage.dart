@@ -1,11 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrichild/bloc/auth/auth_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../bloc/auth/auth_bloc.dart';
-import '../bloc/auth/auth_event.dart';
-import '../ui/ResetPasswordPage.dart';
+import '../../bloc/auth/auth_bloc.dart';
+import '../../bloc/auth/auth_event.dart';
+import 'ResetPasswordPage.dart';
 
 class Loginpage extends StatefulWidget {
   const Loginpage({super.key});
@@ -88,7 +89,35 @@ class _LoginpageState extends State<Loginpage> {
             Navigator.pushReplacementNamed(context, '/');
           } else if (state is ErrorAuthState) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Error: ${state.message}")),
+              SnackBar(
+                content: Text(
+                  state.message.contains('verify your email')
+                      ? 'Please check your email and verify your account before logging in'
+                      : state.message,
+                ),
+                action: state.message.contains('verify your email')
+                    ? SnackBarAction(
+                        label: 'Resend',
+                        onPressed: () async {
+                          try {
+                            User? user = FirebaseAuth.instance.currentUser;
+                            if (user != null && !user.emailVerified) {
+                              await user.sendEmailVerification();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Verification email resent'),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
+                        },
+                      )
+                    : null,
+              ),
             );
           }
         },

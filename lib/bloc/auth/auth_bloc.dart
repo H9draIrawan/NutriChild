@@ -16,6 +16,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           email: event.email,
           password: event.password,
         );
+
+        // Cek apakah email sudah diverifikasi
+        if (!signIn.user!.emailVerified) {
+          emit(const ErrorAuthState('Please verify your email first'));
+          return;
+        }
+
         DocumentSnapshot user =
             await _firestore.collection('users').doc(signIn.user!.uid).get();
         emit(LoginAuthState(
@@ -37,13 +44,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           password: event.password,
         );
 
+        // Kirim email verifikasi
+        await userCredential.user!.sendEmailVerification();
+
         String uid = userCredential.user!.uid;
         await _firestore.collection('users').doc(uid).set({
           'username': event.username,
           'email': event.email,
+          'emailVerified': false,
         });
 
-        emit(RegisterAuthState());
+        emit(EmailVerificationSentState());
       } catch (e) {
         emit(ErrorAuthState(e.toString()));
       }
@@ -118,6 +129,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           await user.updatePassword(event.newPassword);
 
           emit(ChangePasswordSuccessState());
+        }
+      } catch (e) {
+        emit(ErrorAuthState(e.toString()));
+      }
+    });
+
+    on<DeleteAccountEvent>((event, emit) async {
+      try {
+        emit(LoadingAuthState());
+
+        final user = _firebaseAuth.currentUser;
+        if (user != null) {
+          // Re-authenticate user before deletion
+          final credential = EmailAuthProvider.credential(
+            email: user.email!,
+            password: event.password,
+          );
+          await user.reauthenticateWithCredential(credential);
+
+          // Delete user data from Firestore
+          await _firestore.collection('users').doc(user.uid).delete();
+
+          // Delete user account
+          await user.delete();
+
+          emit(DeleteAccountSuccessState());
         }
       } catch (e) {
         emit(ErrorAuthState(e.toString()));

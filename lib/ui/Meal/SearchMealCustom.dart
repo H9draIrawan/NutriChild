@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:nutrichild/ui/CustomMealPlan.dart';
+import 'package:nutrichild/data/model/Meal.dart';
 
 class SearchMealCustom extends StatelessWidget {
-  const SearchMealCustom({super.key});
+  final String mealType;
+
+  const SearchMealCustom({
+    super.key,
+    required this.mealType,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +16,7 @@ class SearchMealCustom extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: TextField(
@@ -26,14 +31,29 @@ class SearchMealCustom extends StatelessWidget {
         ),
       ),
       body: ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: 6, // Sesuai dengan jumlah item pada gambar
+        padding: const EdgeInsets.all(16),
+        itemCount: mealData.length,
         itemBuilder: (context, index) {
           return MealCard(
             title: mealData[index]['title'],
             time: mealData[index]['time'],
             calories: mealData[index]['calories'],
             imageUrl: mealData[index]['imageUrl'],
+            onTap: () {
+              final meal = Meal(
+                id: DateTime.now().toString(),
+                childId: 'default',
+                foodId: index.toString(),
+                mealTime: mealType,
+                dateTime: DateTime.now().toString(),
+                qty: 1,
+                name: mealData[index]['title'],
+                calories: int.parse(mealData[index]['calories']),
+                imageUrl: mealData[index]['imageUrl'],
+              );
+
+              Navigator.pop(context, meal);
+            },
           );
         },
       ),
@@ -46,6 +66,7 @@ class MealCard extends StatelessWidget {
   final String time;
   final String calories;
   final String imageUrl;
+  final Function() onTap;
 
   const MealCard({
     super.key,
@@ -53,25 +74,13 @@ class MealCard extends StatelessWidget {
     required this.time,
     required this.calories,
     required this.imageUrl,
+    required this.onTap,
   });
 
   @override
-  @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        // Handle the onClick action here
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CustomMealPlan(
-              name: title,
-              calories: calories,
-              imageUrl: imageUrl,
-            ),
-          ),
-        );
-      },
+      onTap: onTap,
       child: Card(
         margin: EdgeInsets.only(bottom: 16),
         child: Row(
@@ -122,40 +131,42 @@ final List<Map<String, dynamic>> mealData = [
     'title': 'Salmon with salad',
     'time': '30 min',
     'calories': '450',
-    'imageUrl': '/assets/images/pic1.png',
+    'imageUrl':
+        'https://cdn-assets-eu.frontify.com/s3/frontify-enterprise-files-eu/eyJvYXV0aCI6eyJjbGllbnRfaWQiOiJmcm9udGlmeS1maW5kZXIifSwicGF0aCI6ImloaC1oZWFsdGhjYXJlLWJlcmhhZFwvZmlsZVwvSGhleHdSaUVCYWJ0b1dFRWpUM1EuanBnIn0:ihh-healthcare-berhad:6Zk6UuetaajSDB-43bdLAoamTKKBCqQFMfjY38nWPbk?format=webp',
   },
   {
     'title': 'Quinoa with carrots',
     'time': '30 min',
     'calories': '507',
-    'imageUrl': '/assets/images/pic2.png',
+    'imageUrl':
+        'https://www.allrecipes.com/thmb/qAywXhsLSx1XGNgoc8Y62kjX5RE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/216999simple-savory-quinoaFranceC-398611140dcf4e829a55fdfa967bdec6.jpg',
   },
   {
     'title': 'Pasta and vegetables',
     'time': '25 min',
     'calories': '640',
-
-    'imageUrl': '/assets/images/pic3.png',
+    'imageUrl':
+        'https://media.istockphoto.com/id/509409312/photo/whole-wheat-fusilli-pasta-with-vegetables.jpg?s=612x612&w=0&k=20&c=Dwmq0NgYiA7oZcULyZll-AvDA9FW-XWD6sqSWLCnHjE=',
   },
   {
     'title': 'Guacamole and salad',
     'time': '30 min',
     'calories': '450',
-
-    'imageUrl': '/assets/images/pic4.png',
+    'imageUrl':
+        'https://www.delishknowledge.com/wp-content/uploads/Guacamole-Salad_2.jpg',
   },
   {
     'title': 'Carrots and quinoa',
     'time': '30 min',
     'calories': '507',
-
-    'imageUrl': '/assets/images/pic5.png',
+    'imageUrl':
+        'https://media-cdn2.greatbritishchefs.com/media/lo4ptoar/img54264.whqc_768x512q80.jpg',
   },
   {
     'title': 'Roasted chicken',
     'time': '45 min',
     'calories': '640',
-
-    'imageUrl': '/assets/images/Default.png',
+    'imageUrl':
+        'https://allthehealthythings.com/wp-content/uploads/2021/11/The-Best-Whole-Roasted-Chicken-5-scaled.jpg',
   },
 ];

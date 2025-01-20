@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/auth/auth_bloc.dart';
-import '../bloc/auth/auth_event.dart';
-import '../bloc/auth/auth_state.dart';
+import '../../bloc/auth/auth_bloc.dart';
+import '../../bloc/auth/auth_event.dart';
+import '../../bloc/auth/auth_state.dart';
 
 class Registerpage extends StatefulWidget {
   const Registerpage({super.key});
@@ -27,14 +27,32 @@ class _RegisterpageState extends State<Registerpage> {
         backgroundColor: Colors.white,
         body: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is RegisterAuthState) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Registrasi berhasil!')),
+            if (state is EmailVerificationSentState) {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Verify Your Email'),
+                    content: const Text(
+                      'A verification link has been sent to your email address. Please verify your email before logging in.',
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('OK'),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close dialog
+                          Navigator.pushReplacementNamed(
+                              context, '/login'); // Go to login page
+                        },
+                      ),
+                    ],
+                  );
+                },
               );
-              Navigator.pushReplacementNamed(context, '/login');
             } else if (state is ErrorAuthState) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Error: ${state.message}")),
+                SnackBar(content: Text(state.message)),
               );
             }
 

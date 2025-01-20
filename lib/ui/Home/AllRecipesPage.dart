@@ -36,7 +36,7 @@ class AllRecipesPage extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Container(
-              height: 140,
+              height: 160,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),

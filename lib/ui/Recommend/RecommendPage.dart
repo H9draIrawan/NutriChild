@@ -9,7 +9,7 @@ class Recommendpage extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Recommendation',
+            'Recommend',
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,

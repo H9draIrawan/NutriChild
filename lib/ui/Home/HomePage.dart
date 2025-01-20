@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/auth/auth_bloc.dart';
-import '../bloc/auth/auth_state.dart';
-import '../ui/AllRecipesPage.dart';
+import '../../bloc/auth/auth_bloc.dart';
+import '../../bloc/auth/auth_state.dart';
+import 'AllRecipesPage.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -208,7 +208,7 @@ class _HomepageState extends State<Homepage> {
               ),
               const SizedBox(height: 24),
               RecipeSection(
-                title: "Popular recipes this week",
+                title: "Popular recipes",
                 recipes: [
                   RecipeCard(
                     image: 'assets/images/pic4.png',

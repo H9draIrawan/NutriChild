@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrichild/bloc/auth/auth_bloc.dart';
 import 'package:nutrichild/bloc/auth/auth_state.dart';
-import 'package:nutrichild/ui/EditProfilePage.dart';
-import 'package:nutrichild/ui/ResetPasswordPage.dart';
+import 'package:nutrichild/ui/Auth/ResetPasswordPage.dart';
+import 'package:nutrichild/ui/Profile/EditProfilePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../bloc/auth/auth_event.dart';
+import '../../bloc/auth/auth_event.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
@@ -46,7 +46,19 @@ class Profilepage extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: BlocBuilder<AuthBloc, AuthState>(
+      body: BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is DeleteAccountSuccessState) {
+            Navigator.pushReplacementNamed(context, '/login');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Account deleted successfully')),
+            );
+          } else if (state is ErrorAuthState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${state.message}')),
+            );
+          }
+        },
         builder: (context, state) {
           String username = '';
           if (state is LoginAuthState) {
@@ -372,6 +384,67 @@ class Profilepage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // Delete Account Button
+                TextButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        final passwordController = TextEditingController();
+                        return AlertDialog(
+                          title: const Text('Delete Account'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'This action cannot be undone. Please enter your password to confirm.',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                              const SizedBox(height: 16),
+                              TextField(
+                                controller: passwordController,
+                                obscureText: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Password',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                context.read<AuthBloc>().add(
+                                      DeleteAccountEvent(
+                                        password:
+                                            passwordController.text.trim(),
+                                      ),
+                                    );
+                              },
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                  child: const Text(
+                    'Delete Account',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
               ],
             ),
           );

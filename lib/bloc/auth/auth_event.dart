@@ -60,3 +60,8 @@ class ChangePasswordEvent extends AuthEvent {
     required this.newPassword,
   });
 }
+
+class DeleteAccountEvent extends AuthEvent {
+  final String password;
+  const DeleteAccountEvent({required this.password});
+}

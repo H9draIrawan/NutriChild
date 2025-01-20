@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:nutrichild/ui/ChatPage.dart';
-import 'package:nutrichild/ui/HomePage.dart';
-import 'package:nutrichild/ui/MealPage.dart';
-import 'package:nutrichild/ui/ProfilePage.dart';
-import 'package:nutrichild/ui/RecommendPage.dart';
+import 'package:nutrichild/ui/Chat/ChatPage.dart';
+import 'package:nutrichild/ui/Home/HomePage.dart';
+import 'package:nutrichild/ui/Meal/MealPage.dart';
+import 'package:nutrichild/ui/Profile/ProfilePage.dart';
+import 'package:nutrichild/ui/Recommend/RecommendPage.dart';
 
 class Bottomnavigation extends StatefulWidget {
   static const routeName = '/';
@@ -48,7 +48,7 @@ class _BottomnavigationState extends State<Bottomnavigation> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
-            label: 'Recommendation',
+            label: 'Recommend',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
