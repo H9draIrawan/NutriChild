@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
-import '../data/model/Meal.dart';
+import '../model/Meal.dart';
 
 class MealSqflite {
   static Database? _database;
@@ -14,7 +14,7 @@ class MealSqflite {
 
   initDB() async {
     var path = await getDatabasesPath();
-    var db = openDatabase("$path/meal.db", version: 6,
+    var db = openDatabase("$path/meals.db", version: 6,
         onCreate: (Database db, int version) async {
       await db.execute('''CREATE TABLE $_mealTable(
           id TEXT PRIMARY KEY,

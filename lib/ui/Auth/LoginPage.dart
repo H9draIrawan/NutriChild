@@ -87,7 +87,7 @@ class _LoginpageState extends State<Loginpage> {
 
           if (state is LoginAuthState) {
             _saveCredentials(); // Save credentials when login successful
-            Navigator.pushReplacementNamed(context, '/');
+            Navigator.pushReplacementNamed(context, '/welcome');
           } else if (state is ErrorAuthState) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

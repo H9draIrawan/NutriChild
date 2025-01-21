@@ -2,10 +2,10 @@ import 'package:bloc/bloc.dart';
 import 'package:nutrichild/bloc/food/food_event.dart';
 import 'package:nutrichild/bloc/food/food_state.dart';
 
-import '../../data/model/Food.dart';
-import '../../data/model/Meal.dart';
 import '../../database/database_food.dart';
 import '../../database/database_meal.dart';
+import '../../model/Food.dart';
+import '../../model/Meal.dart';
 
 class FoodBloc extends Bloc<FoodEvent, FoodState> {
   final FoodSqflite foodSqflite = FoodSqflite();

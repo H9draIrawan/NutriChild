@@ -1,10 +1,10 @@
 import 'package:sqflite/sqflite.dart';
 
-import '../data/model/child.dart';
+import '../model/child.dart';
 
 class DatabaseChild {
   static Database? _database;
-  static const String _childTable = 'child';
+  static const String _childTable = 'children';
 
   Future<Database> get database async {
     if (_database != null) {
@@ -17,7 +17,7 @@ class DatabaseChild {
 
   initDB() async {
     var path = await getDatabasesPath();
-    var db = openDatabase("$path/child.db",
+    var db = openDatabase("$path/children.db",
         onCreate: (Database db, int version) async {
       await db.execute(
           "CREATE TABLE $_childTable(id TEXT PRIMARY KEY, name TEXT, age INTEGER, gender TEXT, weight DOUBLE, height DOUBLE)");

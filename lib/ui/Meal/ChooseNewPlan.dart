@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nutrichild/data/model/Food.dart';
-import 'package:nutrichild/data/model/Meal.dart';
 import 'package:nutrichild/database/database_food.dart';
 import 'package:nutrichild/database/database_meal.dart';
+import 'package:nutrichild/model/Food.dart';
+import 'package:nutrichild/model/Meal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 
