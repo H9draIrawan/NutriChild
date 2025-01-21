@@ -2,7 +2,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../model/child.dart';
 
-class DatabaseChild {
+class ChildSqflite {
   static Database? _database;
   static const String _childTable = 'children';
 
@@ -17,10 +17,12 @@ class DatabaseChild {
 
   initDB() async {
     var path = await getDatabasesPath();
-    var db = openDatabase("$path/children.db",
+    var db = openDatabase("$path/children.db", version: 2,
         onCreate: (Database db, int version) async {
-      await db.execute(
-          "CREATE TABLE $_childTable(id TEXT PRIMARY KEY, name TEXT, age INTEGER, gender TEXT, weight DOUBLE, height DOUBLE)");
+      await db.execute('''
+          CREATE TABLE $_childTable(
+          id TEXT PRIMARY KEY, userId TEXT, name TEXT, age INTEGER, gender TEXT, weight DOUBLE, height DOUBLE, goal TEXT)
+          ''');
       print("DB Created");
     });
     return db;
@@ -45,6 +47,20 @@ class DatabaseChild {
     }
     print("Database : ${child.length}");
     return child;
+  }
+
+  Future<Child?> getChildById(String id) async {
+    final Database db = await database;
+    List<Map<String, dynamic>> results =
+        await db.query(_childTable, where: 'id = ?', whereArgs: [id]);
+    return Child.fromMap(results.first);
+  }
+
+  Future<List<Child>> getChildByUserId(String userId) async {
+    final Database db = await database;
+    List<Map<String, dynamic>> results =
+        await db.query(_childTable, where: 'userId = ?', whereArgs: [userId]);
+    return results.map((result) => Child.fromMap(result)).toList();
   }
 
   Future updateChild(Child child) async {

@@ -41,7 +41,7 @@ class UpdateProfileEvent extends AuthEvent {
   final String username;
   final String email;
 
-  UpdateProfileEvent({
+  const UpdateProfileEvent({
     required this.username,
     required this.email,
   });

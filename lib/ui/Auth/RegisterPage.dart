@@ -63,7 +63,7 @@ class _RegisterpageState extends State<Registerpage> {
             }
           },
           builder: (context, state) {
-            return Container(
+            return SizedBox(
               width: double.infinity,
               height: MediaQuery.of(context).size.height,
               child: Column(
@@ -245,7 +245,7 @@ class _RegisterpageState extends State<Registerpage> {
                   ),
                   // Bottom wave and illustration
                   Expanded(
-                    child: Container(
+                    child: SizedBox(
                       width: double.infinity,
                       child: Stack(
                         alignment: Alignment.center,

@@ -554,7 +554,7 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
-            leading: Container(
+            leading: SizedBox(
               width: 100,
               height: 100,
               child: food.imageUrl.isNotEmpty

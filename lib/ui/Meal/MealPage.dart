@@ -115,7 +115,7 @@ class Mealpage extends StatelessWidget {
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(16),
                         ),
-                        child: Container(
+                        child: SizedBox(
                           width: double.infinity,
                           height: 200,
                           child: Image.asset(
@@ -216,7 +216,7 @@ class Mealpage extends StatelessWidget {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: Container(
+                            child: SizedBox(
                               width: double.infinity,
                               height: 200,
                               child: Image.asset(

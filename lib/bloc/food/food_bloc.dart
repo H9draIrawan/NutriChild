@@ -25,8 +25,8 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
     });
 
     on<SaveFoodEvent>((event, emit) async {
-      final foodId = "FOOD${DateTime.now().toString()}";
-      final mealId = "MEAL${DateTime.now().toString()}";
+      final foodId = "FOOD${DateTime.now().millisecondsSinceEpoch}";
+      final mealId = "MEAL${DateTime.now().millisecondsSinceEpoch}";
 
       await foodSqflite.insertFood(Food(
         id: foodId,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class UiRecipe extends StatefulWidget {
-  const UiRecipe({Key? key}) : super(key: key);
+  const UiRecipe({super.key});
 
   @override
   _UiRecipeState createState() => _UiRecipeState();

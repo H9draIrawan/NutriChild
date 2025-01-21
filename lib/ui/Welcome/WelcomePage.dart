@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:nutrichild/bloc/auth/auth_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../bloc/auth/auth_bloc.dart';
+import '../../bloc/child/child_bloc.dart';
+
+import '../../bloc/child/child_event.dart';
 
 class Welcomepage extends StatefulWidget {
   const Welcomepage({super.key});
@@ -25,11 +29,13 @@ class _WelcomepageState extends State<Welcomepage> {
   @override
   Widget build(BuildContext context) {
     AuthBloc blocAuth = BlocProvider.of<AuthBloc>(context);
+    ChildBloc blocChild = BlocProvider.of<ChildBloc>(context);
     return Scaffold(
       body: Stack(
         children: [
           PageView(
             controller: _controller,
+            physics: const NeverScrollableScrollPhysics(),
             onPageChanged: (index) {
               setState(() {
                 isLastPage = index == 4;
@@ -120,10 +126,40 @@ class _WelcomepageState extends State<Welcomepage> {
                 showButton: true,
                 buttonText: "LET'S BEGIN",
                 centerContent: true,
-                onButtonPressed: () {
-                  OnboardingData.saveToPrefs().then((_) {
+                onButtonPressed: () async {
+                  try {
+                    final loginState = blocAuth.state as LoginAuthState;
+                    final userId = loginState.id;
+                    final childId = "C${DateTime.now().millisecondsSinceEpoch}";
+                    final childPref = await SharedPreferences.getInstance();
+                    await childPref.setString('childId', childId);
+
+                    blocChild.add(SaveChildEvent(
+                      id: childId,
+                      userId: userId,
+                      name: OnboardingData.childName!,
+                      age: OnboardingData.childAge!,
+                      gender: OnboardingData.childGender!,
+                      weight: OnboardingData.childWeight!,
+                      height: OnboardingData.childHeight!,
+                      goal: OnboardingData.selectedGoalName!,
+                    ));
+
+                    for (var allergy in OnboardingData.selectedAllergies) {
+                      blocChild.add(SaveAllergyEvent(
+                        name: allergy,
+                        childId: childId,
+                      ));
+                    }
+
+                    blocChild.add(LoadChildEvent(childId: childId));
+
                     Navigator.pushReplacementNamed(context, '/');
-                  });
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error saving data: $e')),
+                    );
+                  }
                 },
               ),
             ],
@@ -189,16 +225,71 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final weightController = TextEditingController();
   final heightController = TextEditingController();
   String? selectedGender;
+  String? selectedAllergy;
   final List<Map<String, dynamic>> allergies = [
-    {'icon': '🥚', 'name': 'Egg', 'isSelected': false},
-    {'icon': '🥛', 'name': 'Milk', 'isSelected': false},
-    {'icon': '🥜', 'name': 'Nut', 'isSelected': false},
-    {'icon': '🫘', 'name': 'Soybean', 'isSelected': false},
-    {'icon': '🐟', 'name': 'Fish', 'isSelected': false},
-    {'icon': '🌾', 'name': 'Wheat', 'isSelected': false},
-    {'icon': '🌽', 'name': 'Celery', 'isSelected': false},
-    {'icon': '🦐', 'name': 'Crustacean', 'isSelected': false},
-    {'icon': '🫙', 'name': 'Mustard', 'isSelected': false},
+    {
+      'icon': '🥚',
+      'name': 'Egg',
+      'isSelected': false,
+      'color': Colors.orange[50],
+      'selectedColor': Colors.orange[100]
+    },
+    {
+      'icon': '🥛',
+      'name': 'Milk',
+      'isSelected': false,
+      'color': Colors.blue[50],
+      'selectedColor': Colors.blue[100]
+    },
+    {
+      'icon': '🥜',
+      'name': 'Peanut',
+      'isSelected': false,
+      'color': Colors.brown[50],
+      'selectedColor': Colors.brown[100]
+    },
+    {
+      'icon': '🌱',
+      'name': 'Soybean',
+      'isSelected': false,
+      'color': Colors.green[50],
+      'selectedColor': Colors.green[100]
+    },
+    {
+      'icon': '🐟',
+      'name': 'Fish',
+      'isSelected': false,
+      'color': Colors.blue[50],
+      'selectedColor': Colors.blue[100]
+    },
+    {
+      'icon': '🌾',
+      'name': 'Wheat',
+      'isSelected': false,
+      'color': Colors.amber[50],
+      'selectedColor': Colors.amber[100]
+    },
+    {
+      'icon': '🥬',
+      'name': 'Celery',
+      'isSelected': false,
+      'color': Colors.lightGreen[50],
+      'selectedColor': Colors.lightGreen[100]
+    },
+    {
+      'icon': '🦐',
+      'name': 'Crustacean',
+      'isSelected': false,
+      'color': Colors.red[50],
+      'selectedColor': Colors.red[100]
+    },
+    {
+      'icon': '🌶️',
+      'name': 'Mustard',
+      'isSelected': false,
+      'color': Colors.yellow[50],
+      'selectedColor': Colors.yellow[100]
+    },
   ];
 
   @override
@@ -255,25 +346,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
               if (widget.image != null) ...[
                 const SizedBox(height: 30),
                 Expanded(
-                  flex: 2,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Image.asset(
-                        widget.image!,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                  flex: 6,
+                  child: Image.asset(
+                    widget.image!,
+                    fit: BoxFit.contain,
+                    width: MediaQuery.of(context).size.width * 0.8,
                   ),
                 ),
               ],
@@ -300,7 +377,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   child: buildChildForm(),
                 ),
               if (widget.showButton) ...[
-                const SizedBox(height: 20),
+                const Spacer(),
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
@@ -340,15 +417,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           );
                         }
                       } else if (widget.title == 'Any allergies?') {
-                        // Cek apakah minimal satu alergi dipilih
                         final selectedAllergies = allergies
                             .where((allergy) => allergy['isSelected'] as bool)
-                            .map((a) => a['name'] as String)
+                            .map((a) => {
+                                  'name': a['name'] as String,
+                                  'icon': a['icon'] as String,
+                                })
                             .toList();
-                        OnboardingData.selectedAllergies = selectedAllergies;
-                        OnboardingData.saveToPrefs().then((_) {
-                          widget.onButtonPressed?.call();
-                        });
+
+                        // Simpan ke OnboardingData
+                        OnboardingData.selectedAllergies =
+                            selectedAllergies.map((a) => a['name']!).toList();
+
+                        widget.onButtonPressed?.call();
                       } else {
                         widget.onButtonPressed?.call();
                       }
@@ -372,7 +453,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 60),
               ],
             ],
           ),
@@ -397,6 +478,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           itemCount: allergies.length,
           itemBuilder: (context, index) {
             final isSelected = allergies[index]['isSelected'] as bool;
+
             return InkWell(
               onTap: () {
                 setState(() {
@@ -405,27 +487,37 @@ class _OnboardingPageState extends State<OnboardingPage> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.green.shade50 : Colors.white,
+                  color: isSelected
+                      ? allergies[index]['selectedColor']
+                      : allergies[index]['color'],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
                         ? Colors.green
                         : Colors.grey.withOpacity(0.1),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       allergies[index]['icon']!,
-                      style: const TextStyle(fontSize: 24),
+                      style: const TextStyle(fontSize: 32),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Text(
                       allergies[index]['name']!,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isSelected ? Colors.green : Colors.black54,
+                        color: isSelected ? Colors.green[700] : Colors.black54,
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
@@ -650,7 +742,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 color: Colors.red,
                 onTap: () {
                   setState(() {
-                    selectedGender = selectedGender == 'Female' ? null : 'Female';
+                    selectedGender =
+                        selectedGender == 'Female' ? null : 'Female';
                   });
                 },
               ),
@@ -884,7 +977,8 @@ class GoalCard extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 15,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.w600,
                       color: isSelected ? Colors.green : Colors.black,
                     ),
                   ),
@@ -893,7 +987,8 @@ class GoalCard extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      color: isSelected ? Colors.green.shade700 : Colors.grey[600],
+                      color:
+                          isSelected ? Colors.green.shade700 : Colors.grey[600],
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
