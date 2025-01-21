@@ -17,6 +17,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'bloc/auth/auth_bloc.dart';
 import 'database/database_food.dart';
 import 'database/database_meal.dart';
+
 import 'firebase_options.dart';
 
 void main() async {
@@ -38,6 +39,7 @@ void main() async {
     // Inisialisasi database
     final foodSqflite = FoodSqflite();
     final mealSqflite = MealSqflite();
+    
     await foodSqflite.initDB();
     await mealSqflite.initDB();
   }
@@ -62,6 +64,8 @@ class MyApp extends StatelessWidget {
           create: (context) => AuthBloc(),
           child: const Registerpage(),
         ),
+        BlocProvider(
+            create: (context) => AuthBloc(), child: const Welcomepage()),
         BlocProvider(
           create: (context) => AuthBloc(),
           child: const Bottomnavigation(),
