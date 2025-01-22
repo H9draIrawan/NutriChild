@@ -95,4 +95,14 @@ class AllergySqflite {
     }
     return "";
   }
+
+  Future<Allergy?> getAllergyById(String id) async {
+    final Database db = await database;
+    final List<Map<String, dynamic>> maps =
+        await db.query(_allergyTable, where: 'id = ?', whereArgs: [id]);
+    if (maps.isNotEmpty) {
+      return Allergy.fromMap(maps[0]);
+    }
+    return null;
+  }
 }

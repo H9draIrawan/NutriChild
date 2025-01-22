@@ -49,3 +49,21 @@ class LoadChildEvent extends ChildEvent {
   @override
   List<Object?> get props => [childId, userId];
 }
+
+class GetAllChildrenEvent extends ChildEvent {
+  final String userId;
+  
+  const GetAllChildrenEvent(this.userId);
+  
+  @override
+  List<Object> get props => [userId];
+}
+
+class SelectChildEvent extends ChildEvent {
+  final String childId;
+  
+  const SelectChildEvent(this.childId);
+  
+  @override
+  List<Object> get props => [childId];
+}

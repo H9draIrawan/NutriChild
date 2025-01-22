@@ -46,4 +46,10 @@ class PatientSqflite {
     final Database db = await database;
     await db.update(_patientTable, patient.toMap(), where: 'id = ?', whereArgs: [patient.id]);
   }
+
+  Future<List<Patient>> getPatientByChildId(String childId) async {
+    final Database db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(_patientTable, where: 'childId = ?', whereArgs: [childId]);
+    return List.generate(maps.length, (i) => Patient.fromMap(maps[i]));
+  }
 }

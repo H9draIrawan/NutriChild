@@ -7,6 +7,7 @@ import 'package:nutrichild/ui/Profile/EditProfilePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../bloc/auth/auth_event.dart';
+import 'SwitchChildPage.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
@@ -328,7 +329,12 @@ class Profilepage extends StatelessWidget {
                       InkWell(
                         onTap: () {
                           // TODO: Implementasi navigasi ke halaman switch child
-                          Navigator.pushNamed(context, '/switch-child');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SwitchChildPage(),
+                            ),
+                          );
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
