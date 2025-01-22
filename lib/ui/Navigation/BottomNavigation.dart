@@ -14,7 +14,6 @@ class Bottomnavigation extends StatefulWidget {
 }
 
 class _BottomnavigationState extends State<Bottomnavigation> {
-  @override
   int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {

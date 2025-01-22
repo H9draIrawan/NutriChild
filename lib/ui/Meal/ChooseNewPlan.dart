@@ -9,7 +9,10 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../bloc/food/food_bloc.dart';
 import '../../bloc/food/food_event.dart';
+import '../../bloc/child/child_bloc.dart';
+import '../../bloc/child/child_state.dart';
 import 'SearchMealCustom.dart';
+import '../../ui/Navigation/Bottomnavigation.dart';
 
 class ChooseNewPlan extends StatefulWidget {
   const ChooseNewPlan({super.key});
@@ -111,6 +114,37 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
     });
   }
 
+  Future<void> _clearSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Clear breakfast data
+    await prefs.remove('breakfast_name');
+    await prefs.remove('breakfast_calories');
+    await prefs.remove('breakfast_protein');
+    await prefs.remove('breakfast_carbs');
+    await prefs.remove('breakfast_fat');
+    await prefs.remove('breakfast_image');
+    await prefs.remove('breakfast_amount');
+
+    // Clear lunch data
+    await prefs.remove('lunch_name');
+    await prefs.remove('lunch_calories');
+    await prefs.remove('lunch_protein');
+    await prefs.remove('lunch_carbs');
+    await prefs.remove('lunch_fat');
+    await prefs.remove('lunch_image');
+    await prefs.remove('lunch_amount');
+
+    // Clear dinner data
+    await prefs.remove('dinner_name');
+    await prefs.remove('dinner_calories');
+    await prefs.remove('dinner_protein');
+    await prefs.remove('dinner_carbs');
+    await prefs.remove('dinner_fat');
+    await prefs.remove('dinner_image');
+    await prefs.remove('dinner_amount');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,12 +152,13 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () async {
+            await _clearSharedPreferences();
+            Navigator.popUntil(context, (route) {
+              return route.isFirst || route.settings.name == '/';
+            });
+          },
         ),
-        title: const Text('Custom Meal'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -175,70 +210,49 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                 final dateStr =
                     "${_selectedDay!.year}-${_selectedDay!.month.toString().padLeft(2, '0')}-${_selectedDay!.day.toString().padLeft(2, '0')}";
 
-                // Dapatkan FoodBloc dari context
+                final childBloc =
+                    BlocProvider.of<ChildBloc>(context).state as LoadChildState;
                 final foodBloc = BlocProvider.of<FoodBloc>(context);
 
-                // Hapus meal yang ada untuk tanggal tersebut
-                await mealSqflite.deleteMealsByDate('default', dateStr);
+                // Tunggu sampai data lama terhapus
+                final meals = await mealSqflite.getMealsByDate(
+                    childBloc.child.id, dateStr);
+                for (var meal in meals) {
+                  await foodSqflite.deleteFoodById(meal.foodId);
+                }
+                await mealSqflite.deleteMealsByDate(
+                    childBloc.child.id, dateStr);
 
-                // Simpan data breakfast jika ada
+                // Simpan data baru secara berurutan
                 if (breakfastData['name']?.isNotEmpty == true) {
-                  foodBloc.add(SaveFoodEvent(
-                      childId: 'default',
-                      foodName: breakfastData['name']!,
-                      calories: double.parse(breakfastData['calories'] ?? '0'),
-                      protein: double.parse(breakfastData['protein'] ?? '0'),
-                      carbs: double.parse(breakfastData['carbs'] ?? '0'),
-                      fat: double.parse(breakfastData['fat'] ?? '0'),
-                      imageUrl: breakfastData['image'] ?? '',
-                      mealTime: 'Breakfast',
-                      qty: mealAmounts['breakfast'] ?? 1,
-                      dateTime: _selectedDay!));
+                  await _saveMeal(
+                      foodBloc, childBloc, breakfastData, 'Breakfast');
                 }
-
-                // Simpan data lunch jika ada
                 if (lunchData['name']?.isNotEmpty == true) {
-                  foodBloc.add(SaveFoodEvent(
-                      childId: 'default',
-                      foodName: lunchData['name']!,
-                      calories: double.parse(lunchData['calories'] ?? '0'),
-                      protein: double.parse(lunchData['protein'] ?? '0'),
-                      carbs: double.parse(lunchData['carbs'] ?? '0'),
-                      fat: double.parse(lunchData['fat'] ?? '0'),
-                      imageUrl: lunchData['image'] ?? '',
-                      mealTime: 'Lunch',
-                      qty: mealAmounts['lunch'] ?? 1,
-                      dateTime: _selectedDay!));
+                  await _saveMeal(foodBloc, childBloc, lunchData, 'Lunch');
                 }
-
-                // Simpan data dinner jika ada
                 if (dinnerData['name']?.isNotEmpty == true) {
-                  foodBloc.add(SaveFoodEvent(
-                      childId: 'default',
-                      foodName: dinnerData['name']!,
-                      calories: double.parse(dinnerData['calories'] ?? '0'),
-                      protein: double.parse(dinnerData['protein'] ?? '0'),
-                      carbs: double.parse(dinnerData['carbs'] ?? '0'),
-                      fat: double.parse(dinnerData['fat'] ?? '0'),
-                      imageUrl: dinnerData['image'] ?? '',
-                      mealTime: 'Dinner',
-                      qty: mealAmounts['dinner'] ?? 1,
-                      dateTime: _selectedDay!));
+                  await _saveMeal(foodBloc, childBloc, dinnerData, 'Dinner');
                 }
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Rencana makan berhasil disimpan!')),
-                );
-                Navigator.pop(context);
+                // Tampilkan pesan sukses setelah semua operasi selesai
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Meal plan berhasil disimpan!')));
+
+                Navigator.popUntil(context, (route) {
+                  return route.isFirst || route.settings.name == '/';
+                });
               }
             } catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error menyimpan rencana makan: $e')),
-              );
+                  SnackBar(content: Text('Error menyimpan rencana makan: $e')));
             }
           },
-          child: const Text('Simpan Perubahan'),
+          child: const Text('Save',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16)),
         ),
       ),
     );
@@ -372,6 +386,41 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                 ],
               ),
               SizedBox(height: 16),
+              // Kalori di bawah gambar
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.orange[100]!,
+                      Colors.orange[50]!,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange[200]!),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.local_fire_department,
+                      color: Colors.orange[700],
+                      size: 28,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      '${savedData['calories']} kcal',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.orange[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+              // Nutrisi lainnya
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -381,12 +430,6 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildNutrientInfo(
-                      icon: Icons.local_fire_department,
-                      value: '${savedData['calories']}',
-                      unit: 'kcal',
-                      color: Colors.orange,
-                    ),
                     _buildNutrientInfo(
                       icon: Icons.egg_outlined,
                       value: '${savedData['protein']}',
@@ -411,21 +454,38 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
               if (amount != null && amount > 0) ...[
                 SizedBox(height: 12),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.red[50],
-                    borderRadius: BorderRadius.circular(6),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.red[400]!,
+                        Colors.red[300]!,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red[200]!.withOpacity(0.5),
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.restaurant, size: 16, color: Colors.red[800]),
-                      SizedBox(width: 4),
+                      Icon(
+                        Icons.restaurant,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 6),
                       Text(
                         'Portion: $amount',
                         style: TextStyle(
-                          color: Colors.red[800],
-                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
                         ),
                       ),
                     ],
@@ -440,6 +500,33 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
 
     // Tampilkan card kosong jika tidak ada data
     if (meal == null) {
+      // Tentukan warna berdasarkan tipe makanan
+      Color backgroundColor;
+      Color iconColor;
+      Color textColor;
+
+      switch (type) {
+        case 'Breakfast':
+          backgroundColor = Colors.orange[50]!;
+          iconColor = Colors.orange[800]!;
+          textColor = Colors.orange[800]!;
+          break;
+        case 'Lunch':
+          backgroundColor = Colors.blue[50]!;
+          iconColor = Colors.blue[800]!;
+          textColor = Colors.blue[800]!;
+          break;
+        case 'Dinner':
+          backgroundColor = Colors.purple[50]!;
+          iconColor = Colors.purple[800]!;
+          textColor = Colors.purple[800]!;
+          break;
+        default:
+          backgroundColor = Colors.red[50]!;
+          iconColor = Colors.red[800]!;
+          textColor = Colors.red[800]!;
+      }
+
       return Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -488,12 +575,12 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: Colors.red[50],
+                    color: backgroundColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
                     Icons.add,
-                    color: Colors.red[800],
+                    color: iconColor,
                     size: 40,
                   ),
                 ),
@@ -507,7 +594,7 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Colors.red[800],
+                          color: textColor,
                         ),
                       ),
                       SizedBox(height: 4),
@@ -773,22 +860,13 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
       margin: EdgeInsets.symmetric(horizontal: 16),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade200),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[500]!),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Ringkasan Nutrisi Harian',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.red[800],
-            ),
-          ),
-          SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -850,5 +928,29 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
         ),
       ],
     );
+  }
+
+  Future<void> _saveMeal(FoodBloc foodBloc, LoadChildState childBloc,
+      Map<String, String> mealData, String mealTime) async {
+    try {
+      final calories = double.tryParse(mealData['calories'] ?? '0') ?? 0.0;
+      final protein = double.tryParse(mealData['protein'] ?? '0') ?? 0.0;
+      final carbs = double.tryParse(mealData['carbs'] ?? '0') ?? 0.0;
+      final fat = double.tryParse(mealData['fat'] ?? '0') ?? 0.0;
+
+      foodBloc.add(SaveFoodEvent(
+          childId: childBloc.child.id,
+          foodName: mealData['name']!,
+          calories: calories,
+          protein: protein,
+          carbs: carbs,
+          fat: fat,
+          imageUrl: mealData['image'] ?? '',
+          mealTime: mealTime,
+          qty: mealAmounts[mealTime.toLowerCase()] ?? 1,
+          dateTime: _selectedDay!));
+    } catch (e) {
+      throw Exception('Error saving $mealTime: $e');
+    }
   }
 }

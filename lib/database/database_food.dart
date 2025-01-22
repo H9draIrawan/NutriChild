@@ -94,6 +94,15 @@ class FoodSqflite {
     );
   }
 
+  Future<void> deleteFoodById(String id) async {
+    final db = await database;
+    await db.delete(
+      _foodTable,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> deleteFoodByDate(String date) async {
     final db = await database;
     await db.delete(

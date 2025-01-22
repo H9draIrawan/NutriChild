@@ -14,20 +14,33 @@ class SearchMealCustom extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: TextField(
-          decoration: InputDecoration(
-            hintText: "Find recipes",
-            prefixIcon: const Icon(Icons.search),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+        title: Container(
+          height: 40,
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: "Find recipes",
+              hintStyle: TextStyle(color: Colors.grey),
+              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade50,
             ),
+            style: TextStyle(color: Colors.black),
           ),
-          style: TextStyle(color: Colors.white),
         ),
       ),
       body: ListView.builder(
@@ -91,17 +104,18 @@ class MealCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
                   imageUrl,
-                  width: 100,
-                  height: 100,
+                  width: 80,
+                  height: 80,
                   fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,6 +123,8 @@ class MealCard extends StatelessWidget {
                     Text(
                       title,
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 8),
                     Container(
@@ -120,44 +136,46 @@ class MealCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.local_fire_department, 
-                              size: 16, 
-                              color: Colors.orange),
+                          Icon(Icons.local_fire_department, size: 14, color: Colors.orange),
                           SizedBox(width: 4),
                           Text(
                             '$calories kcal',
                             style: TextStyle(
                               color: Colors.orange.shade700,
                               fontWeight: FontWeight.bold,
+                              fontSize: 12,
                             ),
                           ),
                         ],
                       ),
                     ),
                     SizedBox(height: 8),
-                    Row(
-                      children: [
-                        _NutrientInfo(
-                          label: 'Protein',
-                          value: protein,
-                          color: Colors.red.shade100,
-                          textColor: Colors.red.shade700,
-                        ),
-                        SizedBox(width: 8),
-                        _NutrientInfo(
-                          label: 'Carbs',
-                          value: carbs,
-                          color: Colors.blue.shade100,
-                          textColor: Colors.blue.shade700,
-                        ),
-                        SizedBox(width: 8),
-                        _NutrientInfo(
-                          label: 'Fat',
-                          value: fat,
-                          color: Colors.green.shade100,
-                          textColor: Colors.green.shade700,
-                        ),
-                      ],
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _NutrientInfo(
+                            label: 'Protein',
+                            value: protein,
+                            color: Colors.red.shade100,
+                            textColor: Colors.red.shade700,
+                          ),
+                          SizedBox(width: 8),
+                          _NutrientInfo(
+                            label: 'Carbs',
+                            value: carbs,
+                            color: Colors.blue.shade100,
+                            textColor: Colors.blue.shade700,
+                          ),
+                          SizedBox(width: 8),
+                          _NutrientInfo(
+                            label: 'Fat',
+                            value: fat,
+                            color: Colors.green.shade100,
+                            textColor: Colors.green.shade700,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -190,7 +208,7 @@ class _NutrientInfo extends StatelessWidget {
       case 'carbs':
         return Icons.breakfast_dining;
       case 'fat':
-        return Icons.water_drop_outlined;
+        return Icons.opacity;
       default:
         return Icons.circle;
     }
@@ -199,37 +217,51 @@ class _NutrientInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: textColor.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _getIcon(),
-                size: 14,
-                color: textColor,
-              ),
-              SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: textColor,
-                ),
-              ),
-            ],
+          Icon(
+            _getIcon(),
+            size: 24,
+            color: textColor,
           ),
+          SizedBox(height: 4),
           Text(
-            '${value}g',
+            label,
             style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+              fontSize: 13,
               color: textColor,
+            ),
+          ),
+          SizedBox(height: 4),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                TextSpan(
+                  text: 'g',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: textColor,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

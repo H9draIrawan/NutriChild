@@ -39,7 +39,7 @@ class MealSqflite {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       _mealTable,
-      where: 'child_id = ? AND date(date_time) = ?',
+      where: 'child_id = ? AND date_time = ?',
       whereArgs: [childId, date],
     );
     return List.generate(maps.length, (i) {
@@ -51,7 +51,7 @@ class MealSqflite {
     final db = await database;
     await db.delete(
       _mealTable,
-      where: 'child_id = ? AND date(date_time) = ?',
+      where: 'child_id = ? AND date_time = ?',
       whereArgs: [childId, date],
     );
   }

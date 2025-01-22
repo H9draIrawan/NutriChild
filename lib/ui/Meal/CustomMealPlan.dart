@@ -30,231 +30,281 @@ class CustomMealPlan extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextEditingController mealController = TextEditingController();
 
-    return MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            // Background image
-            SizedBox(
-              height: 250,
-              width: double.infinity,
-              child: Image.asset(
-                'assets/images/pic1.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 200), // Push card below the image
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 4,
-                      color: Colors.white,
-                      shadowColor: Colors.black.withOpacity(0.2),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'My mealplan',
-                                  style: TextStyle(
-                                    fontFamily: 'WorkSans',
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.edit,
-                                    color: Colors.red[800],
-                                  ),
-                                )
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Description',
-                              style: TextStyle(
-                                fontFamily: 'WorkSans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Thin and lean. Plan for a "skinny guy" who have a hard time gaining weight.',
-                              style: TextStyle(
-                                fontFamily: 'WorkSans',
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Amount of meals',
-                              style: TextStyle(
-                                fontFamily: 'WorkSans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: mealController,
-                              decoration: InputDecoration(
-                                hintText: 'Fill amount of meals',
-                                hintStyle: const TextStyle(
-                                    fontFamily: 'WorkSans',
-                                    fontSize: 16,
-                                    color: Colors.grey),
-                                prefixIcon: const Icon(Icons.search),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 32),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[800],
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () async {
-                          FoodBloc foodBloc =
-                              BlocProvider.of<FoodBloc>(context);
-                          AuthBloc authBloc =
-                              BlocProvider.of<AuthBloc>(context);
-
-                          if (authBloc.state is LoginAuthState) {
-                            final prefs = await SharedPreferences.getInstance();
-
-                            if (foodBloc.state is InitialBreakfastState) {
-                              await prefs.setString('breakfast_name', name);
-                              await prefs.setString(
-                                  'breakfast_calories', calories);
-                              await prefs.setString(
-                                  'breakfast_protein', protein);
-                              await prefs.setString(
-                                  'breakfast_carbs', carbs);
-                              await prefs.setString(
-                                  'breakfast_fat', fat);
-                              await prefs.setString(
-                                  'breakfast_image', imageUrl);
-                              await prefs.setInt('breakfast_amount',
-                                  int.parse(mealController.text.trim()));
-                            } else if (foodBloc.state is InitialLunchState) {
-                              await prefs.setString('lunch_name', name);
-                              await prefs.setString('lunch_calories', calories);
-                              await prefs.setString('lunch_protein', protein);
-                              await prefs.setString('lunch_carbs', carbs);
-                              await prefs.setString('lunch_fat', fat);
-                              await prefs.setString('lunch_image', imageUrl);
-                              await prefs.setInt('lunch_amount',
-                                  int.parse(mealController.text.trim()));
-                            } else if (foodBloc.state is InitialDinnerState) {
-                              await prefs.setString('dinner_name', name);
-                              await prefs.setString(
-                                  'dinner_calories', calories);
-                              await prefs.setString(
-                                  'dinner_protein', protein);
-                              await prefs.setString('dinner_carbs', carbs);
-                              await prefs.setString('dinner_fat', fat);
-                              await prefs.setString(
-                                  'dinner_image', imageUrl);
-                              await prefs.setInt('dinner_amount',
-                                  int.parse(mealController.text.trim()));
-                            }
-                          }
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ChooseNewPlan()),
-                          );
-                        },
-                        child: const Text(
-                          'CONTINUE',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 30,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
       ),
-    );
-  }
-
-  Widget _buildMealCard(String name, String calories, String imageUrl) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        elevation: 4,
-        color: Colors.white,
-        shadowColor: Colors.black.withOpacity(0.2),
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontFamily: 'WorkSans',
-                  fontSize: 24,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  imageUrl,
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.local_fire_department,
+                                  color: Colors.orange.shade700,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Calories',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.orange.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$calories kcal',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(child: _buildNutrientInfo('Protein', protein, 'g')),
+                          Expanded(child: _buildNutrientInfo('Carbs', carbs, 'g')),
+                          Expanded(child: _buildNutrientInfo('Fat', fat, 'g')),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Amount of meals',
+                style: TextStyle(
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                'Calories: $calories',
-                style: const TextStyle(
-                  fontFamily: 'WorkSans',
-                  fontSize: 16,
-                  color: Colors.black54,
+              TextField(
+                controller: mealController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter number of meals',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Image.network(imageUrl),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red[800],
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () async {
+                    FoodBloc foodBloc =
+                        BlocProvider.of<FoodBloc>(context);
+                    AuthBloc authBloc =
+                        BlocProvider.of<AuthBloc>(context);
+
+                    if (authBloc.state is LoginAuthState) {
+                      final prefs =
+                          await SharedPreferences.getInstance();
+
+                      if (foodBloc.state is InitialBreakfastState) {
+                        await prefs.setString('breakfast_name', name);
+                        await prefs.setString(
+                            'breakfast_calories', calories);
+                        await prefs.setString(
+                            'breakfast_protein', protein);
+                        await prefs.setString('breakfast_carbs', carbs);
+                        await prefs.setString('breakfast_fat', fat);
+                        await prefs.setString(
+                            'breakfast_image', imageUrl);
+                        await prefs.setInt('breakfast_amount',
+                            int.parse(mealController.text.trim()));
+                      } else if (foodBloc.state is InitialLunchState) {
+                        await prefs.setString('lunch_name', name);
+                        await prefs.setString(
+                            'lunch_calories', calories);
+                        await prefs.setString('lunch_protein', protein);
+                        await prefs.setString('lunch_carbs', carbs);
+                        await prefs.setString('lunch_fat', fat);
+                        await prefs.setString('lunch_image', imageUrl);
+                        await prefs.setInt('lunch_amount',
+                            int.parse(mealController.text.trim()));
+                      } else if (foodBloc.state is InitialDinnerState) {
+                        await prefs.setString('dinner_name', name);
+                        await prefs.setString(
+                            'dinner_calories', calories);
+                        await prefs.setString(
+                            'dinner_protein', protein);
+                        await prefs.setString('dinner_carbs', carbs);
+                        await prefs.setString('dinner_fat', fat);
+                        await prefs.setString('dinner_image', imageUrl);
+                        await prefs.setInt('dinner_amount',
+                            int.parse(mealController.text.trim()));
+                      }
+                    }
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ChooseNewPlan()),
+                    );
+                  },
+                  child: const Text(
+                    'CONTINUE',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildNutrientInfo(String label, String value, String unit) {
+    Color backgroundColor;
+    Color textColor;
+    IconData icon;
+
+    switch (label.toLowerCase()) {
+      case 'protein':
+        backgroundColor = Colors.red.shade100;
+        textColor = Colors.red.shade700;
+        icon = Icons.egg_outlined;
+        break;
+      case 'carbs':
+        backgroundColor = Colors.blue.shade100;
+        textColor = Colors.blue.shade700;
+        icon = Icons.breakfast_dining;
+        break;
+      case 'fat':
+        backgroundColor = Colors.green.shade100;
+        textColor = Colors.green.shade700;
+        icon = Icons.opacity;
+        break;
+      default:
+        backgroundColor = Colors.orange.shade50;
+        textColor = Colors.orange.shade700;
+        icon = Icons.local_fire_department;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: textColor.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: textColor,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: textColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                TextSpan(
+                  text: unit,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: textColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
