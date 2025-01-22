@@ -60,7 +60,8 @@ class _MealpageState extends State<Mealpage> {
                   },
                   borderRadius: BorderRadius.circular(16),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -86,7 +87,8 @@ class _MealpageState extends State<Mealpage> {
                                   const SizedBox(width: 16),
                                   const Flexible(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Goal',
@@ -104,7 +106,8 @@ class _MealpageState extends State<Mealpage> {
                             ),
                             const SizedBox(width: 12),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
                                 color: Colors.orange.shade50,
                                 borderRadius: BorderRadius.circular(12),
@@ -117,7 +120,7 @@ class _MealpageState extends State<Mealpage> {
                                     builder: (context, state) {
                                       if (state is LoadChildState) {
                                         return Text(
-                                          state.child.goal ?? 'Not set',
+                                          state.child.goal,
                                           style: TextStyle(
                                             fontFamily: 'WorkSans',
                                             fontSize: 14,
