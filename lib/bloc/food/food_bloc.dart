@@ -38,8 +38,6 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
         imageUrl: event.imageUrl,
       ));
 
-      print("Food Inserted");
-
       await mealSqflite.insertMeal(
         Meal(
           id: mealId,
@@ -51,8 +49,15 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
           qty: event.qty,
         ),
       );
+    });
 
-      print("Meal Inserted");
+    on<DeleteFoodEvent>((event, emit) async {
+      final meals =
+          await mealSqflite.getMealsByDate(event.childId, event.dateTime);
+      for (var meal in meals) {
+        await foodSqflite.deleteFoodById(meal.foodId);
+      }
+      await mealSqflite.deleteMealsByDate(event.childId, event.dateTime);
     });
   }
 }

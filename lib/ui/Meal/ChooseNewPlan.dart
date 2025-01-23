@@ -42,31 +42,7 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
   void initState() {
     super.initState();
     _selectedDay = DateTime.now();
-    _loadMealsForSelectedDay();
     _loadSavedMeals(); // Tambahkan ini
-  }
-
-  Future<void> _loadMealsForSelectedDay() async {
-    if (_selectedDay == null) return;
-
-    final dateStr =
-        "${_selectedDay!.year}-${_selectedDay!.month.toString().padLeft(2, '0')}-${_selectedDay!.day.toString().padLeft(2, '0')}";
-    final meals = await mealSqflite.getMealsByDate('default', dateStr);
-
-    setState(() {
-      selectedBreakfast =
-          meals.where((meal) => meal.mealTime == 'Breakfast').isEmpty
-              ? null
-              : meals.firstWhere((meal) => meal.mealTime == 'Breakfast');
-
-      selectedLunch = meals.where((meal) => meal.mealTime == 'Lunch').isEmpty
-          ? null
-          : meals.firstWhere((meal) => meal.mealTime == 'Lunch');
-
-      selectedDinner = meals.where((meal) => meal.mealTime == 'Dinner').isEmpty
-          ? null
-          : meals.firstWhere((meal) => meal.mealTime == 'Dinner');
-    });
   }
 
   // Tambahkan fungsi untuk memuat data dari SharedPreferences
@@ -173,7 +149,6 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                     _selectedDay = selectedDay;
                     _focusedDay = focusedDay;
                   });
-                  _loadMealsForSelectedDay();
                 },
                 onPageChanged: (focusedDay) {
                   _focusedDay = focusedDay;
@@ -213,14 +188,7 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                     BlocProvider.of<ChildBloc>(context).state as LoadChildState;
                 final foodBloc = BlocProvider.of<FoodBloc>(context);
 
-                // Tunggu sampai data lama terhapus
-                final meals = await mealSqflite.getMealsByDate(
-                    childBloc.child.id, dateStr);
-                for (var meal in meals) {
-                  await foodSqflite.deleteFoodById(meal.foodId);
-                }
-                await mealSqflite.deleteMealsByDate(
-                    childBloc.child.id, dateStr);
+                foodBloc.add(DeleteFoodEvent(childBloc.child.id, dateStr));
 
                 // Simpan data baru secara berurutan
                 if (breakfastData['name']?.isNotEmpty == true) {

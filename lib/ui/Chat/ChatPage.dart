@@ -13,7 +13,6 @@ class Chatpage extends StatefulWidget {
 class _ChatpageState extends State<Chatpage> {
   final TextEditingController _messageController = TextEditingController();
   final List<ChatMessage> _messages = [];
-  bool _isLoading = false;
   String _currentDisplayText = "";
   Timer? _typeTimer;
 
@@ -54,9 +53,6 @@ class _ChatpageState extends State<Chatpage> {
           );
         });
         currentIndex++;
-      } else {
-        timer.cancel();
-        _isLoading = false;
       }
     });
   }
@@ -72,7 +68,6 @@ class _ChatpageState extends State<Chatpage> {
           timestamp: DateTime.now(),
         ),
       );
-      _isLoading = true;
     });
 
     _messageController.clear();
@@ -138,7 +133,6 @@ class _ChatpageState extends State<Chatpage> {
             timestamp: DateTime.now(),
           ),
         );
-        _isLoading = false;
       });
     }
   }

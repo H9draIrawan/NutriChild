@@ -8,6 +8,11 @@ import '../../bloc/child/child_bloc.dart';
 import '../../bloc/child/child_event.dart';
 import '../../bloc/child/child_state.dart';
 import '../../model/child.dart';
+import '../../model/patient.dart';
+
+import '../../database/database_patient.dart';
+import '../../database/database_allergy.dart';
+import 'AddChildPage.dart';
 
 class SwitchChildPage extends StatefulWidget {
   const SwitchChildPage({super.key});
@@ -20,6 +25,11 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
   Child? _selectedChild;
   AuthBloc? authBloc;
   ChildBloc? childBloc;
+
+  List<Patient> _allergies = [];
+
+  final PatientSqflite patientSqflite = PatientSqflite();
+  final AllergySqflite allergySqflite = AllergySqflite();
 
   @override
   void initState() {
@@ -47,6 +57,139 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
     return gender.toLowerCase() == 'male'
         ? 'assets/images/male.png'
         : 'assets/images/female.png';
+  }
+
+  Widget _buildAllergiesList(String childId, Color genderColor) {
+    return FutureBuilder<List<Patient>>(
+      future: patientSqflite.getPatientByChildId(childId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: genderColor.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: genderColor.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: genderColor.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.no_food_outlined,
+                    size: 22,
+                    color: genderColor,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Don\'t have any allergies',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return FutureBuilder<List<Widget>>(
+          future: Future.wait(
+            snapshot.data!.map((patient) async {
+              final allergy =
+                  await AllergySqflite().getAllergyById(patient.allergyId);
+              if (allergy == null) return Container();
+
+              return Container(
+                margin: const EdgeInsets.only(right: 8),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: genderColor.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: genderColor.withOpacity(0.1),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: genderColor.withOpacity(0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.warning_amber_rounded,
+                            size: 16,
+                            color: genderColor,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          allergy.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: genderColor.withOpacity(0.8),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: snapshot.data!
+                    .where((widget) => widget is Container)
+                    .toList(),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildSelectedChild(Child child) {
@@ -78,7 +221,8 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                   genderColor.withOpacity(0.2),
                 ],
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               children: [
@@ -167,6 +311,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
           Container(
             padding: const EdgeInsets.all(20),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildInfoRow(
                   'Umur',
@@ -195,6 +340,17 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                   Icons.flag_outlined,
                   genderColor,
                 ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Allergies',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildAllergiesList(child.id, genderColor),
               ],
             ),
           ),
@@ -392,25 +548,32 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
               Navigator.pop(context);
             },
           ),
-          title: const Text(
-            'Pilih Anak',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+                icon: const Icon(Icons.person_add),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AddChildPage()),
+                  );
+                },
+                tooltip: 'Tambah Anak',
+              ),
             ),
-          ),
+          ],
         ),
         body: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {
             if (authState is! LoginAuthState) {
-              return const Center(child: Text('Silakan login terlebih dahulu'));
+              return const Center(child: Text('Please login first'));
             }
 
             return BlocConsumer<ChildBloc, ChildState>(
               listener: (context, state) {
-                if (state is LoadChildState) {
-                }
+                if (state is LoadChildState) {}
               },
               builder: (context, childState) {
                 if (childState is LoadingChildState) {
@@ -429,7 +592,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                         const Padding(
                           padding: EdgeInsets.all(16.0),
                           child: Text(
-                            'Anak yang dipilih saat ini',
+                            'Current child',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -441,7 +604,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                         const Padding(
                           padding: EdgeInsets.all(16.0),
                           child: Text(
-                            'Pilih anak lain',
+                            'Select other child',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -450,18 +613,53 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                           ),
                         ),
                         FutureBuilder<List<Child>>(
-                          future: childBloc?.childSqflite.getChildByUserId(authState.id),
+                          future: childBloc?.childSqflite
+                              .getChildByUserId(authState.id),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(child: CircularProgressIndicator());
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             }
 
                             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                              return const Center(child: Text('Tidak ada anak lain'));
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text('Belum ada anak'),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const AddChildPage(),
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(Icons.person_add),
+                                      label: const Text('Tambah Anak'),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 24,
+                                          vertical: 12,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
                             }
 
                             final otherChildren = snapshot.data!
-                                .where((child) => child.id != childState.child.id)
+                                .where(
+                                    (child) => child.id != childState.child.id)
                                 .toList();
 
                             if (otherChildren.isEmpty) {
@@ -472,7 +670,8 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                             }
 
                             return ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: otherChildren.length,
@@ -480,11 +679,14 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                                 return _buildChildItem(
                                   otherChildren[index],
                                   (childId) async {
-                                    final prefs = await SharedPreferences.getInstance();
-                                    await prefs.setString('selectedChildId', childId);
-                                    
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setString(
+                                        'selectedChildId', childId);
+
                                     if (!mounted) return;
-                                    childBloc?.add(LoadChildEvent(childId: childId));
+                                    childBloc
+                                        ?.add(LoadChildEvent(childId: childId));
                                   },
                                 );
                               },
@@ -502,13 +704,16 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                                 end: Alignment.centerRight,
                                 colors: [
                                   _getGenderColor(childState.child.gender),
-                                  _getGenderColor(childState.child.gender).withOpacity(0.8),
+                                  _getGenderColor(childState.child.gender)
+                                      .withOpacity(0.8),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _getGenderColor(childState.child.gender).withOpacity(0.3),
+                                  color:
+                                      _getGenderColor(childState.child.gender)
+                                          .withOpacity(0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -516,9 +721,11 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                             ),
                             child: ElevatedButton(
                               onPressed: () async {
-                                final prefs = await SharedPreferences.getInstance();
-                                await prefs.setString('selectedChildId', childState.child.id);
-                                
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                    'selectedChildId', childState.child.id);
+
                                 if (!mounted) return;
                                 _selectedChild = childState.child;
                                 Navigator.pop(context);
@@ -526,7 +733,8 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -535,7 +743,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'Confirm Selection: ${childState.child.name}',
+                                    childState.child.name,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
