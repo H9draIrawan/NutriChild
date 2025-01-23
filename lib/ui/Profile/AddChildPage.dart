@@ -523,7 +523,7 @@ class _AddChildPageState extends State<AddChildPage> {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: Container(
+                                        child: SizedBox(
                                           height: 80,
                                           child: _buildFormField(
                                             controller: _weightController,
@@ -549,7 +549,7 @@ class _AddChildPageState extends State<AddChildPage> {
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(
-                                        child: Container(
+                                        child: SizedBox(
                                           height: 80,
                                           child: _buildFormField(
                                             controller: _heightController,

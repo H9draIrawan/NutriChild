@@ -45,7 +45,7 @@ class _WelcomepageState extends State<Welcomepage> {
               // First Page
               OnboardingPage(
                 title: 'Delicious recipies and\npersonalized mealplans',
-                image: 'assets/images/Logo.png',
+                image: 'assets/images/logo.png',
                 showButton: true,
                 buttonText: 'CONTINUE',
                 centerContent: true,
@@ -393,15 +393,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     onPressed: () {
                       if (widget.showChildForm) {
                         if (formKey.currentState?.validate() ?? false) {
+                          if (selectedGender == null) {
+                            return;
+                          }
+
                           // Simpan data anak
                           OnboardingData.childName = nameController.text;
-                          OnboardingData.childAge =
-                              int.parse(ageController.text);
+                          OnboardingData.childAge = int.parse(ageController.text);
                           OnboardingData.childGender = selectedGender;
-                          OnboardingData.childWeight =
-                              double.parse(weightController.text);
-                          OnboardingData.childHeight =
-                              double.parse(heightController.text);
+                          OnboardingData.childWeight = double.parse(weightController.text);
+                          OnboardingData.childHeight = double.parse(heightController.text);
                           OnboardingData.saveToPrefs().then((_) {
                             widget.onButtonPressed?.call();
                           });
@@ -742,8 +743,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 color: Colors.red,
                 onTap: () {
                   setState(() {
-                    selectedGender =
-                        selectedGender == 'Female' ? null : 'Female';
+                    selectedGender = selectedGender == 'Female' ? null : 'Female';
                   });
                 },
               ),

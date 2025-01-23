@@ -143,7 +143,7 @@ class _LoginpageState extends State<Loginpage> {
             listener: (context, state) {
               if (state is LoadChildState) {
                 Navigator.pushReplacementNamed(context, '/');
-              } else if (state is ErrorChildState) {
+              } else {
                 Navigator.pushReplacementNamed(context, '/welcome');
               }
             },

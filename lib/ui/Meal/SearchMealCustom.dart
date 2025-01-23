@@ -20,7 +20,7 @@ class SearchMealCustom extends StatelessWidget {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Container(
+        title: SizedBox(
           height: 40,
           child: TextField(
             decoration: InputDecoration(

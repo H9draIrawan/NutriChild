@@ -43,9 +43,8 @@ class ChildBloc extends Bloc<ChildEvent, ChildState> {
     });
 
     on<LoadChildEvent>((event, emit) async {
+      emit(LoadingChildState());
       try {
-        emit(LoadingChildState());
-
         if (event.childId != null) {
           final child = await childSqflite.getChildById(event.childId!);
           if (child != null) {

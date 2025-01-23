@@ -181,7 +181,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: snapshot.data!
-                    .where((widget) => widget is Container)
+                    .whereType<Container>()
                     .toList(),
               ),
             );

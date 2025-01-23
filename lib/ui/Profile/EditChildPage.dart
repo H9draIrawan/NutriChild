@@ -9,7 +9,7 @@ import '../../database/database_allergy.dart';
 class EditChildPage extends StatefulWidget {
   final Child child;
 
-  const EditChildPage({Key? key, required this.child}) : super(key: key);
+  const EditChildPage({super.key, required this.child});
 
   @override
   State<EditChildPage> createState() => _EditChildPageState();
