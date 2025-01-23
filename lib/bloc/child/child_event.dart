@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-
+import '../../model/child.dart';
 abstract class ChildEvent extends Equatable {
   const ChildEvent();
 }
@@ -50,20 +50,20 @@ class LoadChildEvent extends ChildEvent {
   List<Object?> get props => [childId, userId];
 }
 
-class GetAllChildrenEvent extends ChildEvent {
-  final String userId;
-  
-  const GetAllChildrenEvent(this.userId);
-  
+class UpdateChildEvent extends ChildEvent {
+  final Child child;
+
+  const UpdateChildEvent(this.child);
+
   @override
-  List<Object> get props => [userId];
+  List<Object> get props => [child];
 }
 
-class SelectChildEvent extends ChildEvent {
+class DeleteAllergyEvent extends ChildEvent {
   final String childId;
-  
-  const SelectChildEvent(this.childId);
-  
+
+  const DeleteAllergyEvent(this.childId);
+
   @override
   List<Object> get props => [childId];
 }

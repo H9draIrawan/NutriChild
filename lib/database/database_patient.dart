@@ -42,6 +42,11 @@ class PatientSqflite {
       await db.delete(_patientTable, where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<void> deletePatientByChildId(String childId) async {
+    final Database db = await database;
+    await db.delete(_patientTable, where: 'childId = ?', whereArgs: [childId]);
+  }
+
   Future<void> updatePatient(Patient patient) async {
     final Database db = await database;
     await db.update(_patientTable, patient.toMap(), where: 'id = ?', whereArgs: [patient.id]);

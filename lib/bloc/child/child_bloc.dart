@@ -45,7 +45,7 @@ class ChildBloc extends Bloc<ChildEvent, ChildState> {
     on<LoadChildEvent>((event, emit) async {
       try {
         emit(LoadingChildState());
-        
+
         if (event.childId != null) {
           final child = await childSqflite.getChildById(event.childId!);
           if (child != null) {
@@ -60,6 +60,15 @@ class ChildBloc extends Bloc<ChildEvent, ChildState> {
       } catch (e) {
         emit(ErrorChildState(e.toString()));
       }
+    });
+
+    on<UpdateChildEvent>((event, emit) async {
+      await childSqflite.updateChild(event.child);
+      emit(LoadChildState(event.child));
+    });
+
+    on<DeleteAllergyEvent>((event, emit) async {
+      await patientSqflite.deletePatientByChildId(event.childId);
     });
   }
 }

@@ -13,6 +13,7 @@ import '../../model/patient.dart';
 import '../../database/database_patient.dart';
 import '../../database/database_allergy.dart';
 import 'AddChildPage.dart';
+import 'EditChildPage.dart';
 
 class SwitchChildPage extends StatefulWidget {
   const SwitchChildPage({super.key});
@@ -25,8 +26,6 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
   Child? _selectedChild;
   AuthBloc? authBloc;
   ChildBloc? childBloc;
-
-  List<Patient> _allergies = [];
 
   final PatientSqflite patientSqflite = PatientSqflite();
   final AllergySqflite allergySqflite = AllergySqflite();
@@ -304,6 +303,25 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                       ),
                     ],
                   ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.edit,
+                    color: genderColor,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditChildPage(child: child),
+                      ),
+                    ).then((value) {
+                      if (value == true) {
+                        // Refresh data setelah edit
+                        childBloc?.add(LoadChildEvent(childId: child.id));
+                      }
+                    });
+                  },
                 ),
               ],
             ),

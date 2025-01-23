@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nutrichild/bloc/food/food_bloc.dart';
 import '../../bloc/auth/auth_bloc.dart';
 import '../../bloc/auth/auth_state.dart';
 import '../../bloc/child/child_bloc.dart';
 import '../../bloc/child/child_event.dart';
 import '../../model/child.dart';
-import '../../database/database_child.dart';
 
 class AddChildPage extends StatefulWidget {
   const AddChildPage({super.key});
@@ -725,7 +723,17 @@ class _AddChildPageState extends State<AddChildPage> {
                                         goal: _selectedGoal,
                                       );
 
-                                      await ChildSqflite().insertChild(child);
+                                      childBloc.add(SaveChildEvent(
+                                          id: child.id,
+                                          userId: authState.id,
+                                          name: _nameController.text,
+                                          age: int.parse(_ageController.text),
+                                          gender: _selectedGender!,
+                                          weight: double.parse(
+                                              _weightController.text),
+                                          height: double.parse(
+                                              _heightController.text),
+                                          goal: _selectedGoal));
 
                                       // Dapatkan semua alergi yang dipilih
                                       final selectedAllergies = allergies
