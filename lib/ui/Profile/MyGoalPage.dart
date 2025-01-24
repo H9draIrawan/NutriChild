@@ -8,6 +8,57 @@ import '../../database/database_meal.dart';
 
 import '../../model/Meal.dart';
 
+// Tambahkan konstanta untuk style yang sering digunakan
+const _kDefaultPadding = EdgeInsets.all(16.0);
+const _kDefaultBorderRadius = 24.0;
+const _kDefaultIconSize = 20.0;
+const _kDefaultSpacing = 16.0;
+
+// Tambahkan extension untuk memudahkan penggunaan shadow
+extension BoxDecorationX on BoxDecoration {
+  static BoxDecoration get defaultShadow => BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(_kDefaultBorderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      );
+}
+
+// Tambahkan fungsi helper terpisah
+BoxDecoration gradientContainer({
+  required List<Color> colors,
+  double borderRadius = _kDefaultBorderRadius,
+}) =>
+    BoxDecoration(
+      gradient: LinearGradient(
+        colors: colors,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(borderRadius),
+    );
+
+// Tambahkan extension untuk style text yang sering digunakan
+extension TextStyleX on TextStyle {
+  static const defaultTitle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.3,
+    color: Colors.black87,
+  );
+
+  static const smallLabel = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: Colors.black87,
+  );
+}
+
 class MyGoalPage extends StatefulWidget {
   const MyGoalPage({super.key});
 
@@ -19,17 +70,26 @@ class _MyGoalPageState extends State<MyGoalPage> {
   final FoodSqflite _foodDb = FoodSqflite();
   final MealSqflite _mealDb = MealSqflite();
 
+  // Pindahkan fungsi helper ke class terpisah jika digunakan di banyak tempat
+  static const _chartHeight = 200.0;
+  static const _lineChartHeight = 250.0;
+
+  // Sederhanakan fungsi untuk mendapatkan data chart
   Future<Map<String, double>> _getNutritionData(String childId) async {
     final date = DateTime.now();
     final meals = await _mealDb.getMealsByDate(
         childId, "${date.year}/${date.month}/${date.day}");
 
+    return _calculateNutrition(meals);
+  }
+
+  Future<Map<String, double>> _calculateNutrition(List<Meal> meals) async {
     double totalCalories = 0;
     double totalProtein = 0;
     double totalCarbs = 0;
     double totalFat = 0;
 
-    for (Meal meal in meals) {
+    for (var meal in meals) {
       final foods = await _foodDb.getFoodbyId(meal.foodId);
       if (foods.isNotEmpty) {
         final food = foods.first;
@@ -928,19 +988,6 @@ class _MyGoalPageState extends State<MyGoalPage> {
     }
   }
 
-  // Tambahkan method untuk mendapatkan warna BMI
-  Color _getBMIColor(double bmi) {
-    if (bmi < 18.5) {
-      return Colors.blue;
-    } else if (bmi >= 18.5 && bmi < 25) {
-      return Colors.green;
-    } else if (bmi >= 25 && bmi < 30) {
-      return Colors.orange;
-    } else {
-      return Colors.red;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChildBloc, ChildState>(
@@ -1065,79 +1112,6 @@ class _MyGoalPageState extends State<MyGoalPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Column(
                       children: [
-                        _buildSectionContainer(
-                          title: 'Today\'s Nutrition',
-                          icon: Icons.show_chart,
-                          iconColor: Colors.blue,
-                          child: FutureBuilder<Map<String, double>>(
-                            future: _getNutritionData(state.child.id),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return Column(
-                                  children: [
-                                    _buildCaloriesChart(
-                                        snapshot.data!['calories'] ?? 0),
-                                    const SizedBox(height: 16),
-                                    _buildNutritionChart(snapshot.data!),
-                                  ],
-                                );
-                              }
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            },
-                          ),
-                        ),
-                        _buildSectionContainer(
-                          title: 'Calories Progress (7 Days)',
-                          icon: Icons.bar_chart,
-                          iconColor: Colors.orange,
-                          child: FutureBuilder<List<Map<String, dynamic>>>(
-                            future: _getNutritionHistory(state.child.id),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return _buildCaloriesLineChart(snapshot.data!);
-                              }
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            },
-                          ),
-                        ),
-                        _buildSectionContainer(
-                          title: 'Nutrition Progress (7 Days)',
-                          icon: Icons.show_chart,
-                          iconColor: Colors.green,
-                          child: FutureBuilder<List<Map<String, dynamic>>>(
-                            future: _getNutritionHistory(state.child.id),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return Column(
-                                  children: [
-                                    _buildNutritionLineChart(snapshot.data!),
-                                    const SizedBox(height: 16),
-                                    SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          _buildLegendItem(
-                                              'Protein', Colors.red),
-                                          const SizedBox(width: 16),
-                                          _buildLegendItem(
-                                              'Carbs', Colors.blue),
-                                          const SizedBox(width: 16),
-                                          _buildLegendItem('Fat', Colors.green),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            },
-                          ),
-                        ),
                         _buildSectionContainer(
                           title: 'Details',
                           showIcon: false,
@@ -1264,6 +1238,79 @@ class _MyGoalPageState extends State<MyGoalPage> {
                             ],
                           ),
                         ),
+                        _buildSectionContainer(
+                          title: 'Today\'s Nutrition',
+                          icon: Icons.show_chart,
+                          iconColor: Colors.blue,
+                          child: FutureBuilder<Map<String, double>>(
+                            future: _getNutritionData(state.child.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Column(
+                                  children: [
+                                    _buildCaloriesChart(
+                                        snapshot.data!['calories'] ?? 0),
+                                    const SizedBox(height: 16),
+                                    _buildNutritionChart(snapshot.data!),
+                                  ],
+                                );
+                              }
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            },
+                          ),
+                        ),
+                        _buildSectionContainer(
+                          title: 'Calories Progress (7 Days)',
+                          icon: Icons.bar_chart,
+                          iconColor: Colors.orange,
+                          child: FutureBuilder<List<Map<String, dynamic>>>(
+                            future: _getNutritionHistory(state.child.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return _buildCaloriesLineChart(snapshot.data!);
+                              }
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            },
+                          ),
+                        ),
+                        _buildSectionContainer(
+                          title: 'Nutrition Progress (7 Days)',
+                          icon: Icons.show_chart,
+                          iconColor: Colors.green,
+                          child: FutureBuilder<List<Map<String, dynamic>>>(
+                            future: _getNutritionHistory(state.child.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Column(
+                                  children: [
+                                    _buildNutritionLineChart(snapshot.data!),
+                                    const SizedBox(height: 16),
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          _buildLegendItem(
+                                              'Protein', Colors.red),
+                                          const SizedBox(width: 16),
+                                          _buildLegendItem(
+                                              'Carbs', Colors.blue),
+                                          const SizedBox(width: 16),
+                                          _buildLegendItem('Fat', Colors.green),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1386,63 +1433,62 @@ class _MyGoalPageState extends State<MyGoalPage> {
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      padding: _kDefaultPadding,
+      decoration: BoxDecorationX.defaultShadow,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              if (showIcon && icon != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        iconColor?.withOpacity(0.2) ?? Colors.grey.shade200,
-                        iconColor?.withOpacity(0.1) ?? Colors.grey.shade100,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor ?? Colors.grey,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-              ],
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: title.contains('Progress') ? 14 : 16,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.3,
-                    color: Colors.black87,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+          if (showIcon && icon != null) ...[
+            _buildSectionHeader(title: title, icon: icon, iconColor: iconColor),
+            const SizedBox(height: _kDefaultSpacing),
+          ] else
+            Text(
+              title,
+              style: TextStyleX.defaultTitle.copyWith(
+                fontSize: title.contains('Progress') ? 14 : 16,
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          const SizedBox(height: _kDefaultSpacing),
           child,
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required String title,
+    required IconData icon,
+    Color? iconColor,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: gradientContainer(
+            colors: [
+              iconColor?.withOpacity(0.2) ?? Colors.grey.shade200,
+              iconColor?.withOpacity(0.1) ?? Colors.grey.shade100,
+            ],
+            borderRadius: 14,
+          ),
+          child: Icon(
+            icon,
+            color: iconColor ?? Colors.grey,
+            size: _kDefaultIconSize,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyleX.defaultTitle.copyWith(
+              fontSize: title.contains('Progress') ? 14 : 16,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
