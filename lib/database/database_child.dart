@@ -74,7 +74,7 @@ class ChildSqflite {
     }
   }
 
-  Future deleteChild(int id) async {
+  Future deleteChild(String id) async {
     final Database db = await database;
     try {
       await db.delete(_childTable, where: 'id = ?', whereArgs: [id]);

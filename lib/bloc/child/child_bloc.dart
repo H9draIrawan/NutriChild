@@ -32,7 +32,7 @@ class ChildBloc extends Bloc<ChildEvent, ChildState> {
 
     on<SaveAllergyEvent>((event, emit) async {
       if (event.name != "") {
-        final id = "ALLERGY${DateTime.now().millisecondsSinceEpoch}";
+        final id = "A${DateTime.now().millisecondsSinceEpoch}";
         final allergyId = await allergySqflite.getAllergybyName(event.name);
         await patientSqflite.insertPatient(Patient(
           id: id,
@@ -44,20 +44,17 @@ class ChildBloc extends Bloc<ChildEvent, ChildState> {
 
     on<LoadChildEvent>((event, emit) async {
       emit(LoadingChildState());
-      try {
-        if (event.childId != null) {
-          final child = await childSqflite.getChildById(event.childId!);
-          if (child != null) {
-            emit(LoadChildState(child));
-          }
-        } else if (event.userId != null) {
-          final children = await childSqflite.getChildByUserId(event.userId!);
-          if (children.isNotEmpty) {
-            emit(LoadChildState(children.first));
-          }
+
+      if (event.childId != null) {
+        final child = await childSqflite.getChildById(event.childId!);
+        emit(LoadChildState(child!));
+      } else if (event.userId != null) {
+        final children = await childSqflite.getChildByUserId(event.userId!);
+        if (children.isNotEmpty) {
+          emit(LoadChildState(children.first));
+        } else {
+          emit(ErrorChildState("Child not found"));
         }
-      } catch (e) {
-        emit(ErrorChildState(e.toString()));
       }
     });
 
@@ -67,6 +64,11 @@ class ChildBloc extends Bloc<ChildEvent, ChildState> {
     });
 
     on<DeleteAllergyEvent>((event, emit) async {
+      await patientSqflite.deletePatientByChildId(event.childId);
+    });
+
+    on<DeleteChildEvent>((event, emit) async {
+      await childSqflite.deleteChild(event.childId);
       await patientSqflite.deletePatientByChildId(event.childId);
     });
   }

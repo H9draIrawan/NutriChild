@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:nutrichild/model/Food.dart';
+import 'package:nutrichild/model/Meal.dart';
 
 abstract class FoodEvent extends Equatable {
   const FoodEvent();
@@ -13,42 +15,13 @@ class InitialLunchEvent extends FoodEvent {}
 class InitialDinnerEvent extends FoodEvent {}
 
 class SaveFoodEvent extends FoodEvent {
-  final String childId;
-  final String foodName;
-  final double calories;
-  final double protein;
-  final double carbs;
-  final double fat;
-  final String imageUrl;
-  final String mealTime;
-  final int qty;
-  final DateTime dateTime;
+  final Food food;
+  final Meal meal;
 
-  const SaveFoodEvent(
-      {required this.childId,
-      required this.foodName,
-      required this.calories,
-      required this.protein,
-      required this.carbs,
-      required this.fat,
-      required this.imageUrl,
-      required this.mealTime,
-      required this.qty,
-      required this.dateTime});
+  const SaveFoodEvent({required this.food, required this.meal});
 
   @override
-  List<Object> get props => [
-        childId,
-        foodName,
-        calories,
-        protein,
-        carbs,
-        fat,
-        imageUrl,
-        mealTime,
-        qty,
-        dateTime
-      ];
+  List<Object> get props => [food, meal];
 }
 
 class DeleteFoodEvent extends FoodEvent {
@@ -61,3 +34,11 @@ class DeleteFoodEvent extends FoodEvent {
   List<Object> get props => [childId, dateTime];
 }
 
+class DeleteMealEvent extends FoodEvent {
+  final String childId;
+
+  const DeleteMealEvent(this.childId);
+
+  @override
+  List<Object> get props => [childId];
+}

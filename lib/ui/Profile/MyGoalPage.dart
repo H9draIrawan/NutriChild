@@ -1,121 +1,1259 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../bloc/child/child_bloc.dart';
+import '../../bloc/child/child_state.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../../database/database_food.dart';
+import '../../database/database_meal.dart';
 
-class MyGoalPage extends StatelessWidget {
+import '../../model/Meal.dart';
+
+class MyGoalPage extends StatefulWidget {
   const MyGoalPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'My goal',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+  State<MyGoalPage> createState() => _MyGoalPageState();
+}
+
+class _MyGoalPageState extends State<MyGoalPage> {
+  final FoodSqflite _foodDb = FoodSqflite();
+  final MealSqflite _mealDb = MealSqflite();
+
+  Future<Map<String, double>> _getNutritionData(String childId) async {
+    final date = DateTime.now();
+    final meals = await _mealDb.getMealsByDate(
+        childId, "${date.year}/${date.month}/${date.day}");
+
+    double totalCalories = 0;
+    double totalProtein = 0;
+    double totalCarbs = 0;
+    double totalFat = 0;
+
+    for (Meal meal in meals) {
+      final foods = await _foodDb.getFoodbyId(meal.foodId);
+      if (foods.isNotEmpty) {
+        final food = foods.first;
+        final qty = meal.qty;
+        totalCalories += (food.calories * qty);
+        totalProtein += (food.protein * qty);
+        totalCarbs += (food.carbs * qty);
+        totalFat += (food.fat * qty);
+      }
+    }
+
+    return {
+      'calories': totalCalories,
+      'protein': totalProtein,
+      'carbs': totalCarbs,
+      'fat': totalFat,
+    };
+  }
+
+  Future<List<Map<String, dynamic>>> _getNutritionHistory(
+      String childId) async {
+    List<Map<String, dynamic>> history = [];
+    final now = DateTime.now();
+
+    // Mendapatkan tanggal 7 hari yang lalu
+    final startDate = now.subtract(
+        const Duration(days: 6)); // 6 hari yang lalu + hari ini = 7 hari
+
+    for (int i = 0; i <= 6; i++) {
+      final date = startDate.add(Duration(days: i));
+      final dateString = "${date.year}/${date.month}/${date.day}";
+      final meals = await _mealDb.getMealsByDate(childId, dateString);
+
+      double totalCalories = 0;
+      double totalProtein = 0;
+      double totalCarbs = 0;
+      double totalFat = 0;
+
+      for (Meal meal in meals) {
+        final foods = await _foodDb.getFoodbyId(meal.foodId);
+        if (foods.isNotEmpty) {
+          final food = foods.first;
+          final qty = meal.qty;
+          totalCalories += (food.calories * qty);
+          totalProtein += (food.protein * qty);
+          totalCarbs += (food.carbs * qty);
+          totalFat += (food.fat * qty);
+        }
+      }
+
+      history.add({
+        'date': date,
+        'dateString': dateString,
+        'nutrition': {
+          'calories': totalCalories,
+          'protein': totalProtein,
+          'carbs': totalCarbs,
+          'fat': totalFat,
+        }
+      });
+    }
+
+    return history;
+  }
+
+  Widget _buildNutritionChart(Map<String, double> nutrition) {
+    double maxNutrition = [
+      nutrition['protein'] ?? 0,
+      nutrition['carbs'] ?? 0,
+      nutrition['fat'] ?? 0,
+    ].reduce((curr, next) => curr > next ? curr : next);
+
+    double maxY = maxNutrition + (maxNutrition * 0.2);
+    maxY = maxY < 100 ? 100 : maxY;
+    int interval = (maxY / 5).ceil();
+
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 5,
+            blurRadius: 15,
+            offset: const Offset(0, 3),
           ),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Your goal card
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: InkWell(
-                onTap: () {
-                  // Handle goal selection
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.orange, Colors.red.shade300],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Your goal',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Build muscles',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right),
-                    ],
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          maxY: maxY,
+          barTouchData: BarTouchData(
+            enabled: true,
+            touchTooltipData: BarTouchTooltipData(
+              tooltipBgColor: Colors.black87,
+              tooltipPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              tooltipMargin: 8,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                String nutrientValue = '';
+                Color tooltipColor = Colors.white;
+                switch (group.x) {
+                  case 0:
+                    nutrientValue =
+                        '${nutrition['protein']?.toStringAsFixed(1)} g';
+                    tooltipColor = Colors.blue;
+                    break;
+                  case 1:
+                    nutrientValue =
+                        '${nutrition['carbs']?.toStringAsFixed(1)} g';
+                    tooltipColor = Colors.green;
+                    break;
+                  case 2:
+                    nutrientValue = '${nutrition['fat']?.toStringAsFixed(1)} g';
+                    tooltipColor = Colors.red;
+                    break;
+                }
+                return BarTooltipItem(
+                  nutrientValue,
+                  TextStyle(
+                    color: tooltipColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
+            ),
+          ),
+          barGroups: [
+            BarChartGroupData(
+              x: 0,
+              barRods: [
+                BarChartRodData(
+                  toY: nutrition['protein'] ?? 0,
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade300, Colors.blue.shade500],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                  width: 20,
+                  borderRadius: BorderRadius.circular(8),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: maxY,
+                    color: Colors.grey.withOpacity(0.1),
                   ),
                 ),
+              ],
+            ),
+            BarChartGroupData(
+              x: 1,
+              barRods: [
+                BarChartRodData(
+                  toY: nutrition['carbs'] ?? 0,
+                  gradient: LinearGradient(
+                    colors: [Colors.green.shade300, Colors.green.shade500],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                  width: 20,
+                  borderRadius: BorderRadius.circular(8),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: maxY,
+                    color: Colors.grey.withOpacity(0.1),
+                  ),
+                ),
+              ],
+            ),
+            BarChartGroupData(
+              x: 2,
+              barRods: [
+                BarChartRodData(
+                  toY: nutrition['fat'] ?? 0,
+                  gradient: LinearGradient(
+                    colors: [Colors.red.shade300, Colors.red.shade500],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                  width: 20,
+                  borderRadius: BorderRadius.circular(8),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: maxY,
+                    color: Colors.grey.withOpacity(0.1),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  switch (value.toInt()) {
+                    case 0:
+                      return const Text(
+                        'Protein',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      );
+                    case 1:
+                      return const Text(
+                        'Carbs',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      );
+                    case 2:
+                      return const Text(
+                        'Fat',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      );
+                    default:
+                      return const Text('');
+                  }
+                },
               ),
             ),
-            const SizedBox(height: 24),
-
-            // Goal details
-            _buildGoalDetail('Starting weight', '79kg on 22/08/2020'),
-            _buildGoalDetail('Current weight', '82 kg'),
-            _buildGoalDetail('Goal weight', '90 kg'),
-            _buildGoalDetail('Weekly goal', 'Gain 0.5 kg'),
-            _buildGoalDetail('Activity level', 'Quite active'),
-            _buildGoalDetail('Period', '10 weeks'),
-          ],
+            leftTitles: AxisTitles(
+              axisNameWidget: const Text(
+                'gram',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              axisNameSize: 20,
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 46,
+                interval: interval.toDouble(),
+                getTitlesWidget: (value, meta) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(
+                      '${value.toInt()}',
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: interval.toDouble(),
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: Colors.grey.withOpacity(0.15),
+                strokeWidth: 1,
+                dashArray: [5, 5],
+              );
+            },
+          ),
+          borderData: FlBorderData(show: false),
         ),
       ),
     );
   }
 
-  Widget _buildGoalDetail(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+  Widget _buildCaloriesChart(double calories) {
+    double maxY = calories + (calories * 0.2);
+    maxY = maxY < 1000 ? 1000 : maxY;
+    int interval = (maxY / 5).ceil();
+
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 5,
+            blurRadius: 15,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.center,
+          maxY: maxY,
+          barTouchData: BarTouchData(
+            enabled: true,
+            touchTooltipData: BarTouchTooltipData(
+              tooltipBgColor: Colors.black87,
+              tooltipPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              tooltipMargin: 8,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  '${calories.toStringAsFixed(1)} kcal',
+                  TextStyle(
+                    color: Colors.orange.shade400,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
+            ),
+          ),
+          barGroups: [
+            BarChartGroupData(
+              x: 0,
+              barRods: [
+                BarChartRodData(
+                  toY: calories,
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.orange.shade300,
+                      Colors.orange.shade500,
+                    ],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                  width: 40,
+                  borderRadius: BorderRadius.circular(8),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: maxY,
+                    color: Colors.grey.withOpacity(0.1),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  return const Text(
+                    'Calories',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  );
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              axisNameWidget: const Text(
+                'kcal',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              axisNameSize: 20,
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 46,
+                interval: interval.toDouble(),
+                getTitlesWidget: (value, meta) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(
+                      '${value.toInt()}',
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: interval.toDouble(),
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: Colors.grey.withOpacity(0.15),
+                strokeWidth: 1,
+                dashArray: [5, 5],
+              );
+            },
+          ),
+          borderData: FlBorderData(show: false),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNutritionLineChart(List<Map<String, dynamic>> history) {
+    // Mencari nilai maksimum untuk skala Y
+    double maxValue = 0;
+    for (var day in history) {
+      final nutrition = day['nutrition'] as Map<String, double>;
+      final values = [
+        nutrition['protein'] ?? 0,
+        nutrition['carbs'] ?? 0,
+        nutrition['fat'] ?? 0,
+      ];
+      final dayMax = values.reduce((curr, next) => curr > next ? curr : next);
+      if (dayMax > maxValue) maxValue = dayMax;
+    }
+
+    // Menambahkan margin 20% ke atas
+    double maxY = maxValue + (maxValue * 0.2);
+    maxY = maxY < 100 ? 100 : maxY;
+
+    return Container(
+      height: 250,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: LineChart(
+        LineChartData(
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: maxY / 5,
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: Colors.grey.withOpacity(0.15),
+                strokeWidth: 1,
+                dashArray: [5, 5],
+              );
+            },
+          ),
+          titlesData: FlTitlesData(
+            show: true,
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 30,
+                interval: 1,
+                getTitlesWidget: (value, meta) {
+                  if (value.toInt() >= 0 && value.toInt() < history.length) {
+                    final date = history[value.toInt()]['date'] as DateTime;
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        '${date.day}/${date.month}',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }
+                  return const Text('');
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              axisNameWidget: const Text(
+                'gram',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+              axisNameSize: 16,
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 35,
+                interval: maxY / 5,
+                getTitlesWidget: (value, meta) {
+                  return Text(
+                    '${value.toInt()}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          lineBarsData: [
+            // Protein Line
+            LineChartBarData(
+              spots: List.generate(history.length, (index) {
+                final nutrition =
+                    history[index]['nutrition'] as Map<String, double>;
+                return FlSpot(
+                  index.toDouble(),
+                  nutrition['protein'] ?? 0,
+                );
+              }),
+              isCurved: true,
+              curveSmoothness: 0.3,
+              preventCurveOverShooting: true,
+              color: Colors.red,
+              barWidth: 2,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: 4,
+                    color: Colors.red,
+                    strokeWidth: 1,
+                    strokeColor: Colors.white,
+                  );
+                },
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                color: Colors.red.withOpacity(0.1),
+              ),
+            ),
+            // Carbs Line
+            LineChartBarData(
+              spots: List.generate(history.length, (index) {
+                final nutrition =
+                    history[index]['nutrition'] as Map<String, double>;
+                return FlSpot(
+                  index.toDouble(),
+                  nutrition['carbs'] ?? 0,
+                );
+              }),
+              isCurved: true,
+              curveSmoothness: 0.3,
+              preventCurveOverShooting: true,
+              color: Colors.blue,
+              barWidth: 2,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: 4,
+                    color: Colors.blue,
+                    strokeWidth: 1,
+                    strokeColor: Colors.white,
+                  );
+                },
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                color: Colors.blue.withOpacity(0.1),
+              ),
+            ),
+            // Fat Line
+            LineChartBarData(
+              spots: List.generate(history.length, (index) {
+                final nutrition =
+                    history[index]['nutrition'] as Map<String, double>;
+                return FlSpot(
+                  index.toDouble(),
+                  nutrition['fat'] ?? 0,
+                );
+              }),
+              isCurved: true,
+              curveSmoothness: 0.3,
+              preventCurveOverShooting: true,
+              color: Colors.green,
+              barWidth: 2,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: 4,
+                    color: Colors.green,
+                    strokeWidth: 1,
+                    strokeColor: Colors.white,
+                  );
+                },
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                color: Colors.green.withOpacity(0.1),
+              ),
+            ),
+          ],
+          minX: 0,
+          maxX: history.length - 1.0,
+          minY: 0,
+          maxY: maxY,
+          lineTouchData: LineTouchData(
+            enabled: true,
+            touchTooltipData: LineTouchTooltipData(
+              tooltipBgColor: Colors.black87,
+              tooltipRoundedRadius: 8,
+              tooltipPadding: const EdgeInsets.all(8),
+              getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                final date =
+                    history[touchedSpots.first.x.toInt()]['date'] as DateTime;
+                String day = date.day.toString().padLeft(2, '0');
+                String month = date.month.toString().padLeft(2, '0');
+                String dateStr = '\n${day}/${month}/${date.year}';
+
+                return touchedSpots.map((LineBarSpot spot) {
+                  Color color;
+
+                  switch (spot.barIndex) {
+                    case 0:
+                      color = Colors.red;
+                      break;
+                    case 1:
+                      color = Colors.blue;
+                      break;
+                    case 2:
+                      color = Colors.green;
+                      break;
+                    default:
+                      color = Colors.white;
+                  }
+
+                  bool isLastItem = spot == touchedSpots.last;
+
+                  return LineTooltipItem(
+                    '${spot.y.toStringAsFixed(1)}g',
+                    TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    children: isLastItem
+                        ? [
+                            TextSpan(
+                              text: dateStr,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ]
+                        : null,
+                  );
+                }).toList();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCaloriesLineChart(List<Map<String, dynamic>> history) {
+    // Mencari nilai maksimum untuk skala Y
+    double maxValue = 0;
+    for (var day in history) {
+      final nutrition = day['nutrition'] as Map<String, double>;
+      final calories = nutrition['calories'] ?? 0;
+      if (calories > maxValue) maxValue = calories;
+    }
+
+    // Menambahkan margin 20% ke atas
+    double maxY = maxValue + (maxValue * 0.2);
+    maxY = maxY < 1000 ? 1000 : maxY;
+
+    return Container(
+      height: 250,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: LineChart(
+        LineChartData(
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: maxY / 5,
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: Colors.grey.withOpacity(0.15),
+                strokeWidth: 1,
+                dashArray: [5, 5],
+              );
+            },
+          ),
+          titlesData: FlTitlesData(
+            show: true,
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 30,
+                interval: 1,
+                getTitlesWidget: (value, meta) {
+                  if (value.toInt() >= 0 && value.toInt() < history.length) {
+                    final date = history[value.toInt()]['date'] as DateTime;
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        '${date.day}/${date.month}',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }
+                  return const Text('');
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              axisNameWidget: const Text(
+                'kcal',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+              axisNameSize: 16,
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 35,
+                interval: maxY / 5,
+                getTitlesWidget: (value, meta) {
+                  return Text(
+                    '${value.toInt()}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          lineBarsData: [
+            LineChartBarData(
+              spots: List.generate(history.length, (index) {
+                final nutrition =
+                    history[index]['nutrition'] as Map<String, double>;
+                return FlSpot(
+                  index.toDouble(),
+                  nutrition['calories'] ?? 0,
+                );
+              }),
+              isCurved: true,
+              curveSmoothness: 0.3,
+              preventCurveOverShooting: true,
+              color: Colors.orange,
+              barWidth: 2,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: 4,
+                    color: Colors.orange,
+                    strokeWidth: 1,
+                    strokeColor: Colors.white,
+                  );
+                },
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                color: Colors.orange.withOpacity(0.1),
+              ),
+            ),
+          ],
+          minX: 0,
+          maxX: history.length - 1.0,
+          minY: 0,
+          maxY: maxY,
+          lineTouchData: LineTouchData(
+            enabled: true,
+            touchTooltipData: LineTouchTooltipData(
+              tooltipBgColor: Colors.black87,
+              tooltipRoundedRadius: 8,
+              tooltipPadding: const EdgeInsets.all(8),
+              getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                final date =
+                    history[touchedSpots.first.x.toInt()]['date'] as DateTime;
+                String day = date.day.toString().padLeft(2, '0');
+                String month = date.month.toString().padLeft(2, '0');
+                String dateStr = '\n${day}/${month}/${date.year}';
+
+                return touchedSpots.map((LineBarSpot spot) {
+                  return LineTooltipItem(
+                    '${spot.y.toStringAsFixed(1)} kcal',
+                    const TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: dateStr,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getGenderColor(String gender) {
+    switch (gender.toLowerCase()) {
+      case 'male':
+        return Colors.blue;
+      case 'female':
+        return Colors.pink;
+      default:
+        return Colors.purple;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ChildBloc, ChildState>(
+      builder: (context, state) {
+        if (state is LoadChildState) {
+          final Color genderColor = _getGenderColor(state.child.gender);
+
+          return Scaffold(
+            backgroundColor: Colors.grey[50],
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: const Text(
+                'My Goal',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              elevation: 0,
+              centerTitle: true,
+            ),
+            body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20.0),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.orange.shade300,
+                                Colors.orange.shade100,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.orange.withOpacity(0.2),
+                                spreadRadius: 2,
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      spreadRadius: 1,
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.flag_rounded,
+                                  color: Colors.orange.shade400,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Current Goal',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[800],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      state.child.goal,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                        letterSpacing: 0.5,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Column(
+                      children: [
+                        _buildSectionContainer(
+                          title: 'Today\'s Nutrition',
+                          icon: Icons.show_chart,
+                          iconColor: Colors.blue,
+                          child: FutureBuilder<Map<String, double>>(
+                            future: _getNutritionData(state.child.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Column(
+                                  children: [
+                                    _buildCaloriesChart(snapshot.data!['calories'] ?? 0),
+                                    const SizedBox(height: 16),
+                                    _buildNutritionChart(snapshot.data!),
+                                  ],
+                                );
+                              }
+                              return const Center(child: CircularProgressIndicator());
+                            },
+                          ),
+                        ),
+                        _buildSectionContainer(
+                          title: 'Calories Progress (7 Days)',
+                          icon: Icons.bar_chart,
+                          iconColor: Colors.orange,
+                          child: FutureBuilder<List<Map<String, dynamic>>>(
+                            future: _getNutritionHistory(state.child.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return _buildCaloriesLineChart(snapshot.data!);
+                              }
+                              return const Center(child: CircularProgressIndicator());
+                            },
+                          ),
+                        ),
+                        _buildSectionContainer(
+                          title: 'Nutrition Progress (7 Days)',
+                          icon: Icons.show_chart,
+                          iconColor: Colors.green,
+                          child: FutureBuilder<List<Map<String, dynamic>>>(
+                            future: _getNutritionHistory(state.child.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Column(
+                                  children: [
+                                    _buildNutritionLineChart(snapshot.data!),
+                                    const SizedBox(height: 16),
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          _buildLegendItem('Protein', Colors.red),
+                                          const SizedBox(width: 16),
+                                          _buildLegendItem('Carbs', Colors.blue),
+                                          const SizedBox(width: 16),
+                                          _buildLegendItem('Fat', Colors.green),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return const Center(child: CircularProgressIndicator());
+                            },
+                          ),
+                        ),
+                        _buildSectionContainer(
+                          title: 'Details',
+                          showIcon: false,
+                          child: Column(
+                            children: [
+                              _buildGoalDetail(
+                                'Current weight',
+                                '${state.child.weight} kg',
+                                Icons.monitor_weight_outlined,
+                                genderColor,
+                              ),
+                              _buildGoalDetail(
+                                'Current height',
+                                '${state.child.height} cm',
+                                Icons.height_outlined,
+                                genderColor,
+                              ),
+                              _buildGoalDetail(
+                                'Age',
+                                '${state.child.age} years',
+                                Icons.cake_outlined,
+                                genderColor,
+                              ),
+                              _buildGoalDetail(
+                                'Gender',
+                                state.child.gender,
+                                Icons.person_outline,
+                                genderColor,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
+  }
+
+  Widget _buildGoalDetail(
+      String label, String value, IconData icon, Color color) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 16,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.black54,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionContainer({
+    required String title,
+    IconData? icon,
+    Color? iconColor,
+    required Widget child,
+    bool showIcon = true,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 5,
+            blurRadius: 15,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (showIcon && icon != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: iconColor?.withOpacity(0.1) ?? Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor ?? Colors.grey,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+              ],
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: title.contains('Progress') ? 16 : 18, // Ukuran lebih kecil untuk judul dengan kata Progress
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          child,
         ],
       ),
     );

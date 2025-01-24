@@ -67,3 +67,12 @@ class DeleteAllergyEvent extends ChildEvent {
   @override
   List<Object> get props => [childId];
 }
+
+class DeleteChildEvent extends ChildEvent {
+  final String childId;
+
+  const DeleteChildEvent(this.childId);
+
+  @override
+  List<Object> get props => [childId];
+}

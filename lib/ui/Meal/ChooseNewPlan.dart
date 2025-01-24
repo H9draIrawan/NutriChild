@@ -182,7 +182,7 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
             try {
               if (_selectedDay != null) {
                 final dateStr =
-                    "${_selectedDay!.year}-${_selectedDay!.month.toString().padLeft(2, '0')}-${_selectedDay!.day.toString().padLeft(2, '0')}";
+                    "${_selectedDay!.year}/${_selectedDay!.month}/${_selectedDay!.day}";
 
                 final childBloc =
                     BlocProvider.of<ChildBloc>(context).state as LoadChildState;
@@ -193,16 +193,17 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                 // Simpan data baru secara berurutan
                 if (breakfastData['name']?.isNotEmpty == true) {
                   await _saveMeal(
-                      foodBloc, childBloc, breakfastData, 'Breakfast');
+                      foodBloc, childBloc, breakfastData, 'Breakfast', dateStr);
                 }
                 if (lunchData['name']?.isNotEmpty == true) {
-                  await _saveMeal(foodBloc, childBloc, lunchData, 'Lunch');
+                  await _saveMeal(
+                      foodBloc, childBloc, lunchData, 'Lunch', dateStr);
                 }
                 if (dinnerData['name']?.isNotEmpty == true) {
-                  await _saveMeal(foodBloc, childBloc, dinnerData, 'Dinner');
+                  await _saveMeal(
+                      foodBloc, childBloc, dinnerData, 'Dinner', dateStr);
                 }
 
-                // Tampilkan pesan sukses setelah semua operasi selesai
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Meal plan berhasil disimpan!')));
 
@@ -211,6 +212,7 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
                 });
               }
             } catch (e) {
+              print('Error saving meal plan: $e');
               ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Error menyimpan rencana makan: $e')));
             }
@@ -898,24 +900,35 @@ class _ChooseNewPlanState extends State<ChooseNewPlan> {
   }
 
   Future<void> _saveMeal(FoodBloc foodBloc, LoadChildState childBloc,
-      Map<String, String> mealData, String mealTime) async {
+      Map<String, String> mealData, String mealTime, String dateStr) async {
     try {
+      final foodId = "F${DateTime.now().millisecondsSinceEpoch}";
+      final mealId = "M${DateTime.now().millisecondsSinceEpoch}";
+
+      // Konversi string ke double bisa gagal jika format tidak sesuai
       final calories = double.tryParse(mealData['calories'] ?? '0') ?? 0.0;
       final protein = double.tryParse(mealData['protein'] ?? '0') ?? 0.0;
       final carbs = double.tryParse(mealData['carbs'] ?? '0') ?? 0.0;
       final fat = double.tryParse(mealData['fat'] ?? '0') ?? 0.0;
 
+      await Future.delayed(Duration(milliseconds: 100));
+
       foodBloc.add(SaveFoodEvent(
-          childId: childBloc.child.id,
-          foodName: mealData['name']!,
-          calories: calories,
-          protein: protein,
-          carbs: carbs,
-          fat: fat,
-          imageUrl: mealData['image'] ?? '',
-          mealTime: mealTime,
-          qty: mealAmounts[mealTime.toLowerCase()] ?? 1,
-          dateTime: _selectedDay!));
+          food: Food(
+              id: foodId,
+              name: mealData['name']!,
+              calories: calories,
+              protein: protein,
+              carbs: carbs,
+              fat: fat,
+              imageUrl: mealData['image'] ?? ''),
+          meal: Meal(
+              id: mealId,
+              childId: childBloc.child.id,
+              foodId: foodId,
+              mealTime: mealTime,
+              dateTime: dateStr,
+              qty: mealAmounts[mealTime.toLowerCase()] ?? 1)));
     } catch (e) {
       throw Exception('Error saving $mealTime: $e');
     }

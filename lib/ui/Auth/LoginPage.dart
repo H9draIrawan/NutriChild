@@ -41,7 +41,7 @@ class _LoginpageState extends State<Loginpage> {
         emailController.text = prefs.getString('savedEmail') ?? '';
         passwordController.text = prefs.getString('savedPassword') ?? '';
 
-        // Auto login if credentials exist
+        // Hanya auto login jika user belum login
         if (emailController.text.isNotEmpty &&
             passwordController.text.isNotEmpty) {
           _performLogin();
@@ -66,6 +66,16 @@ class _LoginpageState extends State<Loginpage> {
 
   // Perform login
   Future<void> _performLogin() async {
+    if (emailController.text.trim().isEmpty ||
+        passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Email dan password tidak boleh kosong'),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     context.read<AuthBloc>().add(
@@ -93,16 +103,12 @@ class _LoginpageState extends State<Loginpage> {
               }
 
               if (state is LoginAuthState) {
-                _saveCredentials();
+                await _saveCredentials();
                 final childPref = await SharedPreferences.getInstance();
+                final userId = state.id;
                 final childId = childPref.getString('childId');
 
-                if (childId != null) {
-                  childBloc.add(LoadChildEvent(childId: childId));
-                } else {
-                  childBloc.add(LoadChildEvent(userId: state.id));
-                  childPref.setString('userId', state.id);
-                }
+                childBloc.add(LoadChildEvent(childId: childId, userId: userId));
               } else if (state is ErrorAuthState) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -140,10 +146,12 @@ class _LoginpageState extends State<Loginpage> {
             },
           ),
           BlocListener<ChildBloc, ChildState>(
-            listener: (context, state) {
+            listener: (context, state) async {
+              final childPref = await SharedPreferences.getInstance();
               if (state is LoadChildState) {
+                childPref.setString('childId', state.child.id);
                 Navigator.pushReplacementNamed(context, '/');
-              } else {
+              } else if (state is ErrorChildState) {
                 Navigator.pushReplacementNamed(context, '/welcome');
               }
             },

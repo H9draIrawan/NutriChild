@@ -7,6 +7,8 @@ import '../../bloc/auth/auth_state.dart';
 import '../../bloc/child/child_bloc.dart';
 import '../../bloc/child/child_event.dart';
 import '../../bloc/child/child_state.dart';
+import '../../bloc/food/food_bloc.dart';
+import '../../bloc/food/food_event.dart';
 import '../../model/child.dart';
 import '../../model/patient.dart';
 
@@ -26,7 +28,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
   Child? _selectedChild;
   AuthBloc? authBloc;
   ChildBloc? childBloc;
-
+  FoodBloc? foodBloc;
   final PatientSqflite patientSqflite = PatientSqflite();
   final AllergySqflite allergySqflite = AllergySqflite();
 
@@ -93,7 +95,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                     ],
                   ),
                   child: Icon(
-                    Icons.no_food_outlined,
+                    Icons.health_and_safety_outlined,
                     size: 22,
                     color: genderColor,
                   ),
@@ -150,7 +152,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                             ],
                           ),
                           child: Icon(
-                            Icons.warning_amber_rounded,
+                            Icons.medical_services_outlined,
                             size: 16,
                             color: genderColor,
                           ),
@@ -180,9 +182,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
             return SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: snapshot.data!
-                    .whereType<Container>()
-                    .toList(),
+                children: snapshot.data!.whereType<Container>().toList(),
               ),
             );
           },
@@ -459,84 +459,129 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        leading: Stack(
-          children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundColor: genderColor.withOpacity(0.1),
-              child: ClipOval(
-                child: Image.asset(
-                  _getProfileImage(child.gender),
-                  width: 40,
-                  height: 40,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey.shade200),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.change_circle_outlined,
-                  size: 14,
-                  color: genderColor,
-                ),
-              ),
-            ),
-          ],
-        ),
-        title: Text(
-          child.name,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+      child: Dismissible(
+        key: Key(child.id),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20.0),
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            Icons.delete,
+            color: Colors.white,
           ),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  _getGenderIcon(child.gender),
-                  size: 16,
-                  color: genderColor,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${child.age} tahun',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
+        confirmDismiss: (direction) async {
+          return await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Konfirmasi Hapus'),
+                content:
+                    Text('Apakah Anda yakin ingin menghapus ${child.name}?'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Batal'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text(
+                      'Hapus',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        onDismissed: (direction) async {
+          childBloc?.add(DeleteChildEvent(child.id));
+          foodBloc?.add(DeleteMealEvent(child.id));
+        },
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(12),
+          leading: Stack(
+            children: [
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: genderColor.withOpacity(0.1),
+                child: ClipOval(
+                  child: Image.asset(
+                    _getProfileImage(child.gender),
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'Target: ${child.goal}',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
               ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey.shade200),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.change_circle_outlined,
+                    size: 14,
+                    color: genderColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          title: Text(
+            child.name,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
-          ],
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(
+                    _getGenderIcon(child.gender),
+                    size: 16,
+                    color: genderColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${child.age} tahun',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Target: ${child.goal}',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            color: genderColor,
+            size: 20,
+          ),
+          onTap: () => onSelect(child.id),
         ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          color: genderColor,
-          size: 20,
-        ),
-        onTap: () => onSelect(child.id),
       ),
     );
   }
@@ -558,7 +603,14 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
           automaticallyImplyLeading: false,
           centerTitle: true,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              child: const Icon(
+                Icons.arrow_back_ios_new,
+                size: 24,
+                color: Colors.black87,
+              ),
+            ),
             onPressed: () {
               if (_selectedChild != null) {
                 childBloc?.add(LoadChildEvent(childId: _selectedChild!.id));
@@ -645,7 +697,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Text('Belum ada anak'),
+                                    const Text('No child'),
                                     const SizedBox(height: 16),
                                     ElevatedButton.icon(
                                       onPressed: () {
@@ -658,7 +710,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                                         );
                                       },
                                       icon: const Icon(Icons.person_add),
-                                      label: const Text('Tambah Anak'),
+                                      label: const Text('Add Child'),
                                       style: ElevatedButton.styleFrom(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 24,
@@ -683,7 +735,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                             if (otherChildren.isEmpty) {
                               return const Padding(
                                 padding: EdgeInsets.all(16.0),
-                                child: Text('Tidak ada anak lain'),
+                                child: Text('No other children'),
                               );
                             }
 
@@ -761,7 +813,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    childState.child.name,
+                                    "Confirm",
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -784,7 +836,7 @@ class _SwitchChildPageState extends State<SwitchChildPage> {
                   );
                 }
 
-                return const Center(child: Text('Tidak ada data anak'));
+                return const Center(child: Text('No child'));
               },
             );
           },

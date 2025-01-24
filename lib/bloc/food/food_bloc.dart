@@ -25,39 +25,38 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
     });
 
     on<SaveFoodEvent>((event, emit) async {
-      final foodId = "F${DateTime.now().millisecondsSinceEpoch}";
-      final mealId = "M${DateTime.now().millisecondsSinceEpoch}";
-
       await foodSqflite.insertFood(Food(
-        id: foodId,
-        name: event.foodName,
-        calories: event.calories,
-        protein: event.protein,
-        carbs: event.carbs,
-        fat: event.fat,
-        imageUrl: event.imageUrl,
+        id: event.food.id,
+        name: event.food.name,
+        calories: event.food.calories,
+        protein: event.food.protein,
+        carbs: event.food.carbs,
+        fat: event.food.fat,
+        imageUrl: event.food.imageUrl,
       ));
 
-      await mealSqflite.insertMeal(
-        Meal(
-          id: mealId,
-          childId: event.childId,
-          foodId: foodId,
-          mealTime: event.mealTime,
-          dateTime:
-              "${event.dateTime.day}/${event.dateTime.month}/${event.dateTime.year}",
-          qty: event.qty,
-        ),
-      );
+      try {
+        await mealSqflite.insertMeal(
+          Meal(
+            id: event.meal.id,
+            childId: event.meal.childId,
+            foodId: event.food.id,
+            mealTime: event.meal.mealTime,
+            dateTime: event.meal.dateTime,
+            qty: event.meal.qty,
+          ),
+        );
+      } catch (e) {
+        print(e);
+      }
     });
 
     on<DeleteFoodEvent>((event, emit) async {
-      final meals =
-          await mealSqflite.getMealsByDate(event.childId, event.dateTime);
-      for (var meal in meals) {
-        await foodSqflite.deleteFoodById(meal.foodId);
-      }
       await mealSqflite.deleteMealsByDate(event.childId, event.dateTime);
+    });
+
+    on<DeleteMealEvent>((event, emit) async {
+      await mealSqflite.deleteMealbyChildId(event.childId);
     });
   }
 }
