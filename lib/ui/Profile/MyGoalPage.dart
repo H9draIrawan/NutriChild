@@ -888,12 +888,70 @@ class _MyGoalPageState extends State<MyGoalPage> {
     }
   }
 
+  // Tambahkan method untuk menghitung BMI
+  double _calculateBMI(double weight, double height) {
+    // BMI = weight(kg) / (height(m))²
+    double heightInMeter = height / 100;
+    return weight / (heightInMeter * heightInMeter);
+  }
+
+  // Update method untuk mendapatkan kategori BMI dengan informasi tambahan
+  Map<String, dynamic> _getBMIInfo(double bmi) {
+    if (bmi < 18.5) {
+      return {
+        'category': 'Underweight',
+        'color': Colors.blue,
+        'description': 'Below ideal weight',
+        'icon': Icons.arrow_downward,
+      };
+    } else if (bmi >= 18.5 && bmi < 25) {
+      return {
+        'category': 'Normal',
+        'color': Colors.green,
+        'description': 'Ideal weight',
+        'icon': Icons.check_circle,
+      };
+    } else if (bmi >= 25 && bmi < 30) {
+      return {
+        'category': 'Overweight',
+        'color': Colors.orange,
+        'description': 'Above ideal weight',
+        'icon': Icons.warning,
+      };
+    } else {
+      return {
+        'category': 'Obese',
+        'color': Colors.red,
+        'description': 'Far above ideal weight',
+        'icon': Icons.warning,
+      };
+    }
+  }
+
+  // Tambahkan method untuk mendapatkan warna BMI
+  Color _getBMIColor(double bmi) {
+    if (bmi < 18.5) {
+      return Colors.blue;
+    } else if (bmi >= 18.5 && bmi < 25) {
+      return Colors.green;
+    } else if (bmi >= 25 && bmi < 30) {
+      return Colors.orange;
+    } else {
+      return Colors.red;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChildBloc, ChildState>(
       builder: (context, state) {
         if (state is LoadChildState) {
           final Color genderColor = _getGenderColor(state.child.gender);
+          final double bmi = _calculateBMI(
+            state.child.weight,
+            state.child.height,
+          );
+          final Map<String, dynamic> bmiInfo = _getBMIInfo(bmi);
 
           return Scaffold(
             backgroundColor: Colors.grey[50],
@@ -1004,7 +1062,7 @@ class _MyGoalPageState extends State<MyGoalPage> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Column(
                       children: [
                         _buildSectionContainer(
@@ -1017,13 +1075,15 @@ class _MyGoalPageState extends State<MyGoalPage> {
                               if (snapshot.hasData) {
                                 return Column(
                                   children: [
-                                    _buildCaloriesChart(snapshot.data!['calories'] ?? 0),
+                                    _buildCaloriesChart(
+                                        snapshot.data!['calories'] ?? 0),
                                     const SizedBox(height: 16),
                                     _buildNutritionChart(snapshot.data!),
                                   ],
                                 );
                               }
-                              return const Center(child: CircularProgressIndicator());
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             },
                           ),
                         ),
@@ -1037,7 +1097,8 @@ class _MyGoalPageState extends State<MyGoalPage> {
                               if (snapshot.hasData) {
                                 return _buildCaloriesLineChart(snapshot.data!);
                               }
-                              return const Center(child: CircularProgressIndicator());
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             },
                           ),
                         ),
@@ -1056,11 +1117,14 @@ class _MyGoalPageState extends State<MyGoalPage> {
                                     SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
-                                          _buildLegendItem('Protein', Colors.red),
+                                          _buildLegendItem(
+                                              'Protein', Colors.red),
                                           const SizedBox(width: 16),
-                                          _buildLegendItem('Carbs', Colors.blue),
+                                          _buildLegendItem(
+                                              'Carbs', Colors.blue),
                                           const SizedBox(width: 16),
                                           _buildLegendItem('Fat', Colors.green),
                                         ],
@@ -1069,7 +1133,8 @@ class _MyGoalPageState extends State<MyGoalPage> {
                                   ],
                                 );
                               }
-                              return const Center(child: CircularProgressIndicator());
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             },
                           ),
                         ),
@@ -1078,6 +1143,100 @@ class _MyGoalPageState extends State<MyGoalPage> {
                           showIcon: false,
                           child: Column(
                             children: [
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.all(16.0),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      bmiInfo['color'].withOpacity(0.15),
+                                      bmiInfo['color'].withOpacity(0.05),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: bmiInfo['color'].withOpacity(0.1),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'BMI',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                bmiInfo['description'],
+                                                style: TextStyle(
+                                                  color: bmiInfo['color'],
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: bmiInfo['color'].withOpacity(0.2),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                bmiInfo['icon'],
+                                                color: bmiInfo['color'],
+                                                size: 14,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                bmiInfo['category'],
+                                                style: TextStyle(
+                                                  color: bmiInfo['color'],
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      bmi.toStringAsFixed(1),
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: bmiInfo['color'],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                               _buildGoalDetail(
                                 'Current weight',
                                 '${state.child.weight} kg',
@@ -1122,27 +1281,37 @@ class _MyGoalPageState extends State<MyGoalPage> {
       String label, String value, IconData icon, Color color) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withOpacity(0.1),
-          width: 1,
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.1),
+            color.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Icon(
               icon,
               color: color,
-              size: 24,
+              size: 22,
             ),
           ),
           const SizedBox(width: 16),
@@ -1153,17 +1322,19 @@ class _MyGoalPageState extends State<MyGoalPage> {
                 Text(
                   label,
                   style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
+                    color: Colors.grey[700],
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: TextStyle(
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+                    letterSpacing: 0.3,
+                    color: Colors.black87,
                   ),
                 ),
               ],
@@ -1175,25 +1346,34 @@ class _MyGoalPageState extends State<MyGoalPage> {
   }
 
   Widget _buildLegendItem(String label, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(3),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: color.withOpacity(0.8),
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1206,16 +1386,15 @@ class _MyGoalPageState extends State<MyGoalPage> {
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.08),
-            spreadRadius: 5,
-            blurRadius: 15,
-            offset: const Offset(0, 3),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1226,33 +1405,41 @@ class _MyGoalPageState extends State<MyGoalPage> {
             children: [
               if (showIcon && icon != null) ...[
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: iconColor?.withOpacity(0.1) ?? Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      colors: [
+                        iconColor?.withOpacity(0.2) ?? Colors.grey.shade200,
+                        iconColor?.withOpacity(0.1) ?? Colors.grey.shade100,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     icon,
                     color: iconColor ?? Colors.grey,
-                    size: 24,
+                    size: 20,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
               ],
               Expanded(
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: title.contains('Progress') ? 16 : 18, // Ukuran lebih kecil untuk judul dengan kata Progress
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
+                    fontSize: title.contains('Progress') ? 14 : 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                    color: Colors.black87,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           child,
         ],
       ),
