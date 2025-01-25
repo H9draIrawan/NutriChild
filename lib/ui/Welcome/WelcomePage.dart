@@ -45,7 +45,7 @@ class _WelcomepageState extends State<Welcomepage> {
               // First Page
               OnboardingPage(
                 title: 'Delicious recipies and\npersonalized mealplans',
-                image: 'assets/images/logo.png',
+                image: 'assets/images/Logo.png',
                 showButton: true,
                 buttonText: 'CONTINUE',
                 centerContent: true,
