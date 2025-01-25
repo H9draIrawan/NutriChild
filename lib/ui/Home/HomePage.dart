@@ -5,6 +5,8 @@ import '../../bloc/auth/auth_bloc.dart';
 import '../../bloc/auth/auth_state.dart';
 import 'AllRecipesPage.dart';
 import 'ui_recipe.dart';
+import '../../api/ApiService.dart';
+import '../../model/Category.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -15,11 +17,13 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   String? username;
+  List<Category> categories = [];
 
   @override
   void initState() {
     super.initState();
     _loadUsername();
+    _fetchCategories();
   }
 
   Future<void> _loadUsername() async {
@@ -29,6 +33,18 @@ class _HomepageState extends State<Homepage> {
       setState(() {
         username = state.username;
       });
+    }
+  }
+
+  Future<void> _fetchCategories() async {
+    final apiService = ApiService();
+    try {
+      final fetchedCategories = await apiService.fetchCategories();
+      setState(() {
+        categories = fetchedCategories;
+      });
+    } catch (e) {
+      print("Error fetching categories: $e");
     }
   }
 
@@ -148,13 +164,12 @@ class _HomepageState extends State<Homepage> {
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: const [
-                    CategoryButton(label: "LUNCH"),
-                    SizedBox(width: 12),
-                    CategoryButton(label: "DINNER"),
-                    SizedBox(width: 12),
-                    CategoryButton(label: "BREAKFAST"),
-                  ],
+                  children: categories.map((category) {
+                    return CategoryButton(
+                      label: category.strCategory,
+                      imageUrl: category.strCategoryThumb,
+                    );
+                  }).toList(),
                 ),
               ),
               const SizedBox(height: 24),
@@ -267,29 +282,34 @@ class _HomepageState extends State<Homepage> {
 
 class CategoryButton extends StatelessWidget {
   final String label;
-  const CategoryButton({super.key, required this.label});
+  final String imageUrl;
+
+  const CategoryButton({super.key, required this.label, required this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF19A413),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            imageUrl,
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+          ),
         ),
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontFamily: 'WorkSans',
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'WorkSans',
+            color: Colors.black,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
+      ],
     );
   }
 }

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:nutrichild/model/ArticleResult.dart';
+import 'package:nutrichild/model/Category.dart';
+
 
 class ApiService {
   static const String apiKey = "41e1f1b636539e82c15d60b757958247";
@@ -55,6 +57,25 @@ class ApiService {
       } else {
         throw Exception(
             'Failed to load data from Nutritionix: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("API Error: $e");
+      throw Exception('Failed to connect to the server');
+    }
+  }
+
+  Future<List<Category>> fetchCategories() async {
+    final url = Uri.parse("https://www.themealdb.com/api/json/v1/1/categories.php");
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        List<Category> categories = (data['categories'] as List)
+            .map((category) => Category.fromJson(category))
+            .toList();
+        return categories;
+      } else {
+        throw Exception('Failed to load categories: ${response.statusCode}');
       }
     } catch (e) {
       print("API Error: $e");
