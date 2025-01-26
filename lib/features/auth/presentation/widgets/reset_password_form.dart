@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nutrichild/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:nutrichild/features/auth/presentation/bloc/auth_event.dart';
 
 class ResetPasswordForm extends StatefulWidget {
   final bool isFromLogin;
@@ -12,34 +15,24 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
   final emailController = TextEditingController();
   final currentPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
-  bool _isLoading = false;
 
   Future<void> _performResetPassword() async {
     final email = emailController.text.trim();
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email tidak boleh kosong')),
+        const SnackBar(content: Text('Email cannot be empty')),
       );
       return;
     }
 
-    setState(() => _isLoading = true);
-    // TODO: Implement reset password logic with bloc
-  }
+    BlocProvider.of<AuthBloc>(context).add(ResetPasswordEvent(email: email));
 
-  Future<void> _performChangePassword() async {
-    final currentPassword = currentPasswordController.text.trim();
-    final newPassword = newPasswordController.text.trim();
-    
-    if (currentPassword.isEmpty || newPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua field harus diisi')),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-    // TODO: Implement change password logic with bloc
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Link reset password has been sent to your email'),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
@@ -102,11 +95,6 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
             ),
           ),
         ),
-        const SizedBox(height: 24),
-        _buildSubmitButton(
-          onPressed: _performChangePassword,
-          text: 'Change Password',
-        ),
       ],
     );
   }
@@ -117,25 +105,23 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
   }) {
     return SizedBox(
       width: double.infinity,
-      child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ElevatedButton(
-              onPressed: _isLoading ? null : onPressed,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 
@@ -146,4 +132,4 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
     newPasswordController.dispose();
     super.dispose();
   }
-} 
+}

@@ -37,3 +37,7 @@ class ErrorAuthState extends AuthState {
 class LogoutAuthState extends AuthState {
   const LogoutAuthState();
 }
+
+class ResetPasswordAuthState extends AuthState {
+  const ResetPasswordAuthState();
+}

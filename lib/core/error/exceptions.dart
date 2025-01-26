@@ -1,17 +1,29 @@
 class ServerException implements Exception {
   final String message;
-  
-  ServerException({this.message = 'Terjadi kesalahan pada server'});
+
+  ServerException(this.message);
 }
 
-class CacheException implements Exception {
+class AuthException implements Exception {
   final String message;
-  
-  CacheException({this.message = 'Terjadi kesalahan pada cache'});
+
+  AuthException(this.message);
 }
 
-class NetworkException implements Exception {
+class UserNotFoundException implements Exception {
   final String message;
-  
-  NetworkException({this.message = 'Tidak ada koneksi internet'});
-} 
+
+  UserNotFoundException(this.message);
+}
+
+class EmailNotVerifiedException implements Exception {
+  final String message;
+
+  EmailNotVerifiedException(this.message);
+}
+
+class UserAlreadyExistsException implements Exception {
+  final String message;
+
+  UserAlreadyExistsException(this.message);
+}

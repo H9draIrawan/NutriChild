@@ -7,6 +7,7 @@ import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/login.dart';
 import 'features/auth/domain/usecases/register.dart';
 import 'features/auth/domain/usecases/logout.dart';
+import 'features/auth/domain/usecases/reset_password.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
 final sl = GetIt.instance;
@@ -36,6 +37,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => Login(sl()));
   sl.registerLazySingleton(() => Register(sl()));
   sl.registerLazySingleton(() => Logout(sl()));
+  sl.registerLazySingleton(() => ResetPassword(sl()));
 
   // Bloc
   sl.registerFactory(
@@ -43,6 +45,7 @@ Future<void> init() async {
       login: sl(),
       register: sl(),
       logout: sl(),
+      resetPassword: sl(),
     ),
   );
 }

@@ -17,8 +17,14 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final result = await remoteDataSource.login(email, password);
       return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on UserNotFoundException catch (e) {
+      return Left(UserNotFoundFailure(e.message));
+    } on EmailNotVerifiedException catch (e) {
+      return Left(EmailNotVerifiedFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -26,20 +32,26 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> register(
       String email, String password, String username) async {
     try {
-      await remoteDataSource.register(email, password, username);
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      final result = await remoteDataSource.register(email, password, username);
+      return Right(result);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on UserAlreadyExistsException catch (e) {
+      return Left(UserAlreadyExistsFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
   }
 
   @override
   Future<Either<Failure, void>> logout() async {
-    try {
-      await remoteDataSource.logout();
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    }
+    final result = await remoteDataSource.logout();
+    return Right(result);
+  }
+
+  @override
+  Future<Either<Failure, void>> resetPassword(String email) async {
+    final result = await remoteDataSource.resetPassword(email);
+    return Right(result);
   }
 }

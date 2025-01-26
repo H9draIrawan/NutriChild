@@ -7,6 +7,7 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> login(String email, String password);
   Future<void> register(String email, String password, String username);
   Future<void> logout();
+  Future<void> resetPassword(String email);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -22,14 +23,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> login(String email, String password) async {
     try {
-      final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+      if (email.isEmpty || password.isEmpty) {
+        throw AuthException('Email and password cannot be empty');
+      } else if (!email.contains('@')) {
+        throw AuthException('Invalid email');
+      } else if (password.length < 6) {
+        throw AuthException('Password must be at least 6 characters long');
+      }
+
+      final userCredential = await _firebaseAuth
+          .signInWithEmailAndPassword(
         email: email,
         password: password,
-      );
+      )
+          .onError((error, stackTrace) {
+        throw UserNotFoundException('Email or password is incorrect');
+      });
 
       if (!userCredential.user!.emailVerified) {
-        throw ServerException(
-            message: 'Silakan verifikasi email Anda terlebih dahulu');
+        throw EmailNotVerifiedException('Email not verified');
       }
 
       final userDoc = await _firestore
@@ -37,46 +49,53 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .doc(userCredential.user!.uid)
           .get();
 
-      if (!userDoc.exists) {
-        throw ServerException(message: 'Data pengguna tidak ditemukan');
-      }
-
-      final userData = userDoc.data()!;
-
       return UserModel(
-        id: userCredential.user!.uid,
-        email: userData['email'],
-        username: userData['username'],
+        id: userDoc.id,
+        email: userDoc['email'],
+        username: userDoc['username'],
       );
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      throw ServerException(message: e.message ?? 'Terjadi kesalahan');
+    } on AuthException catch (e) {
+      throw AuthException(e.message);
+    } on UserNotFoundException catch (e) {
+      throw UserNotFoundException(e.message);
+    } on EmailNotVerifiedException catch (e) {
+      throw EmailNotVerifiedException(e.message);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString());
     }
   }
 
   @override
   Future<void> register(String email, String password, String username) async {
     try {
-      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      if (userCredential.user == null) {
-        throw ServerException(message: 'Gagal membuat user');
+      if (email.isEmpty || password.isEmpty || username.isEmpty) {
+        throw AuthException('Email, password, and username cannot be empty');
+      } else if (!email.contains('@')) {
+        throw AuthException('Invalid email');
+      } else if (password.length < 6) {
+        throw AuthException('Password must be at least 6 characters long');
       }
 
-      await userCredential.user!.sendEmailVerification();
+      final userCredential = await _firebaseAuth
+          .createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      )
+          .onError((error, stackTrace) {
+        throw UserAlreadyExistsException('User already exists');
+      });
 
+      await userCredential.user!.sendEmailVerification();
       await _firestore
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({'email': email, 'username': username});
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      throw ServerException(message: e.message ?? 'Terjadi kesalahan');
+    } on AuthException catch (e) {
+      throw AuthException(e.message);
+    } on UserAlreadyExistsException catch (e) {
+      throw UserAlreadyExistsException(e.message);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString());
     }
   }
 
@@ -85,7 +104,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       await _firebaseAuth.signOut();
     } catch (e) {
-      throw ServerException(message: 'Gagal logout');
+      throw ServerException('Failed to logout');
+    }
+  }
+
+  @override
+  Future<void> resetPassword(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      throw ServerException('Failed to reset password');
     }
   }
 }

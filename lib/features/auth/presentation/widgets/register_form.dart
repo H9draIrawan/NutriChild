@@ -34,9 +34,9 @@ class _RegisterFormState extends State<RegisterForm> {
               context: context,
               barrierDismissible: false,
               builder: (context) => AlertDialog(
-                title: const Text('Verifikasi Email'),
+                title: const Text('Verification Email'),
                 content: const Text(
-                  'Link verifikasi telah dikirim ke email Anda. Silakan cek email dan verifikasi akun Anda sebelum login.',
+                  'Verification email has been sent to your email. Please check your email and verify your account before logging in.',
                 ),
                 actions: [
                   TextButton(
@@ -50,7 +50,10 @@ class _RegisterFormState extends State<RegisterForm> {
             );
           } else if (state is ErrorAuthState) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         }
@@ -143,21 +146,36 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   Future<void> _performRegister() async {
-    if (emailController.text.trim().isEmpty ||
-        passwordController.text.trim().isEmpty ||
-        usernameController.text.trim().isEmpty) {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final username = usernameController.text.trim();
+
+    // Validasi input
+    String? errorMessage;
+    if (email.isEmpty || password.isEmpty || username.isEmpty) {
+      errorMessage = 'Email, password, and username cannot be empty';
+    } else if (!email.contains('@')) {
+      errorMessage = 'Invalid email format';
+    } else if (password.length < 6) {
+      errorMessage = 'Password must be at least 6 characters long';
+    } else if (username.length < 3) {
+      errorMessage = 'Username must be at least 3 characters long';
+    }
+
+    if (errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Semua field harus diisi'),
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
     context.read<AuthBloc>().add(RegisterEvent(
-          email: emailController.text.trim(),
-          username: usernameController.text.trim(),
-          password: passwordController.text.trim(),
+          email: email,
+          username: username,
+          password: password,
         ));
   }
 

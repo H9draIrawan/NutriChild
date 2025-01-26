@@ -43,33 +43,6 @@ class _LoginFormState extends State<LoginForm> {
     });
   }
 
-  Future<void> _performLogin() async {
-    if (emailController.text.trim().isEmpty ||
-        passwordController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email dan password tidak boleh kosong')),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    if (rememberMe) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('rememberMe', true);
-      await prefs.setString('savedEmail', emailController.text.trim());
-      await prefs.setString('savedPassword', passwordController.text.trim());
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-    }
-
-    context.read<AuthBloc>().add(LoginEvent(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        ));
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
@@ -80,23 +53,8 @@ class _LoginFormState extends State<LoginForm> {
           setState(() => _isLoading = false);
 
           if (state is LoginAuthState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Login berhasil'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            // context.go(AppRoutes.home);
           } else if (state is ErrorAuthState) {
-            if (state.message.contains('wrong-password') || 
-                state.message.contains('user-not-found')) {
-              SharedPreferences.getInstance().then((prefs) {
-                prefs.clear();
-                setState(() {
-                  rememberMe = false;
-                });
-              });
-            }
-
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -212,6 +170,46 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
     );
+  }
+
+  Future<void> _performLogin() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    // Validasi input
+    String? errorMessage;
+    if (email.isEmpty || password.isEmpty) {
+      errorMessage = 'Email and password cannot be empty';
+    } else if (!email.contains('@')) {
+      errorMessage = 'Invalid email format';
+    } else if (password.length < 6) {
+      errorMessage = 'Password must be at least 6 characters long';
+    }
+
+    if (errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (rememberMe) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('rememberMe', true);
+      await prefs.setString('savedEmail', email);
+      await prefs.setString('savedPassword', password);
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+    }
+
+    context.read<AuthBloc>().add(LoginEvent(
+      email: email,
+      password: password,
+    ));
   }
 
   @override
