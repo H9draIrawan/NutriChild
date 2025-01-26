@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nutrichild/core/routes/app_routes.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -50,6 +54,12 @@ class _LoginFormState extends State<LoginForm> {
 
     setState(() => _isLoading = true);
 
+    // Dispatch login event ke AuthBloc
+    context.read<AuthBloc>().add(LoginEvent(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        ));
+
     // Simpan kredensial jika remember me dicentang
     if (rememberMe) {
       final prefs = await SharedPreferences.getInstance();
@@ -64,53 +74,72 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          controller: emailController,
-          decoration: InputDecoration(
-            hintText: 'Email Address',
-            hintStyle: TextStyle(color: Colors.grey[400]),
-            prefixIcon:
-                Icon(Icons.mail_outline, color: Colors.grey[400], size: 22),
-            border: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey)),
-            enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey)),
-            focusedBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.blue)),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: passwordController,
-          obscureText: _obscureText,
-          decoration: InputDecoration(
-            hintText: 'Password',
-            hintStyle: TextStyle(color: Colors.grey[400]),
-            prefixIcon:
-                Icon(Icons.lock_outline, color: Colors.grey[400], size: 22),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscureText ? Icons.visibility_off : Icons.visibility,
-                color: Colors.grey[400],
-                size: 22,
-              ),
-              onPressed: () => setState(() => _obscureText = !_obscureText),
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthLoading) {
+          setState(() => _isLoading = true);
+        } else {
+          setState(() => _isLoading = false);
+
+          if (state is Authenticated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Login berhasil')),
+            );
+          } else if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        }
+      },
+      child: Column(
+        children: [
+          TextField(
+            controller: emailController,
+            decoration: InputDecoration(
+              hintText: 'Email Address',
+              hintStyle: TextStyle(color: Colors.grey[400]),
+              prefixIcon:
+                  Icon(Icons.mail_outline, color: Colors.grey[400], size: 22),
+              border: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey)),
+              enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey)),
+              focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue)),
             ),
-            border: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey)),
-            enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey)),
-            focusedBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.blue)),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildRememberMeAndForgotPassword(),
-        const SizedBox(height: 24),
-        _buildLoginButton(),
-      ],
+          const SizedBox(height: 16),
+          TextField(
+            controller: passwordController,
+            obscureText: _obscureText,
+            decoration: InputDecoration(
+              hintText: 'Password',
+              hintStyle: TextStyle(color: Colors.grey[400]),
+              prefixIcon:
+                  Icon(Icons.lock_outline, color: Colors.grey[400], size: 22),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                  color: Colors.grey[400],
+                  size: 22,
+                ),
+                onPressed: () => setState(() => _obscureText = !_obscureText),
+              ),
+              border: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey)),
+              enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey)),
+              focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildRememberMeAndForgotPassword(),
+          const SizedBox(height: 24),
+          _buildLoginButton(),
+        ],
+      ),
     );
   }
 

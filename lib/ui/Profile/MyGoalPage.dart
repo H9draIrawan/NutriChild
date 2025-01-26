@@ -70,10 +70,6 @@ class _MyGoalPageState extends State<MyGoalPage> {
   final FoodSqflite _foodDb = FoodSqflite();
   final MealSqflite _mealDb = MealSqflite();
 
-  // Pindahkan fungsi helper ke class terpisah jika digunakan di banyak tempat
-  static const _chartHeight = 200.0;
-  static const _lineChartHeight = 250.0;
-
   // Sederhanakan fungsi untuk mendapatkan data chart
   Future<Map<String, double>> _getNutritionData(String childId) async {
     final date = DateTime.now();
@@ -1173,7 +1169,8 @@ class _MyGoalPageState extends State<MyGoalPage> {
                                             vertical: 4,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: bmiInfo['color'].withOpacity(0.2),
+                                            color: bmiInfo['color']
+                                                .withOpacity(0.2),
                                             borderRadius:
                                                 BorderRadius.circular(12),
                                           ),
