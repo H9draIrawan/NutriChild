@@ -13,27 +13,21 @@ class AuthRepositoryImpl implements AuthRepository {
   });
 
   @override
-  Future<Either<Failure, User>> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<Either<Failure, User>> login(String email, String password) async {
     try {
-      final user = await remoteDataSource.login(email, password);
-      return Right(user);
+      final result = await remoteDataSource.login(email, password);
+      return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     }
   }
 
   @override
-  Future<Either<Failure, User>> register({
-    required String email,
-    required String password,
-    required String username,
-  }) async {
+  Future<Either<Failure, void>> register(
+      String email, String password, String username) async {
     try {
-      final user = await remoteDataSource.register(email, password, username);
-      return Right(user);
+      await remoteDataSource.register(email, password, username);
+      return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     }
@@ -44,19 +38,6 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.logout();
       return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    }
-  }
-
-  @override
-  Future<Either<Failure, User>> getCurrentUser() async {
-    try {
-      final user = await remoteDataSource.getCurrentUser();
-      if (user != null) {
-        return Right(user);
-      }
-      return Left(ServerFailure(message: 'User tidak ditemukan'));
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     }

@@ -54,40 +54,54 @@ class _LoginFormState extends State<LoginForm> {
 
     setState(() => _isLoading = true);
 
-    // Dispatch login event ke AuthBloc
-    context.read<AuthBloc>().add(LoginEvent(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        ));
-
-    // Simpan kredensial jika remember me dicentang
     if (rememberMe) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('rememberMe', true);
-      await prefs.setString('savedEmail', emailController.text);
-      await prefs.setString('savedPassword', passwordController.text);
+      await prefs.setString('savedEmail', emailController.text.trim());
+      await prefs.setString('savedPassword', passwordController.text.trim());
     } else {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
     }
+
+    context.read<AuthBloc>().add(LoginEvent(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is AuthLoading) {
+        if (state is LoadingAuthState) {
           setState(() => _isLoading = true);
         } else {
           setState(() => _isLoading = false);
 
-          if (state is Authenticated) {
+          if (state is LoginAuthState) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Login berhasil')),
+              const SnackBar(
+                content: Text('Login berhasil'),
+                backgroundColor: Colors.green,
+              ),
             );
-          } else if (state is AuthError) {
+          } else if (state is ErrorAuthState) {
+            if (state.message.contains('wrong-password') || 
+                state.message.contains('user-not-found')) {
+              SharedPreferences.getInstance().then((prefs) {
+                prefs.clear();
+                setState(() {
+                  rememberMe = false;
+                });
+              });
+            }
+
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         }
@@ -202,6 +216,9 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   void dispose() {
+    if (!rememberMe) {
+      SharedPreferences.getInstance().then((prefs) => prefs.clear());
+    }
     emailController.dispose();
     passwordController.dispose();
     super.dispose();

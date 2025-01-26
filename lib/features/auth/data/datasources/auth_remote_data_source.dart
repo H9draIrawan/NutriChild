@@ -5,9 +5,8 @@ import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> login(String email, String password);
-  Future<UserModel> register(String email, String password, String username);
+  Future<void> register(String email, String password, String username);
   Future<void> logout();
-  Future<UserModel?> getCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -28,38 +27,37 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         password: password,
       );
 
-      if (userCredential.user == null) {
-        throw ServerException(message: 'User tidak ditemukan');
+      if (!userCredential.user!.emailVerified) {
+        throw ServerException(
+            message: 'Silakan verifikasi email Anda terlebih dahulu');
       }
 
-      final userData = await _getUserData(userCredential.user!.uid);
-      return userData;
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      throw ServerException(
-        message: _getMessageFromErrorCode(e.code),
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .get();
+
+      if (!userDoc.exists) {
+        throw ServerException(message: 'Data pengguna tidak ditemukan');
+      }
+
+      final userData = userDoc.data()!;
+
+      return UserModel(
+        id: userCredential.user!.uid,
+        email: userData['email'],
+        username: userData['username'],
       );
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw ServerException(message: e.message ?? 'Terjadi kesalahan');
     } catch (e) {
-      throw ServerException(message: 'Terjadi kesalahan saat login');
+      throw ServerException(message: e.toString());
     }
   }
 
   @override
-  Future<UserModel> register(
-    String email,
-    String password,
-    String username,
-  ) async {
+  Future<void> register(String email, String password, String username) async {
     try {
-      // Check if username already exists
-      final usernameQuery = await _firestore
-          .collection('users')
-          .where('username', isEqualTo: username)
-          .get();
-
-      if (usernameQuery.docs.isNotEmpty) {
-        throw ServerException(message: 'Username sudah digunakan');
-      }
-
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -69,22 +67,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw ServerException(message: 'Gagal membuat user');
       }
 
-      // Create user document in Firestore
-      final user = UserModel(
-        id: userCredential.user!.uid,
-        email: email,
-        username: username,
-      );
+      await userCredential.user!.sendEmailVerification();
 
-      await _firestore.collection('users').doc(user.id).set(user.toJson());
-
-      return user;
+      await _firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({'email': email, 'username': username});
     } on firebase_auth.FirebaseAuthException catch (e) {
-      throw ServerException(
-        message: _getMessageFromErrorCode(e.code),
-      );
+      throw ServerException(message: e.message ?? 'Terjadi kesalahan');
     } catch (e) {
-      throw ServerException(message: 'Terjadi kesalahan saat registrasi');
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -93,50 +85,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       await _firebaseAuth.signOut();
     } catch (e) {
-      throw ServerException(message: 'Terjadi kesalahan saat logout');
-    }
-  }
-
-  @override
-  Future<UserModel?> getCurrentUser() async {
-    final currentUser = _firebaseAuth.currentUser;
-    if (currentUser != null) {
-      return _getUserData(currentUser.uid);
-    }
-    return null;
-  }
-
-  Future<UserModel> _getUserData(String uid) async {
-    try {
-      final docSnapshot = await _firestore.collection('users').doc(uid).get();
-
-      if (!docSnapshot.exists) {
-        throw ServerException(message: 'Data user tidak ditemukan');
-      }
-
-      return UserModel.fromJson({
-        'id': docSnapshot.id,
-        ...docSnapshot.data()!,
-      });
-    } catch (e) {
-      throw ServerException(message: 'Gagal mengambil data user');
-    }
-  }
-
-  String _getMessageFromErrorCode(String code) {
-    switch (code) {
-      case 'user-not-found':
-        return 'Email tidak terdaftar';
-      case 'wrong-password':
-        return 'Password salah';
-      case 'email-already-in-use':
-        return 'Email sudah terdaftar';
-      case 'invalid-email':
-        return 'Format email tidak valid';
-      case 'weak-password':
-        return 'Password terlalu lemah';
-      default:
-        return 'Terjadi kesalahan: $code';
+      throw ServerException(message: 'Gagal logout');
     }
   }
 }
