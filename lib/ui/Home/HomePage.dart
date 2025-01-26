@@ -18,6 +18,8 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   String? username;
   List<Category> categories = [];
+  List<Category> filteredCategories = [];
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -42,10 +44,31 @@ class _HomepageState extends State<Homepage> {
       final fetchedCategories = await apiService.fetchCategories();
       setState(() {
         categories = fetchedCategories;
+        filteredCategories = fetchedCategories;
       });
     } catch (e) {
       print("Error fetching categories: $e");
     }
+  }
+
+  void _filterCategories(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredCategories = categories;
+      } else {
+        filteredCategories = categories
+            .where((category) => category.strCategory
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -122,6 +145,8 @@ class _HomepageState extends State<Homepage> {
                   children: [
                     Expanded(
                       child: TextField(
+                        controller: searchController,
+                        onChanged: _filterCategories,
                         decoration: InputDecoration(
                           hintText: "Find recipes",
                           hintStyle: TextStyle(
@@ -144,7 +169,11 @@ class _HomepageState extends State<Homepage> {
                     Container(
                       margin: const EdgeInsets.only(right: 8),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          // Clear search
+                          searchController.clear();
+                          _filterCategories('');
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF19A413),
                           padding: const EdgeInsets.all(12),
@@ -153,8 +182,7 @@ class _HomepageState extends State<Homepage> {
                           ),
                           elevation: 0,
                         ),
-                        child:
-                            const Icon(Icons.filter_list, color: Colors.white),
+                        child: const Icon(Icons.clear, color: Colors.white),
                       ),
                     ),
                   ],
@@ -165,16 +193,41 @@ class _HomepageState extends State<Homepage> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.8,
-                children: categories.map((category) {
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.85,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                children: filteredCategories.map((category) {
                   return CategoryButton(
                     label: category.strCategory,
                     imageUrl: category.strCategoryThumb,
                   );
                 }).toList(),
               ),
+              if (filteredCategories.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No categories found",
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               const SizedBox(height: 24),
             ],
           ),
@@ -196,40 +249,62 @@ class CategoryButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 4,
-            offset: const Offset(0, 1),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              imageUrl,
-              width: 120,
-              height: 120,
-              fit: BoxFit.cover,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // Handle category tap
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    imageUrl,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 100,
+                        height: 100,
+                        color: Colors.grey[200],
+                        child: Icon(Icons.error, color: Colors.grey[400]),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: 'WorkSans',
+                    color: Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'WorkSans',
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:nutrichild/model/ArticleResult.dart';
 import 'package:nutrichild/model/Category.dart';
 
-
 class ApiService {
   static const String apiKey = "41e1f1b636539e82c15d60b757958247";
 
@@ -65,7 +64,8 @@ class ApiService {
   }
 
   Future<List<Category>> fetchCategories() async {
-    final url = Uri.parse("https://www.themealdb.com/api/json/v1/1/categories.php");
+    final url =
+        Uri.parse("https://www.themealdb.com/api/json/v1/1/categories.php");
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -73,6 +73,51 @@ class ApiService {
         List<Category> categories = (data['categories'] as List)
             .map((category) => Category.fromJson(category))
             .toList();
+
+        // Add custom categories
+        categories.addAll([
+          Category(
+              idCategory: "custom1",
+              strCategory: "Healthy Breakfast",
+              strCategoryThumb:
+                  "https://www.themealdb.com/images/category/breakfast.png"),
+          Category(
+              idCategory: "custom2",
+              strCategory: "Quick & Easy",
+              strCategoryThumb:
+                  "https://www.themealdb.com/images/category/miscellaneous.png"),
+          Category(
+              idCategory: "custom3",
+              strCategory: "Kids Favorite",
+              strCategoryThumb:
+                  "https://www.themealdb.com/images/category/dessert.png"),
+          Category(
+              idCategory: "custom4",
+              strCategory: "Low Calorie",
+              strCategoryThumb:
+                  "https://www.themealdb.com/images/category/vegetarian.png"),
+          Category(
+              idCategory: "custom5",
+              strCategory: "High Protein",
+              strCategoryThumb:
+                  "https://www.themealdb.com/images/category/beef.png"),
+          Category(
+              idCategory: "custom6",
+              strCategory: "Vegetarian",
+              strCategoryThumb:
+                  "https://www.themealdb.com/images/category/vegan.png"),
+          Category(
+              idCategory: "custom7",
+              strCategory: "Snacks",
+              strCategoryThumb:
+                  "https://www.themealdb.com/images/category/side.png"),
+          Category(
+              idCategory: "custom8",
+              strCategory: "Smoothies",
+              strCategoryThumb:
+                  "https://www.themealdb.com/images/category/miscellaneous.png"),
+        ]);
+
         return categories;
       } else {
         throw Exception('Failed to load categories: ${response.statusCode}');
