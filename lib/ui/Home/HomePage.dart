@@ -161,117 +161,21 @@ class _HomepageState extends State<Homepage> {
                 ),
               ),
               const SizedBox(height: 24),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: categories.map((category) {
-                    return CategoryButton(
-                      label: category.strCategory,
-                      imageUrl: category.strCategoryThumb,
-                    );
-                  }).toList(),
-                ),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.8,
+                children: categories.map((category) {
+                  return CategoryButton(
+                    label: category.strCategory,
+                    imageUrl: category.strCategoryThumb,
+                  );
+                }).toList(),
               ),
               const SizedBox(height: 24),
-              RecipeSection(
-                title: "Rich in protein recipes",
-                recipes: [
-                  RecipeCard(
-                    image: 'assets/images/pic3.png',
-                    title: "Roasted chicken",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic4.png',
-                    title: "Salmon with salad",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic5.png',
-                    title: "Roasted lamb",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic3.png',
-                    title: "Ravioli with pesto",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic4.png',
-                    title: "Grilled steak",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic5.png',
-                    title: "Tuna salad",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic3.png',
-                    title: "Beef stir fry",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic4.png',
-                    title: "Chicken curry",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic5.png',
-                    title: "Grilled fish",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic3.png',
-                    title: "Turkey breast",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic4.png',
-                    title: "Shrimp scampi",
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              RecipeSection(
-                title: "Popular recipes",
-                recipes: [
-                  RecipeCard(
-                    image: 'assets/images/pic4.png',
-                    title: "Tomato soup",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic5.png',
-                    title: "Pumpkin soup",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic3.png',
-                    title: "Roasted chicken",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic4.png',
-                    title: "Ravioli with pesto",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic5.png',
-                    title: "Caesar salad",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic3.png',
-                    title: "Beef stew",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic4.png',
-                    title: "Pasta carbonara",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic5.png',
-                    title: "Greek salad",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic3.png',
-                    title: "Mushroom risotto",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic4.png',
-                    title: "Vegetable curry",
-                  ),
-                  RecipeCard(
-                    image: 'assets/images/pic5.png',
-                    title: "Fish tacos",
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -284,176 +188,48 @@ class CategoryButton extends StatelessWidget {
   final String label;
   final String imageUrl;
 
-  const CategoryButton({super.key, required this.label, required this.imageUrl});
+  const CategoryButton(
+      {super.key, required this.label, required this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            imageUrl,
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'WorkSans',
-            color: Colors.black,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class RecipeSection extends StatelessWidget {
-  final String title;
-  final List<RecipeCard> recipes;
-  const RecipeSection({super.key, required this.title, required this.recipes});
-
-  @override
-  Widget build(BuildContext context) {
-    final recipesList = recipes
-        .map((recipe) => {
-              'image': recipe.image,
-              'title': recipe.title,
-            })
-        .toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontFamily: 'WorkSans',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AllRecipesPage(
-                      categoryTitle: title,
-                      recipes: recipesList,
-                    ),
-                  ),
-                );
-              },
-              child: const Text(
-                "Show all",
-                style: TextStyle(
-                  color: Color(0xFF19A413),
-                  fontFamily: 'WorkSans',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 180,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: recipes.length,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: recipes[index],
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              imageUrl,
+              width: 120,
+              height: 120,
+              fit: BoxFit.cover,
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class RecipeCard extends StatelessWidget {
-  final String image;
-  final String title;
-  const RecipeCard({super.key, required this.image, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const UiRecipe(),
+          const SizedBox(height: 12),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'WorkSans',
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
           ),
-        );
-      },
-      child: Container(
-        width: 140,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.asset(
-                image,
-                height: 140,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 12,
-                        fontFamily: 'WorkSans',
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const Icon(
-                    Icons.favorite_border,
-                    color: Colors.grey,
-                    size: 16,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
