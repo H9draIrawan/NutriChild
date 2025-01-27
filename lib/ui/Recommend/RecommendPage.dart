@@ -1,304 +1,349 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../../models/child_model.dart';
 
-class Recommendpage extends StatelessWidget {
+class Recommendpage extends StatefulWidget {
   const Recommendpage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Recommend',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
+  State<Recommendpage> createState() => _RecommendpageState();
+}
+
+class _RecommendpageState extends State<Recommendpage> {
+  static const String _apiUrl = 'https://api.cohere.ai/v1/generate';
+  static const String _apiKey = '7DNoJE0QGQI0roKdN4shT9JW0SU7FNUldPcYyr0V';
+
+  bool _isLoading = true;
+  Map<String, dynamic>? _recommendations;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendations();
+  }
+
+  Future<void> _loadRecommendations() async {
+    try {
+      setState(() => _isLoading = true);
+
+      print('=== DEBUG: Sending request to Cohere ===');
+      final response = await http.post(
+        Uri.parse(_apiUrl),
+        headers: {
+          'Authorization': 'Bearer $_apiKey',
+          'Content-Type': 'application/json',
+          'accept': 'application/json',
+        },
+        body: jsonEncode({
+          'model': 'command-r-plus-08-2024',
+          'prompt':
+              '''Berikan rekomendasi menu makanan sehat dalam format JSON persis seperti ini:
+{
+  "breakfast": {
+    "name": "XXX",
+    "ingredients": ["XXX gram ", "XXX gram"],
+    "healthBenefits": "XXXXXXXXXXXXXXXXXXX",
+    "nutritionFacts": ["Kalori: XXX kcal", "Protein: XX gram", "Karbohidrat: XX gram", "Lemak: XX gram", "Serat: XX gram"]
+  },
+  "lunch": {
+    "name": "XXX",
+    "ingredients": ["XXX gram ", "XXX gram"],
+    "healthBenefits": "XXXXXXXXXXXXXXXXXXX",
+    "nutritionFacts": ["Kalori: XXX kcal", "Protein: XX gram", "Karbohidrat: XX gram", "Lemak: XX gram", "Serat: XX gram"]
+  },
+  "dinner": {
+    "name": "XXX",
+    "ingredients": ["XXX gram ", "XXX gram"],
+    "healthBenefits": "XXXXXXXXXXXXXXXXXXX",
+    "nutritionFacts": ["Kalori: XXX kcal", "Protein: XX gram", "Karbohidrat: XX gram", "Lemak: XX gram", "Serat: XX gram"]
+  }
+}''',
+          'max_tokens': 1000,
+          'temperature': 0.7,
+          'return_likelihoods': 'NONE',
+        }),
+      );
+
+      print('=== DEBUG: Response received ===');
+      print('Status code: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        print('=== DEBUG: Parsed response ===');
+        print(jsonEncode(jsonResponse));
+
+        if (jsonResponse.containsKey('generations')) {
+          final generatedText =
+              jsonResponse['generations'][0]['text'] as String;
+          print('=== DEBUG: Generated text ===');
+          print(generatedText);
+
+          // Clean up the response text
+          var cleanText = generatedText.trim();
+
+          // Extract only the JSON part
+          final startIndex = cleanText.indexOf('{');
+          final endIndex = cleanText.lastIndexOf('}') + 1;
+          if (startIndex >= 0 && endIndex > startIndex) {
+            cleanText = cleanText.substring(startIndex, endIndex);
+          }
+
+          print('=== DEBUG: Cleaned text ===');
+          print(cleanText);
+
+          try {
+            final parsedRecommendations = jsonDecode(cleanText);
+            print('=== DEBUG: Parsed recommendations ===');
+            print(jsonEncode(parsedRecommendations));
+
+            if (parsedRecommendations is Map<String, dynamic> &&
+                parsedRecommendations.containsKey('breakfast') &&
+                parsedRecommendations.containsKey('lunch') &&
+                parsedRecommendations.containsKey('dinner')) {
+              print('=== DEBUG: Valid recommendations found ===');
+              setState(() {
+                _recommendations = parsedRecommendations;
+                _isLoading = false;
+              });
+              return;
+            } else {
+              print('=== DEBUG: Invalid recommendations structure ===');
+              throw Exception('Format rekomendasi tidak sesuai');
+            }
+          } catch (e) {
+            print('=== DEBUG: JSON parsing error ===');
+            print(e);
+            throw Exception('Gagal mengurai JSON: $e');
+          }
+        } else {
+          print('=== DEBUG: No generations in response ===');
+          throw Exception('Tidak ada hasil generasi dari Cohere');
+        }
+      } else {
+        print('=== DEBUG: Non-200 response ===');
+        print('Status: ${response.statusCode}');
+        print('Body: ${response.body}');
+        throw Exception(
+            'Gagal mendapatkan rekomendasi (${response.statusCode})');
+      }
+    } catch (e) {
+      print('=== DEBUG: Error caught ===');
+      print(e);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'Coba Lagi',
+            onPressed: _loadRecommendations,
           ),
         ),
-        body: SingleChildScrollView(
+      );
+
+      // Set default recommendations
+      setState(() {
+        _recommendations = {
+          "breakfast": {
+            "name": "Bubur Ayam",
+            "ingredients": [
+              "100 gram beras",
+              "50 gram daging ayam",
+              "1 butir telur",
+              "Sayuran sesuai selera"
+            ],
+            "healthBenefits":
+                "Memberikan energi dan protein untuk memulai hari",
+            "nutritionFacts": [
+              "Kalori: 300 kcal",
+              "Protein: 15 gram",
+              "Karbohidrat: 45 gram"
+            ]
+          },
+          "lunch": {
+            "name": "Nasi Ikan Kukus",
+            "ingredients": [
+              "150 gram nasi",
+              "100 gram ikan",
+              "Sayuran sesuai selera"
+            ],
+            "healthBenefits": "Kaya omega-3 dan protein untuk pertumbuhan",
+            "nutritionFacts": [
+              "Kalori: 400 kcal",
+              "Protein: 20 gram",
+              "Karbohidrat: 50 gram"
+            ]
+          },
+          "dinner": {
+            "name": "Sup Sayur Tahu",
+            "ingredients": [
+              "100 gram sayuran campur",
+              "50 gram tahu",
+              "Bumbu sup secukupnya"
+            ],
+            "healthBenefits": "Mudah dicerna dan kaya nutrisi",
+            "nutritionFacts": [
+              "Kalori: 250 kcal",
+              "Protein: 10 gram",
+              "Karbohidrat: 30 gram"
+            ]
+          }
+        };
+        _isLoading = false;
+      });
+    }
+  }
+
+  Widget _buildMealCard(
+      String mealType, Map<String, dynamic>? mealData, int calories) {
+    if (mealData == null) {
+      return const Center(child: Text('Memuat rekomendasi...'));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              mealType,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.local_fire_department),
+            Text(
+              ' $calories kcal',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          elevation: 4,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    const Text(
-                      'Breakfast',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.local_fire_department,
-                    ),
-                    const Text(
-                      ' 450 kcal',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Oatmeal Pisang',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Bahan-bahan:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text('• 50 gram oatmeal'),
-                        const Text('• 1 buah pisang'),
-                        const Text('• 200 ml susu rendah lemak'),
-                        const Text('• 1 sendok makan madu'),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Cara mempersiapkan:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Masak oatmeal dengan susu di atas api sedang, aduk hingga mendidih. Tambahkan pisang yang sudah dipotong dan madu sebelum disajikan.',
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Manfaat kesehatan:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Memberikan energi yang baik dan serat tinggi untuk memulai hari.',
-                        ),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Tambahkan logika untuk tombol "Add Plan"
-                            },
-                            child: const Text('ADD PLAN'),
-                          ),
-                        ),
-                      ],
-                    ),
+                Text(
+                  mealData['name'] ?? 'Memuat...',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Text(
-                      'Lunch',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.local_fire_department,
-                    ),
-                    const Text(
-                      ' 600 kcal',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Nasi Ayam Bakar',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Bahan-bahan:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text('• 100 gram nasi'),
-                        const Text('• 100 gram ayam'),
-                        const Text('• 50 gram sayuran'),
-                        const Text('• 1 sendok makan sambal'),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Cara mempersiapkan:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Masak nasi dan ayam, kemudian bakar ayam hingga matang. Sajikan dengan sayuran dan sambal.',
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Manfaat kesehatan:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Mengandung protein tinggi dan karbohidrat kompleks yang baik untuk pertumbuhan anak.',
-                        ),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Tambahkan logika untuk tombol "Add Plan"
-                            },
-                            child: const Text('ADD PLAN'),
-                          ),
-                        ),
-                      ],
-                    ),
+                const Text(
+                  'Bahan-bahan:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                const SizedBox(height: 8),
+                ...(mealData['ingredients'] as List<dynamic>? ?? [])
+                    .map<Widget>((ingredient) => Text('• $ingredient'))
+                    .toList(),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Text(
-                      'Dinner',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.local_fire_department,
-                    ),
-                    const Text(
-                      ' 500 kcal',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                const Text(
+                  'Manfaat kesehatan:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Pasta Bolognese',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Bahan-bahan:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text('• 100 gram pasta'),
-                        const Text('• 100 gram daging cincang'),
-                        const Text('• 50 gram saus tomat'),
-                        const Text('• 1 sendok makan keju parmesan'),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Cara mempersiapkan:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Rebus pasta hingga matang, kemudian tumis daging cincang hingga matang. Tambahkan saus tomat dan keju parmesan.',
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Manfaat kesehatan:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Mengandung protein tinggi dan karbohidrat kompleks yang baik untuk pertumbuhan anak.',
-                        ),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Tambahkan logika untuk tombol "Add Plan"
-                            },
-                            child: const Text('ADD PLAN'),
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                const SizedBox(height: 8),
+                Text(mealData['healthBenefits'] ?? 'Memuat...'),
+                const SizedBox(height: 16),
+                const Text(
+                  'Informasi Gizi:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...(mealData['nutritionFacts'] as List<dynamic>? ?? [])
+                    .map<Widget>((fact) => Text('• $fact'))
+                    .toList(),
+                const SizedBox(height: 16),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Add to meal plan functionality
+                    },
+                    child: const Text('TAMBAH KE PLAN'),
                   ),
                 ),
               ],
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Rekomendasi',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          if (!_isLoading)
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _loadRecommendations,
+              tooltip: 'Muat ulang rekomendasi',
+            ),
+        ],
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_recommendations != null) ...[
+                      _buildMealCard(
+                          'Sarapan', _recommendations!['breakfast'], 450),
+                      const SizedBox(height: 16),
+                      _buildMealCard(
+                          'Makan Siang', _recommendations!['lunch'], 600),
+                      const SizedBox(height: 16),
+                      _buildMealCard(
+                          'Makan Malam', _recommendations!['dinner'], 500),
+                    ] else
+                      const Center(
+                        child: Text(
+                          'Tidak ada rekomendasi tersedia.\nTarik ke bawah untuk memuat ulang.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 }
