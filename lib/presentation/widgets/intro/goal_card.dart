@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GoalCard extends StatelessWidget {
   final String title;
@@ -14,10 +15,20 @@ class GoalCard extends StatelessWidget {
     required this.onTap,
   });
 
+  Future<void> _saveSelectedGoal() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('child_goal', title);
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        onTap();
+        if (isSelected) {
+          _saveSelectedGoal();
+        }
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -80,4 +91,4 @@ class GoalCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

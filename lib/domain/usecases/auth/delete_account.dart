@@ -3,11 +3,11 @@ import '../../../core/error/failures.dart';
 import '../../repositories/auth_repository.dart';
 
 class DeleteAccount {
-  final AuthRepository repository;
+  final AuthRepository _authRepository;
 
-  DeleteAccount(this.repository);
+  DeleteAccount(this._authRepository);
 
   Future<Either<Failure, void>> call() async {
-    return await repository.deleteAccount();
+    return await _authRepository.deleteAccount();
   }
 }

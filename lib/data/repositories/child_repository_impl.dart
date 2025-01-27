@@ -12,9 +12,9 @@ class ChildRepositoryImpl implements ChildRepository {
   });
 
   @override
-  Future<Either<Failure, List<Child>>> get() async {
+  Future<Either<Failure, List<Child>>> get(String userId) async {
     try {
-      final children = await childRemoteDataSource.get();
+      final children = await childRemoteDataSource.get(userId);
       return Right(children);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

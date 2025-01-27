@@ -4,11 +4,11 @@ import '../../repositories/child_repository.dart';
 import '../../entities/child.dart';
 
 class UpdateChild {
-  final ChildRepository repository;
+  final ChildRepository _childRepository;
 
-  UpdateChild(this.repository);
+  UpdateChild(this._childRepository);
 
   Future<Either<Failure, void>> call(Child child) async {
-    return await repository.update(child);
+    return await _childRepository.update(child);
   }
 }

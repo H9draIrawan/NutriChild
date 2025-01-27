@@ -3,11 +3,11 @@ import '../../../../core/error/failures.dart';
 import '../../repositories/auth_repository.dart';
 
 class Logout {
-  final AuthRepository repository;
+  final AuthRepository _authRepository;
 
-  Logout(this.repository);
+  Logout(this._authRepository);
 
   Future<Either<Failure, void>> call() {
-    return repository.logout();
+    return _authRepository.logout();
   }
 } 

@@ -4,11 +4,11 @@ import '../../entities/user.dart';
 import '../../repositories/auth_repository.dart';
 
 class Login {
-  final AuthRepository repository;
+  final AuthRepository _authRepository;
 
-  Login(this.repository);
+  Login(this._authRepository);
 
   Future<Either<Failure, User>> call(String email, String password) {
-    return repository.login(email, password);
+    return _authRepository.login(email, password);
   }
 }

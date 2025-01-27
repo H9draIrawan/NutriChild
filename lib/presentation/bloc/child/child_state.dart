@@ -34,6 +34,9 @@ class GetChildState extends ChildState {
   final List<Child> children;
 
   const GetChildState({required this.children});
+
+  @override
+  List<Object?> get props => [children];
 }
 
 class AddChildState extends ChildState {}

@@ -4,7 +4,7 @@ import '../../models/child_model.dart';
 import '../../../domain/entities/child.dart';
 
 abstract class ChildRemoteDataSource {
-  Future<List<Child>> get();
+  Future<List<Child>> get(String userId);
   Future<void> add(Child child);
   Future<void> update(Child child);
   Future<void> delete(Child child);
@@ -18,9 +18,9 @@ class ChildRemoteDataSourceImpl implements ChildRemoteDataSource {
   }) : _firestore = firestore;
 
   @override
-  Future<List<Child>> get() async {
+  Future<List<Child>> get(String userId) async {
     try {
-      final snapshot = await _firestore.collection('children').get();
+      final snapshot = await _firestore.collection('children').where('userId', isEqualTo: userId).get();
       return snapshot.docs
           .map((doc) => ChildModel.fromJson(doc.data()))
           .toList();

@@ -3,11 +3,11 @@ import '../../../core/error/failures.dart';
 import '../../repositories/auth_repository.dart';
 
 class ChangePassword {
-  final AuthRepository repository;
+  final AuthRepository _authRepository;
 
-  ChangePassword(this.repository);
+  ChangePassword(this._authRepository);
 
   Future<Either<Failure, void>> call(String email, String password) async {
-    return await repository.changePassword(email, password);
+    return await _authRepository.changePassword(email, password);
   }
 }

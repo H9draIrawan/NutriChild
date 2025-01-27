@@ -3,11 +3,11 @@ import '../../../../core/error/failures.dart';
 import '../../repositories/auth_repository.dart';
 
 class ResetPassword {
-  final AuthRepository repository;
+  final AuthRepository _authRepository;
 
-  ResetPassword(this.repository);
+  ResetPassword(this._authRepository);
 
   Future<Either<Failure, void>> call(String email) {
-    return repository.resetPassword(email);
+    return _authRepository.resetPassword(email);
   }
 }

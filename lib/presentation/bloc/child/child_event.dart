@@ -12,6 +12,9 @@ class GetChildEvent extends ChildEvent {
   final String id;
 
   const GetChildEvent({required this.id});
+
+  @override
+  List<Object?> get props => [id];
 }
 
 class AddChildEvent extends ChildEvent {

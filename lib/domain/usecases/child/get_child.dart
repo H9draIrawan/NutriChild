@@ -4,11 +4,11 @@ import 'package:nutrichild/domain/entities/child.dart';
 import 'package:nutrichild/domain/repositories/child_repository.dart';
 
 class GetChild {
-  final ChildRepository repository;
+  final ChildRepository _childRepository;
 
-  GetChild(this.repository);
+  GetChild(this._childRepository);
 
-  Future<Either<Failure, List<Child>>> call() async {
-    return await repository.get();
+  Future<Either<Failure, List<Child>>> call(String userId) async {
+    return await _childRepository.get(userId);
   }
 }

@@ -4,11 +4,11 @@ import '../../repositories/auth_repository.dart';
 import '../../entities/user.dart';
 
 class UpdateUser {
-  final AuthRepository repository;
+  final AuthRepository _authRepository;
 
-  UpdateUser(this.repository);
+  UpdateUser(this._authRepository);
 
   Future<Either<Failure, void>> call(User user) async {
-    return await repository.updateUser(user);
+    return await _authRepository.updateUser(user);
   }
 }

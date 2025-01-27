@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:nutrichild/domain/entities/child.dart';
+import 'package:nutrichild/presentation/bloc/auth/auth_state.dart';
 import '../../widgets/intro/intro_content.dart';
 import '../../widgets/intro/goal_card.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nutrichild/core/routes/app_routes.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nutrichild/presentation/bloc/auth/auth_bloc.dart';
+import 'package:nutrichild/presentation/bloc/child/child_bloc.dart';
+import 'package:nutrichild/presentation/bloc/child/child_event.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class IntroPage extends StatefulWidget {
   const IntroPage({super.key});
@@ -15,7 +23,7 @@ class _IntroPageState extends State<IntroPage> {
   final PageController _controller = PageController();
   final GlobalKey<FormState> _childFormKey = GlobalKey<FormState>();
   bool isLastPage = false;
-  int? selectedGoalIndex;
+  String? selectedGoal;
 
   @override
   void initState() {
@@ -41,10 +49,23 @@ class _IntroPageState extends State<IntroPage> {
     }
   }
 
+  Future<Map<String, dynamic>> getChildData() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'name': prefs.getString('child_name') ?? '',
+      'age': prefs.getInt('child_age') ?? 0,
+      'weight': prefs.getDouble('child_weight') ?? 0,
+      'height': prefs.getDouble('child_height') ?? 0,
+      'gender': prefs.getString('child_gender') ?? '',
+      'goal': prefs.getString('child_goal') ?? '',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
     final List<Widget> onboardingPages = [
-      OnboardingContent(
+      IntroContent(
         title: 'Delicious recipies and\npersonalized mealplans',
         image: 'assets/images/logo.png',
         showButton: true,
@@ -55,7 +76,7 @@ class _IntroPageState extends State<IntroPage> {
           curve: Curves.easeInOut,
         ),
       ),
-      OnboardingContent(
+      IntroContent(
         title: "Let's setup your child's profile",
         showChildForm: true,
         showButton: true,
@@ -65,7 +86,7 @@ class _IntroPageState extends State<IntroPage> {
         onButtonPressed: _handleChildFormContinue,
       ),
       // Third Page - Goal Selection
-      OnboardingContent(
+      IntroContent(
         title: "What's your diet goal?",
         showCards: true,
         showButton: true,
@@ -75,25 +96,25 @@ class _IntroPageState extends State<IntroPage> {
           GoalCard(
             title: 'Eat healthy',
             subtitle: 'Have balanced diet and stay lean',
-            isSelected: selectedGoalIndex == 0,
-            onTap: () => _handleGoalSelection(0, 'Eat healthy'),
+            isSelected: selectedGoal == 'Eat healthy',
+            onTap: () => _handleGoalSelection('Eat healthy'),
           ),
           GoalCard(
             title: 'Loose weight',
             subtitle: 'Get lean without struggle',
-            isSelected: selectedGoalIndex == 1,
-            onTap: () => _handleGoalSelection(1, 'Loose weight'),
+            isSelected: selectedGoal == 'Loose weight',
+            onTap: () => _handleGoalSelection('Loose weight'),
           ),
           GoalCard(
             title: 'Build muscles',
             subtitle: 'Stay active and get stronger',
-            isSelected: selectedGoalIndex == 2,
-            onTap: () => _handleGoalSelection(2, 'Build muscles'),
+            isSelected: selectedGoal == 'Build muscles',
+            onTap: () => _handleGoalSelection('Build muscles'),
           ),
         ],
         onButtonPressed: _handleGoalContinue,
       ),
-      OnboardingContent(
+      IntroContent(
         title: 'Do you have any allergies?',
         subtitle:
             'Select the allergies you have so we can adjust the food recommendations for you',
@@ -106,7 +127,7 @@ class _IntroPageState extends State<IntroPage> {
         ),
       ),
       // Fifth Page
-      OnboardingContent(
+      IntroContent(
         title: "You're all set!",
         subtitle:
             "Let's explore delicious recipes\nand personalized meal plans",
@@ -120,6 +141,28 @@ class _IntroPageState extends State<IntroPage> {
             final childId = "C${DateTime.now().millisecondsSinceEpoch}";
             final childPref = await SharedPreferences.getInstance();
             await childPref.setString('childId', childId);
+
+            final childData = await getChildData();
+
+            final userId = (authBloc.state as LoginAuthState).user.id;
+
+            // Simpan data ke bloc
+            BlocProvider.of<ChildBloc>(context).add(AddChildEvent(
+                child: Child(
+                    id: childId,
+                    userId: userId,
+                    name: childData['name'].toString(),
+                    age: childData['age'],
+                    weight: childData['weight'],
+                    height: childData['height'],
+                    gender: childData['gender'].toString(),
+                    goal: childData['goal'].toString())));
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              BlocProvider.of<ChildBloc>(context)
+                  .add(GetChildEvent(id: userId));
+            });
+            context.go(AppRoutes.navigation);
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -162,14 +205,14 @@ class _IntroPageState extends State<IntroPage> {
     );
   }
 
-  void _handleGoalSelection(int index, String goalName) {
+  void _handleGoalSelection(String goalName) {
     setState(() {
-      selectedGoalIndex = selectedGoalIndex == index ? null : index;
+      selectedGoal = goalName;
     });
   }
 
   void _handleGoalContinue() {
-    if (selectedGoalIndex != null) {
+    if (selectedGoal != null) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,

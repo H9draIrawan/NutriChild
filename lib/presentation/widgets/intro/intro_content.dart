@@ -3,7 +3,7 @@ import 'child_form.dart';
 import 'allergy_grid.dart';
 import 'goal_card.dart';
 
-class OnboardingContent extends StatefulWidget {
+class IntroContent extends StatefulWidget {
   final String title;
   final String? subtitle;
   final String? image;
@@ -18,7 +18,7 @@ class OnboardingContent extends StatefulWidget {
   final bool showChildForm;
   final GlobalKey<FormState>? formKey;
 
-  const OnboardingContent({
+  const IntroContent({
     super.key,
     required this.title,
     this.subtitle,
@@ -36,10 +36,10 @@ class OnboardingContent extends StatefulWidget {
   });
 
   @override
-  State<OnboardingContent> createState() => _OnboardingContentState();
+  State<IntroContent> createState() => _IntroContentState();
 }
 
-class _OnboardingContentState extends State<OnboardingContent> {
+class _IntroContentState extends State<IntroContent> {
   final childFormKey = GlobalKey<FormState>();
 
   @override

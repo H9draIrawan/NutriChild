@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChildForm extends StatefulWidget {
   final GlobalKey<FormState>? formKey;
@@ -20,6 +21,15 @@ class _ChildFormState extends State<ChildForm> {
   final heightController = TextEditingController();
   String? selectedGender;
 
+  Future<void> saveChildData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('child_name', nameController.text);
+    await prefs.setInt('child_age', int.parse(ageController.text));
+    await prefs.setDouble('child_weight', double.parse(weightController.text));
+    await prefs.setDouble('child_height', double.parse(heightController.text));
+    await prefs.setString('child_gender', selectedGender ?? '');
+  }
+
   @override
   void dispose() {
     nameController.dispose();
@@ -40,7 +50,8 @@ class _ChildFormState extends State<ChildForm> {
       return false;
     }
 
-    if (widget.formKey?.currentState?.validate() ?? false) {
+    if (formKey.currentState?.validate() ?? false) {
+      saveChildData();
       return true;
     }
     return false;

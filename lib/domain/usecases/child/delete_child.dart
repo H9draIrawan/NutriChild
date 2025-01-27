@@ -4,11 +4,11 @@ import '../../repositories/child_repository.dart';
 import '../../entities/child.dart';
 
 class DeleteChild {
-  final ChildRepository repository;
+  final ChildRepository _childRepository;
 
-  DeleteChild(this.repository);
+  DeleteChild(this._childRepository);
 
   Future<Either<Failure, void>> call(Child child) async {
-    return await repository.delete(child);
+    return await _childRepository.delete(child);
   }
 }

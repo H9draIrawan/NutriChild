@@ -3,9 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nutrichild/core/routes/app_routes.dart';
+import 'package:nutrichild/domain/entities/child.dart';
 import '../../bloc/auth/auth_bloc.dart';
 import '../../bloc/auth/auth_event.dart';
 import '../../bloc/auth/auth_state.dart';
+import '../../bloc/child/child_bloc.dart';
+import '../../bloc/child/child_event.dart';
+import '../../bloc/child/child_state.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -45,6 +49,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final childBloc = context.read<ChildBloc>();
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is LoadingAuthState) {
@@ -53,7 +58,19 @@ class _LoginFormState extends State<LoginForm> {
           setState(() => _isLoading = false);
 
           if (state is LoginAuthState) {
-            context.goNamed(AppRoutes.onboarding);
+            childBloc.add(
+              GetChildEvent(id: state.user.id),
+            );
+
+            if (childBloc.state is GetChildState) {
+              final children = (childBloc.state as GetChildState).children;
+
+              if (children.isEmpty) {
+                context.goNamed(AppRoutes.intro);
+              } else {
+                context.goNamed(AppRoutes.navigation);
+              }
+            }
           } else if (state is ErrorAuthState) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -176,26 +193,6 @@ class _LoginFormState extends State<LoginForm> {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    // Validasi input
-    String? errorMessage;
-    if (email.isEmpty || password.isEmpty) {
-      errorMessage = 'Email and password cannot be empty';
-    } else if (!email.contains('@')) {
-      errorMessage = 'Invalid email format';
-    } else if (password.length < 6) {
-      errorMessage = 'Password must be at least 6 characters long';
-    }
-
-    if (errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     if (rememberMe) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('rememberMe', true);
@@ -207,9 +204,9 @@ class _LoginFormState extends State<LoginForm> {
     }
 
     context.read<AuthBloc>().add(LoginEvent(
-      email: email,
-      password: password,
-    ));
+          email: email,
+          password: password,
+        ));
   }
 
   @override
