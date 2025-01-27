@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../model/child.dart';
+import 'database_initializer.dart';
 
 class ChildSqflite {
   static Database? _database;
@@ -15,9 +16,17 @@ class ChildSqflite {
     return _database!;
   }
 
-  initDB() async {
+  Future<Database> initDB() async {
+    if (kIsWeb) {
+      throw UnsupportedError(
+          "SQLite operations are not supported on web platform");
+    }
+
+    // Ensure database is initialized
+    await DatabaseInitializer.initialize();
+
     var path = await getDatabasesPath();
-    var db = openDatabase("$path/children.db", version: 2,
+    var db = await openDatabase("$path/children.db", version: 2,
         onCreate: (Database db, int version) async {
       await db.execute('''
           CREATE TABLE $_childTable(
@@ -29,16 +38,24 @@ class ChildSqflite {
   }
 
   Future insertChild(Child child) async {
+    if (kIsWeb) {
+      print("Skipping SQLite operation on web platform");
+      return;
+    }
     final Database db = await database;
     try {
       await db.insert(_childTable, child.toMap());
       print("Data Inserted");
     } catch (_) {
-      print("Failed to Inserted Data");
+      print("Failed to Insert Data");
     }
   }
 
   Future<List<Child>> getChild() async {
+    if (kIsWeb) {
+      print("Skipping SQLite operation on web platform");
+      return [];
+    }
     final Database db = await database;
     List<Map<String, dynamic>> results = await db.query(_childTable);
     List<Child> child = [];
@@ -50,6 +67,10 @@ class ChildSqflite {
   }
 
   Future<Child?> getChildById(String id) async {
+    if (kIsWeb) {
+      print("Skipping SQLite operation on web platform");
+      return null;
+    }
     final Database db = await database;
     List<Map<String, dynamic>> results =
         await db.query(_childTable, where: 'id = ?', whereArgs: [id]);
@@ -57,6 +78,10 @@ class ChildSqflite {
   }
 
   Future<List<Child>> getChildByUserId(String userId) async {
+    if (kIsWeb) {
+      print("Skipping SQLite operation on web platform");
+      return [];
+    }
     final Database db = await database;
     List<Map<String, dynamic>> results =
         await db.query(_childTable, where: 'userId = ?', whereArgs: [userId]);
@@ -64,6 +89,10 @@ class ChildSqflite {
   }
 
   Future updateChild(Child child) async {
+    if (kIsWeb) {
+      print("Skipping SQLite operation on web platform");
+      return;
+    }
     final Database db = await database;
     try {
       await db.update(_childTable, child.toMap(),
@@ -75,6 +104,10 @@ class ChildSqflite {
   }
 
   Future deleteChild(String id) async {
+    if (kIsWeb) {
+      print("Skipping SQLite operation on web platform");
+      return;
+    }
     final Database db = await database;
     try {
       await db.delete(_childTable, where: 'id = ?', whereArgs: [id]);

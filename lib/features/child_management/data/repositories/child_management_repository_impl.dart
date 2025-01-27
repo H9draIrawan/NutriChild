@@ -7,7 +7,7 @@ class ChildManagementRepositoryImpl implements ChildManagementRepository {
     try {
       return await function();
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 }

@@ -8,7 +8,7 @@ class NutritionTrackingRemoteDataSourceImpl
     try {
       return await function();
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 }

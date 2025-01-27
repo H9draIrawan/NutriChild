@@ -718,7 +718,7 @@ class _MyGoalPageState extends State<MyGoalPage> {
                     history[touchedSpots.first.x.toInt()]['date'] as DateTime;
                 String day = date.day.toString().padLeft(2, '0');
                 String month = date.month.toString().padLeft(2, '0');
-                String dateStr = '\n${day}/${month}/${date.year}';
+                String dateStr = '\n$day/$month/${date.year}';
 
                 return touchedSpots.map((LineBarSpot spot) {
                   Color color;
@@ -909,7 +909,7 @@ class _MyGoalPageState extends State<MyGoalPage> {
                     history[touchedSpots.first.x.toInt()]['date'] as DateTime;
                 String day = date.day.toString().padLeft(2, '0');
                 String month = date.month.toString().padLeft(2, '0');
-                String dateStr = '\n${day}/${month}/${date.year}';
+                String dateStr = '\n$day/$month/${date.year}';
 
                 return touchedSpots.map((LineBarSpot spot) {
                   return LineTooltipItem(

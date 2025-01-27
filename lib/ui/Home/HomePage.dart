@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/auth/auth_bloc.dart';
 import '../../bloc/auth/auth_state.dart';
-import 'AllRecipesPage.dart';
-import 'ui_recipe.dart';
 import '../../api/ApiService.dart';
 import '../../model/Category.dart';
 
@@ -189,21 +187,29 @@ class _HomepageState extends State<Homepage> {
                 ),
               ),
               const SizedBox(height: 24),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.85,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                children: filteredCategories.map((category) {
-                  return CategoryButton(
-                    label: category.strCategory,
-                    imageUrl: category.strCategoryThumb,
-                  );
-                }).toList(),
-              ),
+              LayoutBuilder(builder: (context, constraints) {
+                // Use 4 columns if width is larger than 800 (desktop)
+                final crossAxisCount = constraints.maxWidth > 800 ? 4 : 2;
+                // Adjust aspect ratio for desktop to maintain proportions
+                final childAspectRatio =
+                    constraints.maxWidth > 800 ? 0.95 : 0.85;
+
+                return GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: childAspectRatio,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  children: filteredCategories.map((category) {
+                    return CategoryButton(
+                      label: category.strCategory,
+                      imageUrl: category.strCategoryThumb,
+                    );
+                  }).toList(),
+                );
+              }),
               if (filteredCategories.isEmpty)
                 Center(
                   child: Padding(
