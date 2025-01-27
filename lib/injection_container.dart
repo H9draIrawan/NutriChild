@@ -1,14 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
-import 'features/auth/data/datasources/auth_remote_data_source.dart';
-import 'features/auth/data/repositories/auth_repository_impl.dart';
-import 'features/auth/domain/repositories/auth_repository.dart';
-import 'features/auth/domain/usecases/login.dart';
-import 'features/auth/domain/usecases/register.dart';
-import 'features/auth/domain/usecases/logout.dart';
-import 'features/auth/domain/usecases/reset_password.dart';
-import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:nutrichild/data/datasources/remote/auth_remote_data_source.dart';
+import 'package:nutrichild/data/repositories/auth_repository_impl.dart';
+import 'package:nutrichild/domain/repositories/auth_repository.dart';
+import 'package:nutrichild/domain/usecases/auth/login.dart';
+import 'package:nutrichild/domain/usecases/auth/register.dart';
+import 'package:nutrichild/domain/usecases/auth/logout.dart';
+import 'package:nutrichild/domain/usecases/auth/reset_password.dart';
+import 'package:nutrichild/domain/usecases/auth/change_password.dart';
+import 'package:nutrichild/domain/usecases/auth/delete_account.dart';
+import 'package:nutrichild/domain/usecases/auth/update_user.dart';
+import 'package:nutrichild/presentation/bloc/auth/auth_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -38,6 +41,9 @@ Future<void> init() async {
   sl.registerLazySingleton(() => Register(sl()));
   sl.registerLazySingleton(() => Logout(sl()));
   sl.registerLazySingleton(() => ResetPassword(sl()));
+  sl.registerLazySingleton(() => ChangePassword(sl()));
+  sl.registerLazySingleton(() => DeleteAccount(sl()));
+  sl.registerLazySingleton(() => UpdateUser(sl()));
 
   // Bloc
   sl.registerFactory(
@@ -46,6 +52,9 @@ Future<void> init() async {
       register: sl(),
       logout: sl(),
       resetPassword: sl(),
+      changePassword: sl(),
+      deleteAccount: sl(),
+      updateUser: sl(),
     ),
   );
 }

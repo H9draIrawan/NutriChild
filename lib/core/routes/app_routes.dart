@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:nutrichild/features/splash/presentation/pages/splash_page.dart';
-import 'package:nutrichild/features/auth/presentation/pages/login_page.dart';
-import 'package:nutrichild/features/auth/presentation/pages/register_page.dart';
-import 'package:nutrichild/features/auth/presentation/pages/reset_password_page.dart';
+import 'package:nutrichild/presentation/pages/splash/splash_page.dart';
+import 'package:nutrichild/presentation/pages/auth/login_page.dart';
+import 'package:nutrichild/presentation/pages/auth/register_page.dart';
+import 'package:nutrichild/presentation/pages/auth/reset_password_page.dart';
+import 'package:nutrichild/presentation/pages/intro/intro_page.dart';
 
 class AppRoutes {
   static const String splash = '/splash';
   static const String login = '/login';
   static const String register = '/register';
   static const String resetPassword = '/reset-password';
-  static const String changePassword = '/change-password';
+  static const String onboarding = '/onboarding';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -44,10 +45,10 @@ class AppRoutes {
         },
       ),
       GoRoute(
-        path: changePassword,
-        name: changePassword,
+        path: onboarding,
+        name: onboarding,
         builder: (BuildContext context, GoRouterState state) {
-          return const ResetPasswordPage(isFromLogin: false);
+          return const IntroPage();
         },
       ),
     ],
@@ -58,7 +59,6 @@ class AppRoutes {
       login: (context) => const LoginPage(),
       register: (context) => const RegisterPage(),
       resetPassword: (context) => const ResetPasswordPage(isFromLogin: true),
-      changePassword: (context) => const ResetPasswordPage(isFromLogin: false),
     };
   }
 }
