@@ -39,7 +39,33 @@ class _RecommendpageState extends State<Recommendpage> {
         body: jsonEncode({
           'model': 'command-r-plus-08-2024',
           'prompt':
-              '''Berikan rekomendasi menu makanan sehat dalam format JSON persis seperti ini:
+              '''Pilih secara acak dari kategori makanan berikut untuk setiap waktu makan (jangan gunakan makanan yang sama dengan contoh):
+
+KATEGORI SARAPAN:
+- Bubur/Sereal/Oatmeal
+- Roti dan Telur
+- Pancake/Waffle Sehat
+- Sandwich
+- Smoothie Bowl
+- Nasi Goreng Sehat
+
+KATEGORI MAKAN SIANG:
+- Nasi dengan Protein (Ayam/Ikan/Daging)
+- Mie Sehat/Bihun
+- Salad dengan Protein
+- Sup/Soto
+- Bowl (Quinoa/Brown Rice)
+- Wrap/Sandwich
+
+KATEGORI MAKAN MALAM:
+- Protein Panggang/Kukus
+- Sayur-sayuran dengan Tahu/Tempe
+- Sup/Cream Soup
+- Pasta Sehat
+- Ikan bakar/kukus
+- Bowl (Quinoa/Brown Rice)
+
+Berikan rekomendasi menu makanan sehat dalam format JSON persis seperti ini:
 {
   "breakfast": {
     "name": "XXX",
@@ -61,7 +87,7 @@ class _RecommendpageState extends State<Recommendpage> {
   }
 }''',
           'max_tokens': 1000,
-          'temperature': 0.7,
+          'temperature': 0.9,
           'return_likelihoods': 'NONE',
         }),
       );
