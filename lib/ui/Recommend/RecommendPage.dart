@@ -338,6 +338,7 @@ Berikan rekomendasi menu makanan sehat dalam format JSON persis seperti ini:
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           'Rekomendasi',
           style: TextStyle(
