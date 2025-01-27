@@ -290,45 +290,26 @@ class _HomepageState extends State<Homepage> {
             ],
           ),
         ),
-        LayoutBuilder(builder: (context, constraints) {
-          // Use 3 columns for desktop, 2 for tablet, 1 for mobile
-          int crossAxisCount;
-          double childAspectRatio;
-
-          if (constraints.maxWidth > 1100) {
-            // Desktop
-            crossAxisCount = 3;
-            childAspectRatio = 1.2;
-          } else if (constraints.maxWidth > 600) {
-            // Tablet
-            crossAxisCount = 2;
-            childAspectRatio = 1.1;
-          } else {
-            // Mobile
-            crossAxisCount = 1;
-            childAspectRatio = 1.5;
-          }
-
-          return Container(
-            constraints: const BoxConstraints(
-              maxWidth: 1200, // Maximum width for content
-            ),
-            child: GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 20,
-              crossAxisSpacing: 20,
-              childAspectRatio: childAspectRatio,
-              children: categories.map((category) {
-                return CategoryButton(
+        SizedBox(
+          height: 280, // Fixed height for the horizontal list
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              return Container(
+                width: 280, // Fixed width for each card
+                margin: EdgeInsets.only(
+                  right: index == categories.length - 1 ? 0 : 20,
+                ),
+                child: CategoryButton(
                   label: category.strCategory,
                   imageUrl: category.strCategoryThumb,
-                );
-              }).toList(),
-            ),
-          );
-        }),
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }
