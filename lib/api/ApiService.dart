@@ -79,49 +79,25 @@ class ApiService {
             .map((category) => Category.fromJson(category))
             .toList();
 
-        // Add custom categories
-        categories.addAll([
-          Category(
-              idCategory: "custom1",
-              strCategory: "Healthy Breakfast",
-              strCategoryThumb:
-                  "https://images.unsplash.com/photo-1494859802809-d069c3b71a8a?w=500&h=500&fit=crop"),
-          Category(
-              idCategory: "custom2",
-              strCategory: "Quick & Easy",
-              strCategoryThumb:
-                  "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&h=500&fit=crop"),
-          Category(
-              idCategory: "custom3",
-              strCategory: "Kids Favorite",
-              strCategoryThumb:
-                  "https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=500&h=500&fit=crop"),
-          Category(
-              idCategory: "custom4",
-              strCategory: "Low Calorie",
-              strCategoryThumb:
-                  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=500&fit=crop"),
-          Category(
-              idCategory: "custom5",
-              strCategory: "High Protein",
-              strCategoryThumb:
-                  "https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=500&h=500&fit=crop"),
-          Category(
-              idCategory: "custom6",
-              strCategory: "Vegetarian",
-              strCategoryThumb:
-                  "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&h=500&fit=crop"),
-          Category(
-              idCategory: "custom7",
-              strCategory: "Snacks",
-              strCategoryThumb:
-                  "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=500&h=500&fit=crop"),
-          Category(
-              idCategory: "custom8",
-              strCategory: "Smoothies",
-              strCategoryThumb:
-                  "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=500&h=500&fit=crop"),
-        ]);
+        // Filter categories to only include from Beef to Goat
+        categories = categories.where((category) {
+          final name = category.strCategory.toLowerCase();
+          return [
+            'beef',
+            'chicken',
+            'dessert',
+            'lamb',
+            'miscellaneous',
+            'pasta',
+            'pork',
+            'seafood',
+            'side',
+            'starter',
+            'vegan',
+            'vegetarian',
+            'goat'
+          ].contains(name);
+        }).toList();
 
         return categories;
       } else {
