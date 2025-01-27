@@ -7,7 +7,7 @@ class HealthAnalyticsRepositoryImpl implements HealthAnalyticsRepository {
     try {
       return await function();
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 }

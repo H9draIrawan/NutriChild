@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nutrichild/ui/Recipe/CategoryDetailPage.dart';
 
 import '../../bloc/auth/auth_bloc.dart';
 import '../../bloc/auth/auth_state.dart';
-import 'AllRecipesPage.dart';
-import 'ui_recipe.dart';
 import '../../api/ApiService.dart';
 import '../../model/Category.dart';
 
@@ -74,165 +73,244 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        toolbarHeight: 80,
-        title: BlocConsumer<AuthBloc, AuthState>(
-          listener: (context, state) {},
-          builder: (context, state) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Welcome, ",
-                      style: TextStyle(
-                        fontFamily: 'WorkSans',
-                        fontSize: 16,
-                        color: Colors.black54,
-                      ),
-                    ),
-                    Text(
-                      username ?? '',
-                      style: const TextStyle(
-                        fontFamily: 'WorkSans',
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "What do you want to cook today?",
-                style: TextStyle(
-                  fontFamily: 'WorkSans',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
+      backgroundColor: Colors.grey[100],
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 180.0,
+            toolbarHeight: 80.0,
+            floating: false,
+            pinned: true,
+            automaticallyImplyLeading: false,
+            backgroundColor: const Color(0xFF19A413),
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding:
+                  const EdgeInsets.only(left: 16, bottom: 20, right: 16),
+              expandedTitleScale: 1.0,
+              background: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 4,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      const Color(0xFF19A413),
+                      Colors.green[600]!,
+                    ],
+                  ),
                 ),
-                child: Row(
+                child: Stack(
                   children: [
-                    Expanded(
-                      child: TextField(
-                        controller: searchController,
-                        onChanged: _filterCategories,
-                        decoration: InputDecoration(
-                          hintText: "Find recipes",
-                          hintStyle: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 16,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: Colors.grey[400],
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
+                    Positioned(
+                      right: -50,
+                      top: -50,
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.1),
                         ),
                       ),
                     ),
-                    Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Clear search
-                          searchController.clear();
-                          _filterCategories('');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF19A413),
-                          padding: const EdgeInsets.all(12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 0,
+                    Positioned(
+                      left: -30,
+                      bottom: -30,
+                      child: Container(
+                        width: 140,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.1),
                         ),
-                        child: const Icon(Icons.clear, color: Colors.white),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.85,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                children: filteredCategories.map((category) {
-                  return CategoryButton(
-                    label: category.strCategory,
-                    imageUrl: category.strCategoryThumb,
-                  );
-                }).toList(),
-              ),
-              if (filteredCategories.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+              title: BlocConsumer<AuthBloc, AuthState>(
+                listener: (context, state) {},
+                builder: (context, state) {
+                  return Container(
+                    padding: const EdgeInsets.only(right: 16),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          "No categories found",
+                        const Text(
+                          "Welcome,",
                           style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            color: Colors.white70,
+                            height: 1.1,
                           ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          username ?? '',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            height: 1.1,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              centerTitle: false,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 24),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: searchController,
+                            onChanged: _filterCategories,
+                            decoration: InputDecoration(
+                              hintText: "Search for recipes...",
+                              hintStyle: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 16,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: Colors.grey[400],
+                              ),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            searchController.clear();
+                            _filterCategories('');
+                          },
+                          icon: const Icon(Icons.clear),
+                          color: Colors.grey[400],
                         ),
                       ],
                     ),
                   ),
+                  if (filteredCategories.isEmpty)
+                    Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            "No recipes found",
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else ...[
+                    _buildCategorySection(
+                        'Main Dishes',
+                        filteredCategories
+                            .where((c) => c.categoryType == 'Main Dishes')
+                            .toList()),
+                    const SizedBox(height: 32),
+                    _buildCategorySection(
+                        'Other Dishes',
+                        filteredCategories
+                            .where((c) => c.categoryType == 'Other Dishes')
+                            .toList()),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategorySection(String title, List<Category> categories) {
+    if (categories.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF19A413),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-              const SizedBox(height: 24),
+              ),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2D3436),
+                ),
+              ),
             ],
           ),
         ),
-      ),
+        SizedBox(
+          height: 280, // Fixed height for the horizontal list
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              return Container(
+                width: 280, // Fixed width for each card
+                margin: EdgeInsets.only(
+                  right: index == categories.length - 1 ? 0 : 20,
+                ),
+                child: CategoryButton(
+                  label: category.strCategory,
+                  imageUrl: category.strCategoryThumb,
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -241,68 +319,73 @@ class CategoryButton extends StatelessWidget {
   final String label;
   final String imageUrl;
 
-  const CategoryButton(
-      {super.key, required this.label, required this.imageUrl});
+  const CategoryButton({
+    super.key,
+    required this.label,
+    required this.imageUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Material(
-        color: Colors.transparent,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
           onTap: () {
-            // Handle category tap
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CategoryDetailPage(category: label),
+              ),
+            );
           },
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    imageUrl,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 100,
-                        height: 100,
-                        color: Colors.grey[200],
-                        child: Icon(Icons.error, color: Colors.grey[400]),
-                      );
-                    },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: 3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontFamily: 'WorkSans',
-                    color: Colors.black87,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2D3436),
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

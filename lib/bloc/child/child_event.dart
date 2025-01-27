@@ -1,7 +1,11 @@
 import 'package:equatable/equatable.dart';
 import '../../model/child.dart';
+
 abstract class ChildEvent extends Equatable {
   const ChildEvent();
+
+  @override
+  List<Object?> get props => [];
 }
 
 class SaveChildEvent extends ChildEvent {
@@ -26,7 +30,7 @@ class SaveChildEvent extends ChildEvent {
   });
 
   @override
-  List<Object> get props =>
+  List<Object?> get props =>
       [id, userId, name, age, gender, weight, height, goal];
 }
 
@@ -75,4 +79,13 @@ class DeleteChildEvent extends ChildEvent {
 
   @override
   List<Object> get props => [childId];
+}
+
+class LoadChildByUserIdEvent extends ChildEvent {
+  final String userId;
+
+  const LoadChildByUserIdEvent(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
 }

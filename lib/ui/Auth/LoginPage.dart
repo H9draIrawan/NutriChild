@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nutrichild/bloc/auth/auth_state.dart';
 import 'package:nutrichild/bloc/child/child_bloc.dart';
@@ -151,8 +152,13 @@ class _LoginpageState extends State<Loginpage> {
               if (state is LoadChildState) {
                 childPref.setString('childId', state.child.id);
                 Navigator.pushReplacementNamed(context, '/');
-              } else if (state is ErrorChildState) {
-                Navigator.pushReplacementNamed(context, '/welcome');
+              } else if (state is NoChildState || state is ErrorChildState) {
+                if (kIsWeb) {
+                  // On web platform, go directly to home page since SQLite is not supported
+                  Navigator.pushReplacementNamed(context, '/');
+                } else {
+                  Navigator.pushReplacementNamed(context, '/welcome');
+                }
               }
             },
           ),
