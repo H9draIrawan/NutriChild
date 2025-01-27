@@ -267,6 +267,36 @@ class ApiService {
     };
   }
 
+
+  Future<String> getRecipesByCategoryAndDiet(String category, String diet) async {
+    final url = Uri.parse(
+        "https://api.spoonacular.com/recipes/complexSearch?query=$category&diet=$diet&apiKey=$apiKey");
+    )
+
+    try{
+      final response = await http.get(url);
+      if (response.statusCode == 200){
+        final data = json.dcode(response.body);
+        List<Recipe> recipes = []
+
+        if(data['results'] != null) {
+          for (var meal in data ['results']){
+            final recipeDetails = await getRecipeDetails(meal['id']);
+            if (recipeDetails != null) {
+              recipes.add(recipeDetails)
+            }
+          }
+        }
+        return recipes;
+      }else {
+       throw Exception('Failed to load recipes: ${response.statusCode}')
+      }
+    }catch(e) {
+      print("API Error: $e");
+      throw Exception('Failed to connect to the server')
+    }
+  }
+
   static List<String> _extractIngredients(Map<String, dynamic> json) {
     List<String> ingredients = [];
     for (int i = 1; i <= 20; i++) {
