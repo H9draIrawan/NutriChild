@@ -30,6 +30,12 @@ class ErrorChildState extends ChildState {
   List<Object?> get props => [message];
 }
 
+class GetChildState extends ChildState {
+  final List<Child> children;
+
+  const GetChildState({required this.children});
+}
+
 class AddChildState extends ChildState {}
 
 class UpdateChildState extends ChildState {}

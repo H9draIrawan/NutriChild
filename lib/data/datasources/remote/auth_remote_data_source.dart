@@ -27,11 +27,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> login(String email, String password) async {
     try {
       if (email.isEmpty || password.isEmpty) {
-        throw AuthException('Email and password cannot be empty');
+        throw ServerException('Email and password cannot be empty');
       } else if (!email.contains('@')) {
-        throw AuthException('Invalid email');
+        throw ServerException('Invalid email');
       } else if (password.length < 6) {
-        throw AuthException('Password must be at least 6 characters long');
+        throw ServerException('Password must be at least 6 characters long');
       }
 
       final userCredential = await _firebaseAuth
@@ -40,11 +40,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         password: password,
       )
           .onError((error, stackTrace) {
-        throw UserNotFoundException('Email or password is incorrect');
+        throw ServerException('Email or password is incorrect');
       });
 
       if (!userCredential.user!.emailVerified) {
-        throw EmailNotVerifiedException('Email not verified');
+        throw ServerException('Email not verified');
       }
 
       final userDoc = await _firestore
@@ -57,12 +57,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         email: userDoc['email'],
         username: userDoc['username'],
       );
-    } on AuthException catch (e) {
-      throw AuthException(e.message);
-    } on UserNotFoundException catch (e) {
-      throw UserNotFoundException(e.message);
-    } on EmailNotVerifiedException catch (e) {
-      throw EmailNotVerifiedException(e.message);
+    } on ServerException catch (e) {
+      throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -72,11 +68,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> register(String email, String password, String username) async {
     try {
       if (email.isEmpty || password.isEmpty || username.isEmpty) {
-        throw AuthException('Email, password, and username cannot be empty');
+        throw ServerException('Email, password, and username cannot be empty');
       } else if (!email.contains('@')) {
-        throw AuthException('Invalid email');
+        throw ServerException('Invalid email');
       } else if (password.length < 6) {
-        throw AuthException('Password must be at least 6 characters long');
+        throw ServerException('Password must be at least 6 characters long');
       }
 
       final userCredential = await _firebaseAuth
@@ -85,7 +81,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         password: password,
       )
           .onError((error, stackTrace) {
-        throw UserAlreadyExistsException('User already exists');
+        throw ServerException('User already exists');
       });
 
       await userCredential.user!.sendEmailVerification();
@@ -93,10 +89,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({'email': email, 'username': username});
-    } on AuthException catch (e) {
-      throw AuthException(e.message);
-    } on UserAlreadyExistsException catch (e) {
-      throw UserAlreadyExistsException(e.message);
+    } on ServerException catch (e) {
+      throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -122,16 +116,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> changePassword(String email, String password) async {
-    await _firebaseAuth.currentUser!.updatePassword(password);
+    try {
+      await _firebaseAuth.currentUser!.updatePassword(password);
+    } catch (e) {
+      throw ServerException('Failed to change password');
+    }
   }
 
   @override
   Future<void> updateUser(UserModel user) async {
-    await _firestore.collection('users').doc(user.id).update(user.toJson());
+    try {
+      await _firestore.collection('users').doc(user.id).update(user.toJson());
+    } catch (e) {
+      throw ServerException('Failed to update user');
+    }
   }
 
   @override
   Future<void> deleteAccount() async {
-    await _firebaseAuth.currentUser!.delete();
+    try {
+      await _firebaseAuth.currentUser!.delete();
+    } catch (e) {
+      throw ServerException('Failed to delete account');
+    }
   }
 }

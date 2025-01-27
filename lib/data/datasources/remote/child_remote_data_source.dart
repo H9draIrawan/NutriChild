@@ -4,6 +4,7 @@ import '../../models/child_model.dart';
 import '../../../domain/entities/child.dart';
 
 abstract class ChildRemoteDataSource {
+  Future<List<Child>> get();
   Future<void> add(Child child);
   Future<void> update(Child child);
   Future<void> delete(Child child);
@@ -17,6 +18,18 @@ class ChildRemoteDataSourceImpl implements ChildRemoteDataSource {
   }) : _firestore = firestore;
 
   @override
+  Future<List<Child>> get() async {
+    try {
+      final snapshot = await _firestore.collection('children').get();
+      return snapshot.docs
+          .map((doc) => ChildModel.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      throw ServerException('Failed to get children');
+    }
+  }
+
+  @override
   Future<void> add(Child child) async {
     try {
       await _firestore
@@ -24,7 +37,7 @@ class ChildRemoteDataSourceImpl implements ChildRemoteDataSource {
           .doc(child.id)
           .set((child as ChildModel).toJson());
     } catch (e) {
-      throw ServerException(e.toString());
+      throw ServerException('Failed to add child');
     }
   }
 
@@ -36,7 +49,7 @@ class ChildRemoteDataSourceImpl implements ChildRemoteDataSource {
           .doc(child.id)
           .update((child as ChildModel).toJson());
     } catch (e) {
-      throw ServerException(e.toString());
+      throw ServerException('Failed to update child');
     }
   }
 
@@ -45,7 +58,7 @@ class ChildRemoteDataSourceImpl implements ChildRemoteDataSource {
     try {
       await _firestore.collection('children').doc(child.id).delete();
     } catch (e) {
-      throw ServerException(e.toString());
+      throw ServerException('Failed to delete child');
     }
   }
 }

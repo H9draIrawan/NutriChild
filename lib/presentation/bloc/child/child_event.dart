@@ -8,6 +8,12 @@ abstract class ChildEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class GetChildEvent extends ChildEvent {
+  final String id;
+
+  const GetChildEvent({required this.id});
+}
+
 class AddChildEvent extends ChildEvent {
   final Child child;
 
