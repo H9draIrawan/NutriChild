@@ -204,6 +204,18 @@ class _RecommendpageState extends State<Recommendpage> {
       return const Center(child: Text('Memuat rekomendasi...'));
     }
 
+    // Extract calories from nutritionFacts
+    String caloriesText = '';
+    if (mealData['nutritionFacts'] != null) {
+      final nutritionFacts = mealData['nutritionFacts'] as List<dynamic>;
+      for (final fact in nutritionFacts) {
+        if (fact.toString().toLowerCase().contains('kalori')) {
+          caloriesText = fact.toString().replaceAll(RegExp(r'[^0-9]'), '');
+          break;
+        }
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -219,7 +231,7 @@ class _RecommendpageState extends State<Recommendpage> {
             const Spacer(),
             const Icon(Icons.local_fire_department),
             Text(
-              ' $calories kcal',
+              ' ${caloriesText.isNotEmpty ? '$caloriesText kcal' : '$calories kcal'}',
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
