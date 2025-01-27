@@ -121,64 +121,110 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
   }
 
   Widget _buildMealsList() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: MediaQuery.of(context).size.width > 800 ? 4 : 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: meals.length,
-      itemBuilder: (context, index) {
-        final meal = meals[index];
-        return Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate number of columns based on screen width
+        int crossAxisCount;
+        double childAspectRatio;
+        double padding;
+
+        if (constraints.maxWidth > 1800) {
+          // Extra large desktop
+          crossAxisCount = 8;
+          childAspectRatio = 0.85;
+          padding = 24;
+        } else if (constraints.maxWidth > 1400) {
+          // Large desktop
+          crossAxisCount = 6;
+          childAspectRatio = 0.85;
+          padding = 20;
+        } else if (constraints.maxWidth > 1100) {
+          // Desktop
+          crossAxisCount = 4;
+          childAspectRatio = 0.85;
+          padding = 16;
+        } else if (constraints.maxWidth > 800) {
+          // Tablet landscape
+          crossAxisCount = 3;
+          childAspectRatio = 0.85;
+          padding = 16;
+        } else if (constraints.maxWidth > 600) {
+          // Tablet portrait
+          crossAxisCount = 2;
+          childAspectRatio = 0.85;
+          padding = 16;
+        } else {
+          // Mobile
+          crossAxisCount = 2;
+          childAspectRatio = 0.85;
+          padding = 12;
+        }
+
+        return GridView.builder(
+          padding: EdgeInsets.all(padding),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: childAspectRatio,
+            crossAxisSpacing: padding,
+            mainAxisSpacing: padding,
           ),
-          child: InkWell(
-            onTap: () => _loadRecipeDetails(meal['idMeal']),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
-                    child: Image.network(
-                      meal['strMealThumb'],
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
+          itemCount: meals.length,
+          itemBuilder: (context, index) {
+            final meal = meals[index];
+            return Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: InkWell(
+                onTap: () => _loadRecipeDetails(meal['idMeal']),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(12)),
+                        child: Image.network(
+                          meal['strMealThumb'],
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Text(
+                          meal['strMeal'],
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
-                        );
-                      },
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text(
-                    meal['strMeal'],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
